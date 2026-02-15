@@ -9,6 +9,12 @@ export type RoomPolygon = {
   points: Array<{ x: number; y: number }>;
 };
 
+function publicAssetUrl(path: string): string {
+  // Use Vite base so the app works under GitHub Pages subpaths: /<repo>/
+  const base = import.meta.env.BASE_URL;
+  return `${base}${path.replace(/^\/+/, '')}`;
+}
+
 function parseWorldCoordsXY(value: string): Array<{ x: number; y: number }> {
   // Example: [(-5.591, -21.033), (-1.902, -21.033), ...]
   const matches = value.match(/-?\d+(?:\.\d+)?/g);
@@ -75,7 +81,7 @@ export function roomsToPolygons(rooms: Room[]): RoomPolygon[] {
   }));
 }
 
-export async function loadRoomsFromPublicCsv(path = 'room_data.csv'): Promise<Room[]> {
+export async function loadRoomsFromPublicCsv(path = publicAssetUrl('room_data.csv')): Promise<Room[]> {
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
@@ -148,7 +154,7 @@ export async function loadRoomsFromPublicCsv(path = 'room_data.csv'): Promise<Ro
   return rooms;
 }
 
-export async function loadRoomsFromPublicJson(path = 'room_data.json'): Promise<Room[]> {
+export async function loadRoomsFromPublicJson(path = publicAssetUrl('room_data.json')): Promise<Room[]> {
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
@@ -231,8 +237,8 @@ export async function loadRoomsFromPublicJson(path = 'room_data.json'): Promise<
 export async function loadRoomsFromPublic(
   opts: { jsonPath?: string; csvPath?: string } = {},
 ): Promise<Room[]> {
-  const jsonPath = opts.jsonPath ?? 'room_data.json';
-  const csvPath = opts.csvPath ?? 'room_data.csv';
+  const jsonPath = opts.jsonPath ?? publicAssetUrl('room_data.json');
+  const csvPath = opts.csvPath ?? publicAssetUrl('room_data.csv');
 
   try {
     return await loadRoomsFromPublicJson(jsonPath);
