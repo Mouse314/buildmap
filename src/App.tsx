@@ -81,7 +81,7 @@ function App() {
 
   React.useEffect(() => {
     let cancelled = false
-    loadRoomsFromPublic({ jsonPath: '/room_data.json', csvPath: '/room_data.csv' })
+    loadRoomsFromPublic()
       .then((data) => {
         if (cancelled) return
         setRooms(data)

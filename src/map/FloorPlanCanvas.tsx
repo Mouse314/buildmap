@@ -627,4 +627,4 @@ export function FloorPlanCanvas({
   );
 }
 
-useGLTF.preload('/Build_1.glb');
+useGLTF.preload(`${import.meta.env.BASE_URL}Build_1.glb`);
