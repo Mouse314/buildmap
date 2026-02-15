@@ -1,0 +1,417 @@
+.appRoot {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.appMain {
+  flex: 1;
+  min-height: 0;
+}
+
+.appError {
+  padding: 16px;
+}
+
+.appErrorTitle {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.appErrorDetails {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+
+.roomModalOverlay {
+  position: fixed;
+  inset: 0;
+  padding: 0;
+  background: transparent;
+  z-index: 1000;
+  /* animation: roomModalOverlayIn 500ms ease-out both; */
+}
+
+.roomModal {
+  position: fixed;
+  width: min(520px, 100%);
+  border-radius: 36px;
+  color: #111;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  border: 5px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(1.25);
+  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+}
+
+.roomModalAbove {
+  transform: translate(-50%, calc(-100% - 12px));
+  animation: roomModalAboveIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.roomModalBelow {
+  transform: translate(-50%, 12px);
+  animation: roomModalBelowIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes roomModalOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes roomModalAboveIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 12px));
+  }
+}
+
+@keyframes roomModalBelowIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roomModalOverlay,
+  .roomModal {
+    animation: none;
+  }
+}
+
+
+
+.roomModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.roomModalTitle {
+  font-weight: 700;
+}
+
+.roomModalClose {
+  height: 34px;
+  width: 34px;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.353);
+}
+
+.roomModalClose:hover {
+  transition: 150ms ease-out;
+  border-color: rgba(0, 0, 0, 0.22);
+  background: rgba(255, 9, 9, 0.5);
+}
+
+.roomModalBody {
+  padding: 14px;
+}
+
+.roomModalRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.roomModalLabel {
+  opacity: 0.78;
+  font-size: 0.92rem;
+}
+
+.roomModalValue {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.roomModalValueDesc {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.roomHoverTip {
+  position: fixed;
+  z-index: 900;
+  pointer-events: none;
+  max-width: 340px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(1.15);
+  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  color: #111;
+  animation: roomHoverTipIn 110ms ease-out both;
+}
+
+@keyframes roomHoverTipIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.roomHoverTipLine {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.roomHoverTipCategory {
+  opacity: 0.92;
+}
+
+.roomHoverTipDesc {
+  margin-top: 6px;
+  font-weight: 500;
+  opacity: 0.88;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roomHoverTip {
+    animation: none;
+  }
+}
+
+.topBar {
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  width: calc(100% - 100px);
+  translate: 50px 10px;
+  gap: 30px;
+  padding: 10px;
+  align-items: center;
+}
+
+.topSelect,
+.topSearch {
+  height: 40px;
+  width: 100%;
+  border-radius: 50vh;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.55);
+  backdrop-filter: blur(5px) saturate(1.1);
+  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  padding: 0 12px;
+  color: #111;
+  outline: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.topSearch {
+  flex: 1;
+  width: calc(100% - 20px);
+  height: 40px;
+}
+
+.topSearchWrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background-color: rgba(163, 163, 163, 0.582);
+  border-radius: 50vh;
+  transition: 1s ease-out;
+}
+
+.topSearchClear {
+  width: 42px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 50vh;
+  opacity: 0.6;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.topButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 50vh;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.55);
+  backdrop-filter: blur(5px) saturate(1.1);
+  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.topThemeButton {
+  width: auto;
+  white-space: nowrap;
+}
+
+.topButton:hover {
+  transition: 150ms ease-out;
+  background: rgba(167, 167, 167, 0.66);
+}
+
+.glassDropdown {
+  position: relative;
+}
+
+.glassDropdownButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.glassDropdownValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glassDropdownChevron {
+  opacity: 0.8;
+  font-weight: 700;
+}
+
+.glassDropdownMenu {
+  position: absolute;
+  width: 300px;
+  left: 0;
+  top: calc(100% + 10px);
+  min-width: 100%;
+  padding: 8px;
+  border-radius: 22px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(1.1);
+  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  z-index: 80;
+
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: 140ms ease-out;
+}
+
+.glassDropdown[data-open='true'] .glassDropdownMenu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.glassDropdownItem {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-weight: 600;
+}
+
+.glassDropdownItem:hover {
+  transition: 120ms ease-out;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.glassDropdownItemSelected {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.appRoot[data-theme='dark'] {
+  background: #0b0f19;
+  color: #f3f4f6;
+}
+
+.appRoot[data-theme='dark'] .topSelect,
+.appRoot[data-theme='dark'] .topSearch,
+.appRoot[data-theme='dark'] .topButton,
+.appRoot[data-theme='dark'] .roomModal,
+.appRoot[data-theme='dark'] .roomHoverTip,
+.appRoot[data-theme='dark'] .glassDropdownMenu {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 18, 0.72);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
+}
+
+.appRoot[data-theme='dark'] .topSearch::placeholder {
+  color: rgba(243, 244, 246, 0.6);
+}
+
+.appRoot[data-theme='dark'] .roomModalHeader {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.appRoot[data-theme='dark'] .roomModalLabel {
+  opacity: 0.78;
+}
+
+.appRoot[data-theme='dark'] .roomModalClose {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.appRoot[data-theme='dark'] .roomModalClose:hover {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 9, 9, 0.35);
+}
+
+.appRoot[data-theme='dark'] .glassDropdownItem {
+  color: #f3f4f6;
+}
+
+.appRoot[data-theme='dark'] .glassDropdownItem:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.appRoot[data-theme='dark'] .glassDropdownItemSelected {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+@media (max-width: 900px) {
+  .topBar {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+  .topSearch {
+    grid-column: 1 / -1;
+  }
+}
