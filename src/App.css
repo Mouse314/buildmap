@@ -42,8 +42,10 @@
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
   border: 5px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.72);
-  backdrop-filter: blur(5px) saturate(1.25);
-  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(125%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(125%);
 }
 
 .roomModalAbove {
@@ -162,8 +164,10 @@
   border-radius: 16px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.72);
-  backdrop-filter: blur(5px) saturate(1.15);
-  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   color: #111;
   animation: roomHoverTipIn 110ms ease-out both;
@@ -219,8 +223,10 @@
   border-radius: 50vh;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.55);
-  backdrop-filter: blur(5px) saturate(1.1);
-  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(110%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(110%);
   padding: 0 12px;
   color: #111;
   outline: none;
@@ -267,8 +273,10 @@
   border-radius: 50vh;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.55);
-  backdrop-filter: blur(5px) saturate(1.1);
-  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(110%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(110%);
   color: #111;
   font-weight: 600;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
@@ -318,8 +326,10 @@
   border-radius: 22px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.72);
-  backdrop-filter: blur(5px) saturate(1.1);
-  -webkit-backdrop-filter: blur(5px) saturate(0.25);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(110%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(110%);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
   z-index: 80;
 
