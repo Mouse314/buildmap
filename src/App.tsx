@@ -1,10 +1,11 @@
 import * as React from 'react'
 import './App.css'
 import { FloorPlanCanvas } from './map/FloorPlanCanvas'
-import { loadRoomsFromPublic } from './map/roomData'
+import { loadRoomDataManifest, loadRoomsFromPublic, type RoomDataManifest } from './map/roomData'
 import { RoomInfoModal } from './map/RoomInfoModal'
 import { RoomHoverTooltip } from './map/RoomHoverTooltip'
 import { GlassDropdown } from './components/GlassDropdown'
+import { getRoomFillColor } from './map/roomPalette'
 
 import type { Room } from './map/Room'
 
@@ -19,7 +20,9 @@ function App() {
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
 
-  const [selectedBuild, setSelectedBuild] = React.useState<string>('__all__')
+  const [manifest, setManifest] = React.useState<RoomDataManifest | null>(null)
+  const [selectedBuild, setSelectedBuild] = React.useState<string>('build14')
+  const [selectedFloor, setSelectedFloor] = React.useState<string>('floor1')
   const [selectedCategory, setSelectedCategory] = React.useState<string>('__all__')
   const [searchText, setSearchText] = React.useState<string>('')
 
@@ -33,13 +36,27 @@ function App() {
   }, [rooms, selectedRoomKey])
 
   const buildOptions = React.useMemo(() => {
-    const set = new Set<string>()
-    for (const r of rooms) {
-      const v = (r.build ?? '').trim()
-      if (v.length > 0) set.add(v)
-    }
-    return Array.from(set).sort((a, b) => a.localeCompare(b))
-  }, [rooms])
+    const builds = manifest?.builds ?? []
+    return builds.map((b) => b.id)
+  }, [manifest])
+
+  const floorOptions = React.useMemo(() => {
+    const b = (manifest?.builds ?? []).find((x) => x.id === selectedBuild)
+    const floors = b?.floors ?? []
+    return floors.length > 0 ? floors : [selectedFloor]
+  }, [manifest, selectedBuild, selectedFloor])
+
+  const buildLabel = React.useCallback((id: string) => {
+    const m = id.match(/build(\d+)/i)
+    if (m) return `${m[1]} корпус`
+    return id
+  }, [])
+
+  const floorLabel = React.useCallback((id: string) => {
+    const m = id.match(/floor(\d+)/i)
+    if (m) return `${m[1]} этаж`
+    return id
+  }, [])
 
   const categoryOptions = React.useMemo(() => {
     const set = new Set<string>()
@@ -50,8 +67,14 @@ function App() {
     return Array.from(set).sort((a, b) => a.localeCompare(b))
   }, [rooms])
 
-  const isFiltering =
-    selectedBuild !== '__all__' || selectedCategory !== '__all__' || searchText.trim().length > 0
+  const selectedCategoryColor = React.useMemo(() => {
+    if (selectedCategory === '__all__') return null
+    const match = rooms.find((r) => (r.category ?? '').trim() === selectedCategory)
+    if (!match) return null
+    return getRoomFillColor(match.roomID)
+  }, [rooms, selectedCategory])
+
+  const isFiltering = selectedCategory !== '__all__' || searchText.trim().length > 0
 
   const matchedKeys = React.useMemo(() => {
     if (!isFiltering) return null
@@ -59,12 +82,10 @@ function App() {
     const set = new Set<string>()
 
     for (const r of rooms) {
-      const build = (r.build ?? '').trim()
       const category = (r.category ?? '').trim()
       const roomNo = (r.roomNo ?? '').trim()
       const description = (r.description ?? '').trim()
 
-      if (selectedBuild !== '__all__' && build !== selectedBuild) continue
       if (selectedCategory !== '__all__' && category !== selectedCategory) continue
 
       if (q.length > 0) {
@@ -77,11 +98,40 @@ function App() {
     }
 
     return set
-  }, [isFiltering, rooms, searchText, selectedBuild, selectedCategory])
+  }, [isFiltering, rooms, searchText, selectedCategory])
 
   React.useEffect(() => {
     let cancelled = false
-    loadRoomsFromPublic()
+    loadRoomDataManifest()
+      .then((m) => {
+        if (cancelled) return
+        setManifest(m)
+        if (!m || m.builds.length === 0) return
+
+        const buildExists = m.builds.some((b) => b.id === selectedBuild)
+        const nextBuild = buildExists ? selectedBuild : m.builds[0].id
+        const floors = m.builds.find((b) => b.id === nextBuild)?.floors ?? []
+        const floorExists = floors.includes(selectedFloor)
+        const nextFloor = floorExists ? selectedFloor : floors[0] ?? selectedFloor
+
+        if (nextBuild !== selectedBuild) setSelectedBuild(nextBuild)
+        if (nextFloor !== selectedFloor) setSelectedFloor(nextFloor)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setManifest(null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  React.useEffect(() => {
+    let cancelled = false
+    setError(null)
+    loadRoomsFromPublic({ buildId: selectedBuild, floorId: selectedFloor })
       .then((data) => {
         if (cancelled) return
         setRooms(data)
@@ -94,7 +144,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [selectedBuild, selectedFloor])
 
   if (error) {
     return (
@@ -110,23 +160,38 @@ function App() {
       <div className="topBar">
         <GlassDropdown
           value={selectedBuild}
-          onChange={setSelectedBuild}
+          onChange={(next) => {
+            setSelectedBuild(next)
+            const floors = (manifest?.builds ?? []).find((b) => b.id === next)?.floors ?? []
+            if (floors.length > 0 && !floors.includes(selectedFloor)) {
+              setSelectedFloor(floors[0])
+            }
+          }}
           buttonClassName="topSelect"
           options={[
-            { value: '__all__', label: 'Все корпуса' },
-            ...buildOptions.map((b) => ({ value: b, label: b })),
+            ...buildOptions.map((b) => ({ value: b, label: buildLabel(b) })),
           ]}
         />
 
-        <GlassDropdown
-          value={selectedCategory}
-          onChange={setSelectedCategory}
-          buttonClassName="topSelect"
-          options={[
-            { value: '__all__', label: 'Все категории' },
-            ...categoryOptions.map((c) => ({ value: c, label: c })),
-          ]}
-        />
+        <div
+          className="topSelectAccentWrap"
+          data-active={selectedCategory !== '__all__' && selectedCategoryColor ? 'true' : 'false'}
+          style={
+            selectedCategory !== '__all__' && selectedCategoryColor
+              ? ({ ['--accent-color']: selectedCategoryColor } as React.CSSProperties)
+              : undefined
+          }
+        >
+          <GlassDropdown
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+            buttonClassName="topSelect topSelectCategory"
+            options={[
+              { value: '__all__', label: 'Все категории' },
+              ...categoryOptions.map((c) => ({ value: c, label: c })),
+            ]}
+          />
+        </div>
 
         <div className="topSearchWrap">
           {searchText.length > 0 ? (
@@ -165,6 +230,25 @@ function App() {
           Сообщить об ошибке
         </button>
         
+      </div>
+
+      <div className="floorBar" aria-label="Выбор этажа">
+        {floorOptions.map((f) => {
+          const selected = f === selectedFloor
+          const short = f.match(/floor(\d+)/i)?.[1] ?? f
+          return (
+            <button
+              key={f}
+              type="button"
+              className={selected ? 'floorButton floorButtonSelected' : 'floorButton'}
+              aria-pressed={selected}
+              title={floorLabel(f)}
+              onClick={() => setSelectedFloor(f)}
+            >
+              {short}
+            </button>
+          )
+        })}
       </div>
 
       <div className="appMain">

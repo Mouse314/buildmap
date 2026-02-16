@@ -9,10 +9,55 @@ export type RoomPolygon = {
   points: Array<{ x: number; y: number }>;
 };
 
-function publicAssetUrl(path: string): string {
+export function publicAssetUrl(path: string): string {
   // Use Vite base so the app works under GitHub Pages subpaths: /<repo>/
   const base = import.meta.env.BASE_URL;
   return `${base}${path.replace(/^\/+/, '')}`;
+}
+
+export type RoomDataManifest = {
+  builds: Array<{
+    id: string;
+    floors: string[];
+  }>;
+};
+
+export async function loadRoomDataManifest(
+  path = publicAssetUrl('room_data_manifest.json'),
+): Promise<RoomDataManifest | null> {
+  try {
+    const response = await fetch(path);
+    if (!response.ok) return null;
+    const data: unknown = await response.json();
+    if (!data || typeof data !== 'object') return null;
+    const anyData = data as Record<string, unknown>;
+    if (!Array.isArray(anyData.builds)) return null;
+    const builds: RoomDataManifest['builds'] = [];
+    for (const b of anyData.builds) {
+      if (!b || typeof b !== 'object') continue;
+      const anyB = b as Record<string, unknown>;
+      const id = typeof anyB.id === 'string' ? anyB.id : '';
+      const floorsRaw = anyB.floors;
+      const floors = Array.isArray(floorsRaw)
+        ? floorsRaw.map((f) => String(f)).filter((f) => f.length > 0)
+        : [];
+      if (id.length === 0) continue;
+      builds.push({ id, floors });
+    }
+    return { builds };
+  } catch {
+    return null;
+  }
+}
+
+export function roomDataPaths(buildId: string, floorId: string): { jsonPath: string; csvPath: string } {
+  const prefix = `${buildId.replace(/^\/+/, '').replace(/\/+$/, '')}/${floorId
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')}`;
+  return {
+    jsonPath: publicAssetUrl(`${prefix}/room_data.json`),
+    csvPath: publicAssetUrl(`${prefix}/room_data.csv`),
+  };
 }
 
 function parseWorldCoordsXY(value: string): Array<{ x: number; y: number }> {
@@ -235,10 +280,15 @@ export async function loadRoomsFromPublicJson(path = publicAssetUrl('room_data.j
 }
 
 export async function loadRoomsFromPublic(
-  opts: { jsonPath?: string; csvPath?: string } = {},
+  opts: { buildId?: string; floorId?: string; jsonPath?: string; csvPath?: string } = {},
 ): Promise<Room[]> {
-  const jsonPath = opts.jsonPath ?? publicAssetUrl('room_data.json');
-  const csvPath = opts.csvPath ?? publicAssetUrl('room_data.csv');
+  const fromBuildFloor =
+    typeof opts.buildId === 'string' && opts.buildId.length > 0 && typeof opts.floorId === 'string' && opts.floorId.length > 0
+      ? roomDataPaths(opts.buildId, opts.floorId)
+      : null;
+
+  const jsonPath = opts.jsonPath ?? fromBuildFloor?.jsonPath ?? publicAssetUrl('room_data.json');
+  const csvPath = opts.csvPath ?? fromBuildFloor?.csvPath ?? publicAssetUrl('room_data.csv');
 
   try {
     return await loadRoomsFromPublicJson(jsonPath);

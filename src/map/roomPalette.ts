@@ -17,7 +17,7 @@ export const ROOM_COLORS: Partial<Record<RoomId, string>> = {
   14: '#0f766e',
   15: '#4f46e5',
   16: '#64748b',
-  100: '#000000',
+  100: '#2e2e2e',
 };
 
 export const FALLBACK_ROOM_COLOR = '#9ca3af';

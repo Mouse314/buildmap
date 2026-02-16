@@ -1,15 +1,16 @@
 ﻿import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Text, useGLTF } from '@react-three/drei';
-import { Bloom, EffectComposer } from '@react-three/postprocessing';
+import { Bloom, EffectComposer, N8AO } from '@react-three/postprocessing';
 import * as React from 'react';
 import * as THREE from 'three';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { computeBounds, roomsToPolygons, type RoomPolygon } from './roomData';
 import type { Room } from './Room';
 import { getRoomFillColor } from './roomPalette';
 
 const NON_HOVERABLE_ROOM_IDS = new Set<number>([1, 100]);
 const WALL_ROOM_ID = 100;
+const WALL_EXTRUDE_DEPTH = 1.2;
 
 function polygonCentroid(points: Array<{ x: number; y: number }>): { x: number; y: number } {
   // Area-weighted centroid; falls back to average if degenerate.
@@ -132,11 +133,23 @@ function RoomLabels({ polygons, color }: { polygons: RoomPolygon[]; color: strin
   );
 }
 
-function makePolygonGeometry(points: Array<{ x: number; y: number }>): THREE.ShapeGeometry | null {
+function makePolygonGeometry(
+  points: Array<{ x: number; y: number }>,
+  opts: { extrudeDepth?: number } = {},
+): THREE.BufferGeometry | null {
   if (points.length < 3) return null;
   const vectors = points.map((p) => new THREE.Vector2(p.x, p.y));
   const shape = new THREE.Shape(vectors);
-  const geom = new THREE.ShapeGeometry(shape);
+
+  const depth = opts.extrudeDepth ?? 0;
+  const geom: THREE.BufferGeometry = depth > 0
+    ? new THREE.ExtrudeGeometry(shape, {
+        depth,
+        bevelEnabled: false,
+        steps: 1,
+      })
+    : new THREE.ShapeGeometry(shape);
+
   geom.computeVertexNormals();
   return geom;
 }
@@ -305,24 +318,6 @@ function HoverHighlighter({
           side={THREE.DoubleSide}
         />
       </mesh>
-
-      <lineSegments
-        ref={outlineRef}
-        geometry={undefined}
-        rotation={[-Math.PI / 2, 0, 0]}
-        renderOrder={renderOrder + 1}
-        raycast={() => null}
-        visible={false}
-      >
-        <lineBasicMaterial
-          ref={lineMatRef}
-          color={'#000000'}
-          transparent
-          opacity={0}
-          blending={THREE.AdditiveBlending}
-          toneMapped={false}
-        />
-      </lineSegments>
     </group>
   );
 }
@@ -370,6 +365,77 @@ function FitView({
   return null;
 }
 
+function MouseLamp({
+  height = 1,
+  intensity = 55,
+}: {
+  height?: number;
+  intensity?: number;
+}) {
+  const lightRef = React.useRef<THREE.SpotLight | null>(null);
+  const targetRef = React.useRef<THREE.Object3D | null>(null);
+  const bulbRef = React.useRef<THREE.Mesh | null>(null);
+
+  const plane = React.useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const hitPoint = React.useMemo(() => new THREE.Vector3(), []);
+  const desiredLightPos = React.useMemo(() => new THREE.Vector3(), []);
+
+  React.useEffect(() => {
+    const light = lightRef.current;
+    const target = targetRef.current;
+    if (!light || !target) return;
+    light.target = target;
+    light.target.updateMatrixWorld();
+  }, []);
+
+  useFrame((state, delta) => {
+    const light = lightRef.current;
+    const target = targetRef.current;
+    if (!light || !target) return;
+
+    state.raycaster.setFromCamera(state.pointer, state.camera);
+    const hit = state.raycaster.ray.intersectPlane(plane, hitPoint);
+    if (!hit) return;
+
+    desiredLightPos.set(hitPoint.x, height, hitPoint.z);
+
+    const t = 1 - Math.exp(-18 * delta);
+    light.position.lerp(desiredLightPos, t);
+    target.position.lerp(hitPoint, t);
+    light.target.updateMatrixWorld();
+
+    if (bulbRef.current) bulbRef.current.position.copy(light.position);
+  });
+
+  return (
+    <group>
+      <object3D ref={targetRef} />
+
+      <pointLight
+        ref={lightRef}
+        castShadow
+        intensity={intensity}
+        distance={height * 32}
+        decay={2}
+        // angle={0.55}
+        // penumbra={0.65}
+        position={[0, height, 0]}
+        shadow-mapSize-width={512}
+        shadow-mapSize-height={512}
+        shadow-bias={-0.00015}
+        shadow-camera-near={0.5}
+        shadow-camera-far={height * 12}
+      />
+
+      // меш лампы
+      {/* <mesh ref={bulbRef} position={[0, height, 0]} raycast={() => null}>
+        <sphereGeometry args={[0.35, 18, 18]} />
+        <meshBasicMaterial color={0xfff1c7} />
+      </mesh> */}
+    </group>
+  );
+}
+
 export function FloorPlanCanvas({
   rooms,
   selectedRoomKey,
@@ -392,7 +458,7 @@ export function FloorPlanCanvas({
   const controlsRef = React.useRef<OrbitControlsImpl | null>(null);
 
   const colors = React.useMemo(() => {
-    const background = theme === 'dark' ? '#0b0f19' : '#ffffff';
+    const background = theme === 'dark' ? '#0b0f19' : '#747474';
     const label = theme === 'dark' ? '#f3f4f6' : '#111111';
     const dimFill = theme === 'dark' ? '#111827' : '#d1d5db';
     return { background, label, dimFill };
@@ -420,14 +486,17 @@ export function FloorPlanCanvas({
     const items: Array<{
       key: string;
       polygon: RoomPolygon;
-      geometry: THREE.ShapeGeometry;
+      geometry: THREE.BufferGeometry;
       color: string;
       hoverable: boolean;
     }> = [];
 
     for (let idx = 0; idx < polygons.length; idx++) {
       const poly = polygons[idx];
-      const geom = makePolygonGeometry(poly.points);
+      const isWall = poly.roomID === WALL_ROOM_ID;
+      const geom = makePolygonGeometry(poly.points, {
+        extrudeDepth: isWall ? WALL_EXTRUDE_DEPTH : 0,
+      });
       if (!geom) continue;
       const room = rooms[idx];
       const key = room?.key ?? `${poly.roomID}-${idx}`;
@@ -463,6 +532,11 @@ export function FloorPlanCanvas({
 
   return (
     <Canvas
+      shadows
+      onCreated={({ gl }) => {
+        gl.shadowMap.enabled = true;
+        gl.shadowMap.type = THREE.PCFSoftShadowMap;
+      }}
       onPointerMissed={() => {
         setHoveredPolyKey(null);
         onHoverRoom?.(null);
@@ -472,9 +546,21 @@ export function FloorPlanCanvas({
       <CursorManager hovered={Boolean(hoveredItem)} dragging={isDragging} />
       <DragDetector dragRef={dragRef} setIsDragging={setIsDragging} />
       <PerspectiveCamera makeDefault near={0.1} far={500} position={[0, 50, 0]} />
-      <ambientLight intensity={0.2} />
+      <ambientLight intensity={theme === 'dark' ? 0.12 : 1} />
+
+      {theme === 'dark' && <MouseLamp height={1} intensity={20} />}
 
       <EffectComposer>
+        {/* <N8AO
+          halfRes
+          quality="medium"
+          aoRadius={1.4}
+          intensity={1.15}
+          distanceFalloff={0.9}
+          aoSamples={16}
+          denoiseSamples={4}
+          denoiseRadius={12}
+        /> */}
         <Bloom
           intensity={0.45}
           luminanceThreshold={1.0}
@@ -544,13 +630,15 @@ export function FloorPlanCanvas({
 
           const shouldDim = matchedKeys != null && !isMatched && !isSelected && !isHovered && !isWall;
           const fillColor = shouldDim ? colors.dimFill : item.color;
-          const fillOpacity = shouldDim ? 0.75 : 0.85;
+          const fillOpacity = shouldDim ? 0.6 : 1.0;
 
           return (
             <mesh
               key={item.key}
               geometry={item.geometry}
               rotation={[-Math.PI / 2, 0, 0]}
+              castShadow={isWall}
+              receiveShadow
               raycast={!isDragging && item.hoverable ? THREE.Mesh.prototype.raycast : nullRaycast}
               onPointerDown={
                 item.hoverable
@@ -611,7 +699,7 @@ export function FloorPlanCanvas({
                   : undefined
               }
             >
-              <meshBasicMaterial
+              <meshPhongMaterial
                 color={fillColor}
                 transparent
                 opacity={fillOpacity}
