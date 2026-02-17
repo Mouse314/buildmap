@@ -29,6 +29,14 @@ function parseAreaM2(value: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function parseBoolLoose(value: string): boolean | undefined {
+  const t = String(value ?? '').trim().toLowerCase();
+  if (t.length === 0) return undefined;
+  if (t === '1' || t === 'true' || t === 'yes' || t === 'y' || t === 'да') return true;
+  if (t === '0' || t === 'false' || t === 'no' || t === 'n' || t === 'нет') return false;
+  return undefined;
+}
+
 function splitSemicolon(line: string): string[] {
   // CSV here doesn't seem to use quotes; keep it minimal and robust.
   return line.split(';').map((s) => s.trim());
@@ -40,6 +48,7 @@ type RoomJson = {
   roomID: number;
   roomNo?: string;
   description?: string;
+  areClosed?: boolean;
   areaM2?: number;
   vertexIndices?: number[];
   worldCoordsXYRaw?: string;
@@ -79,6 +88,7 @@ async function main() {
     const roomIdIndex = indexOf('roomID');
     const roomNoIndex = indexOf('roomNo');
     const descriptionIndex = indexOf('Description');
+    const areClosedIndex = indexOf('areClosed');
     const areaIndex = indexOf('Area (m2)');
     const vertexIndex = indexOf('Vertex_Indices');
     const worldCoordsIndex = indexOf('World_Coords_XY');
@@ -123,6 +133,7 @@ async function main() {
 
       const roomNo = roomNoIndex >= 0 ? cols[roomNoIndex] || undefined : undefined;
       const description = descriptionIndex >= 0 ? cols[descriptionIndex] || undefined : undefined;
+      const areClosed = areClosedIndex >= 0 ? parseBoolLoose(cols[areClosedIndex] ?? '') : undefined;
       const areaM2 = areaIndex >= 0 ? parseAreaM2(cols[areaIndex] ?? '') : undefined;
       const vertexIndices = vertexIndex >= 0 ? parseVertexIndices(cols[vertexIndex] ?? '') : undefined;
       const worldCoordsXYRaw = cols[worldCoordsIndex] ?? undefined;
@@ -135,6 +146,7 @@ async function main() {
         roomID,
         roomNo,
         description,
+        areClosed,
         areaM2,
         vertexIndices,
         worldCoordsXYRaw,

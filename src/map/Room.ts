@@ -10,6 +10,7 @@ export type Room = {
   roomID: RoomId;
   roomNo?: string;
   description?: string;
+  areClosed?: boolean;
   areaM2?: number;
   vertexIndices?: number[];
   worldCoordsXYRaw?: string;

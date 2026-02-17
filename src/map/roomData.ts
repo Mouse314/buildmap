@@ -88,6 +88,21 @@ function parseAreaM2(value: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function parseBoolLoose(value: string): boolean | undefined {
+  const t = value.trim().toLowerCase();
+  if (t.length === 0) return undefined;
+  if (t === '1' || t === 'true' || t === 'yes' || t === 'y' || t === 'да') return true;
+  if (t === '0' || t === 'false' || t === 'no' || t === 'n' || t === 'нет') return false;
+  return undefined;
+}
+
+function parseUnknownBool(value: unknown): boolean | undefined {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') return parseBoolLoose(value);
+  if (typeof value === 'number' && Number.isFinite(value)) return value !== 0;
+  return undefined;
+}
+
 function splitSemicolon(line: string): string[] {
   // CSV here doesn't seem to use quotes; keep it minimal and robust.
   return line.split(';').map((s) => s.trim());
@@ -147,6 +162,7 @@ export async function loadRoomsFromPublicCsv(path = publicAssetUrl('room_data.cs
   const roomIdIndex = indexOf('roomID');
   const roomNoIndex = indexOf('roomNo');
   const descriptionIndex = indexOf('Description');
+  const areClosedIndex = indexOf('areClosed');
   const areaIndex = indexOf('Area (m2)');
   const vertexIndex = indexOf('Vertex_Indices');
   const worldCoordsIndex = indexOf('World_Coords_XY');
@@ -172,6 +188,7 @@ export async function loadRoomsFromPublicCsv(path = publicAssetUrl('room_data.cs
 
     const roomNo = roomNoIndex >= 0 ? (cols[roomNoIndex] || undefined) : undefined;
     const description = descriptionIndex >= 0 ? (cols[descriptionIndex] || undefined) : undefined;
+    const areClosed = areClosedIndex >= 0 ? parseBoolLoose(cols[areClosedIndex] ?? '') : undefined;
     // Room numbers must be taken strictly from CSV column roomNo.
     const areaM2 = areaIndex >= 0 ? parseAreaM2(cols[areaIndex] ?? '') : undefined;
     const vertexIndices = vertexIndex >= 0 ? parseVertexIndices(cols[vertexIndex] ?? '') : undefined;
@@ -187,6 +204,7 @@ export async function loadRoomsFromPublicCsv(path = publicAssetUrl('room_data.cs
       roomNo,
       category: categoryFinal,
       description,
+      areClosed,
       areaM2,
       vertexIndices,
       worldCoordsXYRaw,
@@ -247,6 +265,7 @@ export async function loadRoomsFromPublicJson(path = publicAssetUrl('room_data.j
 
     const roomNo = typeof anyItem.roomNo === 'string' ? anyItem.roomNo : undefined;
     const description = typeof anyItem.description === 'string' ? anyItem.description : undefined;
+    const areClosed = parseUnknownBool(anyItem.areClosed);
     const category = getCategoryByRoomId(roomID);
 
     const areaM2 = typeof anyItem.areaM2 === 'number' && Number.isFinite(anyItem.areaM2) ? anyItem.areaM2 : undefined;
@@ -267,6 +286,7 @@ export async function loadRoomsFromPublicJson(path = publicAssetUrl('room_data.j
       roomNo,
       category,
       description,
+      areClosed,
       areaM2,
       vertexIndices,
       worldCoordsXYRaw,

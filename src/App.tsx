@@ -58,6 +58,10 @@ function App() {
     return id
   }, [])
 
+  const titleText = React.useMemo(() => {
+    return `${buildLabel(selectedBuild)}\n${floorLabel(selectedFloor)}`
+  }, [buildLabel, floorLabel, selectedBuild, selectedFloor])
+
   const categoryOptions = React.useMemo(() => {
     const set = new Set<string>()
     for (const r of rooms) {
@@ -256,6 +260,7 @@ function App() {
           rooms={rooms}
           theme={theme}
           matchedKeys={matchedKeys}
+          titleText={titleText}
           selectedRoomKey={selectedRoomKey}
           onSelectRoomKey={(key) => {
             setSelectedRoomKey(key)

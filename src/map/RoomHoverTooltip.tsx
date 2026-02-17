@@ -15,17 +15,16 @@ export function RoomHoverTooltip({
   const category = text(room.category);
   const roomNo = text(room.roomNo);
   const description = text(room.description);
-
-  const hasAny = category.length > 0 || roomNo.length > 0 || description.length > 0;
-  if (!hasAny) return null;
-
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = React.useState<{ left: number; top: number }>({
     left: anchor.x,
     top: anchor.y,
   });
 
+  const hasAny = category.length > 0 || roomNo.length > 0 || description.length > 0;
+
   React.useLayoutEffect(() => {
+    if (!hasAny) return;
     const el = ref.current;
     if (!el) return;
 
@@ -49,7 +48,9 @@ export function RoomHoverTooltip({
     top = clamp(top, padding, vh - padding - r.height);
 
     setPos({ left, top });
-  }, [anchor.x, anchor.y, room.key]);
+  }, [anchor.x, anchor.y, hasAny, room.key]);
+
+  if (!hasAny) return null;
 
   return (
     <div ref={ref} className="roomHoverTip" style={{ left: pos.left, top: pos.top }}>
