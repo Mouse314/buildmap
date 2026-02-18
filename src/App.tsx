@@ -48,6 +48,13 @@ function findTitleAnchorFromFloor1(rooms: Room[]): { x: number; y: number } | nu
   return polygonCentroid(titleRoom.points)
 }
 
+const MIN_INTERACTIVE_AREA_M2 = 2
+
+function isInteractiveRoom(room: Room): boolean {
+  const area = room.areaM2
+  return !(typeof area === 'number' && Number.isFinite(area) && area < MIN_INTERACTIVE_AREA_M2)
+}
+
 function App() {
   const [rooms, setRooms] = React.useState<Room[]>([])
   const [error, setError] = React.useState<string | null>(null)
@@ -110,6 +117,7 @@ function App() {
   const categoryOptions = React.useMemo(() => {
     const set = new Set<string>()
     for (const r of rooms) {
+      if (!isInteractiveRoom(r)) continue
       const v = (r.category ?? '').trim()
       if (v.length > 0) set.add(v)
     }
@@ -118,7 +126,7 @@ function App() {
 
   const selectedCategoryColor = React.useMemo(() => {
     if (selectedCategory === '__all__') return null
-    const match = rooms.find((r) => (r.category ?? '').trim() === selectedCategory)
+    const match = rooms.find((r) => isInteractiveRoom(r) && (r.category ?? '').trim() === selectedCategory)
     if (!match) return null
     return getRoomFillColor(match.roomID)
   }, [rooms, selectedCategory])
@@ -131,6 +139,7 @@ function App() {
     const set = new Set<string>()
 
     for (const r of rooms) {
+      if (!isInteractiveRoom(r)) continue
       const category = (r.category ?? '').trim()
       const roomNo = (r.roomNo ?? '').trim()
       const description = (r.description ?? '').trim()
@@ -149,8 +158,17 @@ function App() {
     return set
   }, [isFiltering, rooms, searchText, selectedCategory])
 
-  const totalRooms = rooms.length
+  const totalRooms = React.useMemo(() => rooms.filter(isInteractiveRoom).length, [rooms])
   const matchedRooms = matchedKeys ? matchedKeys.size : totalRooms
+
+  React.useEffect(() => {
+    if (selectedRoomKey == null) return
+    const r = rooms.find((x) => x.key === selectedRoomKey)
+    if (r && !isInteractiveRoom(r)) {
+      setSelectedRoomKey(null)
+      setModalAnchor(null)
+    }
+  }, [rooms, selectedRoomKey])
 
   React.useEffect(() => {
     let cancelled = false

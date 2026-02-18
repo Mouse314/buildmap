@@ -5,6 +5,15 @@ function text(value: string | undefined): string {
   return (value ?? '').trim();
 }
 
+function formatAreaM2(areaM2: number | undefined): string {
+  if (typeof areaM2 !== 'number' || !Number.isFinite(areaM2)) return '—';
+  const formatted = new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(areaM2);
+  return `${formatted} м²`;
+}
+
 export function RoomInfoModal({
   room,
   anchor,
@@ -17,6 +26,7 @@ export function RoomInfoModal({
   const roomNo = text(room.roomNo);
   const category = text(room.category);
   const description = text(room.description);
+  const areaText = React.useMemo(() => formatAreaM2(room.areaM2), [room.areaM2]);
 
   const modalRef = React.useRef<HTMLDivElement | null>(null);
   const [placement, setPlacement] = React.useState<'above' | 'below'>('above');
@@ -93,6 +103,11 @@ export function RoomInfoModal({
           <div className="roomModalRow">
             <div className="roomModalLabel">Описание</div>
             <div className="roomModalValue roomModalValueDesc">{description}</div>
+          </div>
+
+          <div className="roomModalRow">
+            <div className="roomModalLabel">Площадь</div>
+            <div className="roomModalValue">{areaText}</div>
           </div>
         </div>
       </div>

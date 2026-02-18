@@ -4,7 +4,7 @@ import { Bloom, EffectComposer, SSAO } from '@react-three/postprocessing';
 import * as React from 'react';
 import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { roomsToPolygons, type RoomPolygon } from './roomData';
+import { computeBounds, roomsToPolygons, type RoomPolygon } from './roomData';
 import type { Room } from './Room';
 import { getRoomFillColor } from './roomPalette';
 import { makePolygonGeometry } from './canvas/geometry';
@@ -15,6 +15,7 @@ import { FitView } from './canvas/FitView';
 import { MouseLamp } from './canvas/MouseLamp';
 import { SmoothWheelZoom } from './canvas/SmoothWheelZoom';
 import { AutoFitToPolygons } from './canvas/AutoFitToPolygons';
+import { PanBounds, type PanBoundsRect } from './canvas/PanBounds';
 import { getGraphicsPreset, type GraphicsPresetId } from './graphicsPresets';
 
 function ShadowConfigurator({ enabled }: { enabled: boolean }) {
@@ -34,6 +35,16 @@ const NON_HOVERABLE_ROOM_IDS = new Set<number>([1, 100, 200]);
 const WALL_ROOM_ID = 100;
 const WALL_EXTRUDE_DEPTH = 1.2;
 const HIDDEN_ROOM_IDS = new Set<number>([300, 301]);
+
+const MIN_INTERACTIVE_AREA_M2 = 2;
+
+function isInteractiveRoomArea(areaM2: number | undefined): boolean {
+  return !(typeof areaM2 === 'number' && Number.isFinite(areaM2) && areaM2 < MIN_INTERACTIVE_AREA_M2);
+}
+
+// Pan clamp (tweak these later if needed)
+const PAN_BOUNDS_PADDING_X = 20;
+const PAN_BOUNDS_PADDING_Z = 20;
 
 export function FloorPlanCanvas({
   rooms,
@@ -104,12 +115,27 @@ export function FloorPlanCanvas({
     const list: RoomPolygon[] = [];
     for (let i = 0; i < rooms.length; i++) {
       const roomKey = rooms[i]?.key;
-      if (roomKey && matchedKeys.has(roomKey)) {
+      const areaOk = isInteractiveRoomArea(rooms[i]?.areaM2);
+      if (roomKey && areaOk && matchedKeys.has(roomKey)) {
         list.push(polygons[i]);
       }
     }
     return list;
   }, [matchedKeys, polygons, rooms]);
+
+  const panBounds = React.useMemo<PanBoundsRect | null>(() => {
+    if (!polygons || polygons.length === 0) return null;
+    const b = computeBounds(polygons);
+
+    const minX = b.minX - PAN_BOUNDS_PADDING_X;
+    const maxX = b.maxX + PAN_BOUNDS_PADDING_X;
+
+    // World Z is -polygonY
+    const minZ = -(b.maxY + PAN_BOUNDS_PADDING_Z);
+    const maxZ = -(b.minY - PAN_BOUNDS_PADDING_Z);
+
+    return { minX, maxX, minZ, maxZ };
+  }, [polygons]);
 
   const deviceDpr = React.useMemo(() => {
     if (typeof window === 'undefined') return 1;
@@ -163,7 +189,7 @@ export function FloorPlanCanvas({
       polygon: RoomPolygon;
       geometry: THREE.BufferGeometry;
       color: string;
-      hoverable: boolean;
+      interactive: boolean;
     }> = [];
 
     for (let idx = 0; idx < polygons.length; idx++) {
@@ -177,13 +203,13 @@ export function FloorPlanCanvas({
       if (!geom) continue;
       const room = rooms[idx];
       const key = room?.key ?? `${poly.roomID}-${idx}`;
-      const hoverable = !NON_HOVERABLE_ROOM_IDS.has(poly.roomID);
+      const interactive = !NON_HOVERABLE_ROOM_IDS.has(poly.roomID) && isInteractiveRoomArea(room?.areaM2);
       items.push({
         key,
         polygon: poly,
         geometry: geom,
         color: getRoomFillColor(poly.roomID),
-        hoverable,
+        interactive,
       });
     }
 
@@ -200,7 +226,8 @@ export function FloorPlanCanvas({
 
   const selectedItem = React.useMemo(() => {
     if (selectedRoomKey == null) return null;
-    return renderItems.find((it) => it.key === selectedRoomKey) ?? null;
+    const it = renderItems.find((x) => x.key === selectedRoomKey) ?? null;
+    return it && it.interactive ? it : null;
   }, [renderItems, selectedRoomKey]);
 
   const nullRaycast = React.useCallback(() => {
@@ -285,6 +312,8 @@ export function FloorPlanCanvas({
         token={searchToken}
       />
 
+      <PanBounds enabled={true} controlsRef={controlsRef} bounds={panBounds} />
+
 
       <OrbitControls
         ref={controlsRef}
@@ -366,9 +395,9 @@ export function FloorPlanCanvas({
               rotation={[-Math.PI / 2, 0, 0]}
               castShadow={shadowsEnabled && isWall}
               receiveShadow={shadowsEnabled}
-              raycast={!isDragging && item.hoverable ? THREE.Mesh.prototype.raycast : nullRaycast}
+              raycast={!isDragging && item.interactive ? THREE.Mesh.prototype.raycast : nullRaycast}
               onPointerDown={
-                item.hoverable
+                item.interactive
                   ? (e) => {
                       if (e.nativeEvent.button !== 0) return;
                       if (isDragging) return;
@@ -381,7 +410,7 @@ export function FloorPlanCanvas({
                   : undefined
               }
               onPointerUp={
-                item.hoverable
+                item.interactive
                   ? (e) => {
                       if (e.nativeEvent.button !== 0) return;
                       e.stopPropagation();
@@ -401,7 +430,7 @@ export function FloorPlanCanvas({
                   : undefined
               }
               onPointerOver={
-                item.hoverable
+                item.interactive
                   ? (e) => {
                       if (isDragging) return;
                       e.stopPropagation();
@@ -416,7 +445,7 @@ export function FloorPlanCanvas({
                   : undefined
               }
               onPointerOut={
-                item.hoverable
+                item.interactive
                   ? (e) => {
                       if (isDragging) return;
                       e.stopPropagation();
