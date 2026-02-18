@@ -6,6 +6,7 @@ import { RoomInfoModal } from './map/RoomInfoModal'
 import { RoomHoverTooltip } from './map/RoomHoverTooltip'
 import { GlassDropdown } from './components/GlassDropdown'
 import { getRoomFillColor } from './map/roomPalette'
+import { GRAPHICS_PRESETS, type GraphicsPresetId } from './map/graphicsPresets'
 
 import type { Room } from './map/Room'
 
@@ -19,6 +20,11 @@ function App() {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null)
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
+
+  const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('medium')
+
+  const [floorsOpen, setFloorsOpen] = React.useState(true)
+  const [graphicsOpen, setGraphicsOpen] = React.useState(true)
 
   const [manifest, setManifest] = React.useState<RoomDataManifest | null>(null)
   const [selectedBuild, setSelectedBuild] = React.useState<string>('build14')
@@ -103,6 +109,9 @@ function App() {
 
     return set
   }, [isFiltering, rooms, searchText, selectedCategory])
+
+  const totalRooms = rooms.length
+  const matchedRooms = matchedKeys ? matchedKeys.size : totalRooms
 
   React.useEffect(() => {
     let cancelled = false
@@ -197,6 +206,10 @@ function App() {
           />
         </div>
 
+        <div className="topCountBadge" aria-label="Найдено помещений">
+          {matchedRooms}/{totalRooms}
+        </div>
+
         <div className="topSearchWrap">
           {searchText.length > 0 ? (
             <button
@@ -236,29 +249,93 @@ function App() {
         
       </div>
 
-      <div className="floorBar" aria-label="Выбор этажа">
-        {floorOptions.map((f) => {
-          const selected = f === selectedFloor
-          const short = f.match(/floor(\d+)/i)?.[1] ?? f
-          return (
-            <button
-              key={f}
-              type="button"
-              className={selected ? 'floorButton floorButtonSelected' : 'floorButton'}
-              aria-pressed={selected}
-              title={floorLabel(f)}
-              onClick={() => setSelectedFloor(f)}
-            >
-              {short}
-            </button>
-          )
-        })}
+      <div className="sidePanel sidePanelLeft" aria-label="Этажи">
+        <div className="sidePanelHeader">
+          <div className="sidePanelTitle">Этажи</div>
+          <button
+            type="button"
+            className="sidePanelToggle"
+            aria-expanded={floorsOpen}
+            aria-controls="floors-panel-body"
+            title={floorsOpen ? 'Свернуть' : 'Развернуть'}
+            onClick={() => setFloorsOpen((v) => !v)}
+          >
+            {floorsOpen ? '▾' : '▸'}
+          </button>
+        </div>
+
+        {floorsOpen ? (
+          <div className="sidePanelBody" id="floors-panel-body">
+            <div className="floorButtons">
+              {floorOptions.map((f) => {
+                const selected = f === selectedFloor
+                const short = f.match(/floor(\d+)/i)?.[1] ?? f
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    className={selected ? 'floorButton floorButtonSelected' : 'floorButton'}
+                    aria-pressed={selected}
+                    title={floorLabel(f)}
+                    onClick={() => setSelectedFloor(f)}
+                  >
+                    {short}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="sidePanel sidePanelRight" aria-label="Настройки графики">
+        <div className="sidePanelHeader">
+          <div className="sidePanelTitle">Настройки графики</div>
+          <button
+            type="button"
+            className="sidePanelToggle"
+            aria-expanded={graphicsOpen}
+            aria-controls="graphics-panel-body"
+            title={graphicsOpen ? 'Свернуть' : 'Развернуть'}
+            onClick={() => setGraphicsOpen((v) => !v)}
+          >
+            {graphicsOpen ? '▾' : '▸'}
+          </button>
+        </div>
+
+        {graphicsOpen ? (
+          <div className="sidePanelBody" id="graphics-panel-body">
+            <div className="graphicsButtons">
+              {GRAPHICS_PRESETS.map((p) => {
+                const selected = graphicsPreset === p.id
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={
+                      selected
+                        ? 'topButton graphicsButton graphicsButtonSelected'
+                        : 'topButton graphicsButton'
+                    }
+                    aria-pressed={selected}
+                    onClick={() => setGraphicsPreset(p.id)}
+                    title={p.title}
+                  >
+                    {p.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="appMain">
         <FloorPlanCanvas
           rooms={rooms}
           theme={theme}
+          graphicsPreset={graphicsPreset}
+          searchText={searchText}
           matchedKeys={matchedKeys}
           titleText={titleText}
           selectedRoomKey={selectedRoomKey}

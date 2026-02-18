@@ -216,15 +216,92 @@
   align-items: center;
 }
 
-.floorBar {
+
+.sidePanel {
   position: absolute;
   z-index: 50;
+  min-width: 190px;
+  border-radius: 22px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.55);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(110%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(110%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 10px;
+}
+
+.sidePanelLeft {
+  left: 10px;
+  top: 70px;
+}
+
+.sidePanelRight {
+  right: 10px;
+  top: 70px;
+}
+
+.sidePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sidePanelTitle {
+  font-weight: 800;
+  color: #111;
+  opacity: 0.9;
+  user-select: none;
+}
+
+.sidePanelToggle {
+  height: 34px;
+  width: 34px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.20);
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.sidePanelToggle:hover {
+  transition: 150ms ease-out;
+  background: rgba(255, 255, 255, 0.30);
+}
+
+.sidePanelBody {
+  margin-top: 10px;
+}
+
+.floorButtons {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  left: 10px;
-  top: 70px;
-  padding: 10px;
+}
+
+.graphicsButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.graphicsButton {
+  width: 160px;
+  justify-content: center;
+  padding: 0 12px;
+}
+
+.graphicsButtonSelected {
+  background: rgba(167, 167, 167, 0.72);
+  border-color: rgba(206, 209, 255, 0.55);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(206, 209, 255, 0.55);
 }
 
 .floorButton {
@@ -254,6 +331,7 @@
 .floorButtonSelected {
   border-color: rgba(206, 209, 255, 0.55);
   background: rgba(167, 167, 167, 0.72);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(206, 209, 255, 0.55);
 }
 
 .topSelect,
@@ -296,6 +374,27 @@
   transition: 1s ease-out;
 }
 
+.topCountBadge {
+  height: 40px;
+  min-width: 76px;
+  padding: 0 12px;
+  border-radius: 50vh;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.55);
+  backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) saturate(110%);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px) saturate(110%);
+  color: #111;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
 .topSearchClear {
   width: 42px;
   position: relative;
@@ -335,6 +434,13 @@
 .topButton:hover {
   transition: 150ms ease-out;
   background: rgba(167, 167, 167, 0.66);
+}
+
+/* Ensure selected graphics preset overrides .topButton defaults (order + specificity) */
+.topButton.graphicsButtonSelected {
+  background: rgba(167, 167, 167, 0.72);
+  border-color: rgba(206, 209, 255, 0.55);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(206, 209, 255, 0.55);
 }
 
 .glassDropdown {
@@ -420,11 +526,46 @@
 .appRoot[data-theme='dark'] .topButton,
 .appRoot[data-theme='dark'] .roomModal,
 .appRoot[data-theme='dark'] .roomHoverTip,
-.appRoot[data-theme='dark'] .glassDropdownMenu {
+.appRoot[data-theme='dark'] .glassDropdownMenu,
+.appRoot[data-theme='dark'] .sidePanel {
   color: #f3f4f6;
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(18, 18, 18, 0.72);
   box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
+}
+
+.appRoot[data-theme='dark'] .topCountBadge {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 18, 0.72);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
+}
+
+.appRoot[data-theme='dark'] .sidePanelTitle {
+  color: #f3f4f6;
+}
+
+.appRoot[data-theme='dark'] .sidePanelToggle {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.appRoot[data-theme='dark'] .graphicsButtonSelected {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(18, 18, 18, 0.82);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.appRoot[data-theme='dark'] .topButton.graphicsButtonSelected {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(18, 18, 18, 0.82);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.appRoot[data-theme='dark'] .floorButtonSelected {
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.18);
 }
 
 .appRoot[data-theme='dark'] .topSelectAccentWrap[data-active='true'] .topSelectCategory {
