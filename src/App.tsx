@@ -10,6 +10,44 @@ import { GRAPHICS_PRESETS, type GraphicsPresetId } from './map/graphicsPresets'
 
 import type { Room } from './map/Room'
 
+function polygonCentroid(points: Array<{ x: number; y: number }>): { x: number; y: number } {
+  // Area-weighted centroid; falls back to average if degenerate.
+  let signedArea = 0
+  let cx = 0
+  let cy = 0
+  const n = points.length
+  for (let i = 0; i < n; i++) {
+    const p0 = points[i]
+    const p1 = points[(i + 1) % n]
+    const a = p0.x * p1.y - p1.x * p0.y
+    signedArea += a
+    cx += (p0.x + p1.x) * a
+    cy += (p0.y + p1.y) * a
+  }
+
+  if (Math.abs(signedArea) < 1e-6) {
+    const avg = points.reduce(
+      (acc, p) => ({ x: acc.x + p.x / n, y: acc.y + p.y / n }),
+      { x: 0, y: 0 },
+    )
+    return avg
+  }
+
+  signedArea *= 0.5
+  cx /= 6 * signedArea
+  cy /= 6 * signedArea
+  return { x: cx, y: cy }
+}
+
+function findTitleAnchorFromFloor1(rooms: Room[]): { x: number; y: number } | null {
+  const titleRoom = rooms.find(
+    (r) => r.roomID === 200 && (r.description ?? '').trim().toUpperCase() === 'TITLE',
+  )
+  if (!titleRoom) return null
+  if (!Array.isArray(titleRoom.points) || titleRoom.points.length < 3) return null
+  return polygonCentroid(titleRoom.points)
+}
+
 function App() {
   const [rooms, setRooms] = React.useState<Room[]>([])
   const [error, setError] = React.useState<string | null>(null)
@@ -29,6 +67,7 @@ function App() {
   const [manifest, setManifest] = React.useState<RoomDataManifest | null>(null)
   const [selectedBuild, setSelectedBuild] = React.useState<string>('build14')
   const [selectedFloor, setSelectedFloor] = React.useState<string>('floor1')
+  const [titleAnchor, setTitleAnchor] = React.useState<{ x: number; y: number } | null>(null)
   const [selectedCategory, setSelectedCategory] = React.useState<string>('__all__')
   const [searchText, setSearchText] = React.useState<string>('')
 
@@ -158,6 +197,27 @@ function App() {
       cancelled = true
     }
   }, [selectedBuild, selectedFloor])
+
+  React.useEffect(() => {
+    let cancelled = false
+
+    const floors = (manifest?.builds ?? []).find((b) => b.id === selectedBuild)?.floors ?? []
+    const floor1Id = floors.find((f) => /floor1/i.test(f)) ?? 'floor1'
+
+    loadRoomsFromPublic({ buildId: selectedBuild, floorId: floor1Id })
+      .then((data) => {
+        if (cancelled) return
+        setTitleAnchor(findTitleAnchorFromFloor1(data))
+      })
+      .catch(() => {
+        if (cancelled) return
+        setTitleAnchor(null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [manifest, selectedBuild])
 
   if (error) {
     return (
@@ -338,6 +398,7 @@ function App() {
           searchText={searchText}
           matchedKeys={matchedKeys}
           titleText={titleText}
+          titleAnchor={titleAnchor}
           selectedRoomKey={selectedRoomKey}
           onSelectRoomKey={(key) => {
             setSelectedRoomKey(key)

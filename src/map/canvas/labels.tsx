@@ -4,6 +4,8 @@ import * as React from 'react';
 import * as THREE from 'three';
 import type { RoomPolygon } from '../roomData';
 
+export type TitleAnchor = { x: number; y: number };
+
 function polygonCentroid(points: Array<{ x: number; y: number }>): { x: number; y: number } {
   // Area-weighted centroid; falls back to average if degenerate.
   let signedArea = 0;
@@ -56,7 +58,6 @@ function RoomLabel({
     if (t.length === 0) return null;
     const text = isTitle ? t.toLocaleUpperCase() : t;
     const isEntrance = !isTitle && t.trim().toLocaleUpperCase().startsWith('ВХОД');
-
     return (
       <Text
         position={[centroid.x, 0.1, -centroid.y]}
@@ -159,10 +160,12 @@ export function RoomLabels({
   polygons,
   color,
   titleText,
+  titleAnchor,
 }: {
   polygons: RoomPolygon[];
   color: string;
   titleText?: string;
+  titleAnchor?: TitleAnchor | null;
 }) {
   const { camera } = useThree();
   const [mode, setMode] = React.useState<0 | 1 | 2>(0);
@@ -186,11 +189,33 @@ export function RoomLabels({
   });
 
   const showDescription = mode === 2;
-  const visiblePolys = mode === 0 ? polygons.filter(isSpecialLabel) : polygons;
-  if (visiblePolys.length === 0) return null;
+  const visiblePolysRaw = mode === 0 ? polygons.filter(isSpecialLabel) : polygons;
+  const shouldForceTitle = Boolean(titleAnchor && (titleText ?? '').trim().length > 0);
+  const visiblePolys = shouldForceTitle
+    ? visiblePolysRaw.filter((p) => !((p.description ?? '').trim().toUpperCase() === 'TITLE' && p.roomID === 200))
+    : visiblePolysRaw;
+  if (!shouldForceTitle && visiblePolys.length === 0) return null;
+
+  const forcedTitleText = (titleText ?? '').trim();
 
   return (
     <group>
+      {shouldForceTitle ? (
+        <Text
+          position={[titleAnchor!.x, 0.1, -titleAnchor!.y]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={6.4}
+          lineHeight={1.05}
+          maxWidth={64}
+          fontWeight="bold"
+          textAlign="center"
+          anchorX="center"
+          anchorY="middle"
+          color={color}
+        >
+          {forcedTitleText.toLocaleUpperCase()}
+        </Text>
+      ) : null}
       {visiblePolys.map((poly, idx) => (
         <RoomLabel
           key={`${poly.roomID}-${idx}`}

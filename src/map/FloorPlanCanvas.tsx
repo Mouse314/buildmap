@@ -1,19 +1,20 @@
-﻿import { Canvas, useFrame, useThree } from '@react-three/fiber';
+﻿import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, PerformanceMonitor, PerspectiveCamera, Stats } from '@react-three/drei';
 import { Bloom, EffectComposer, SSAO } from '@react-three/postprocessing';
 import * as React from 'react';
 import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { computeBounds, roomsToPolygons, type RoomPolygon } from './roomData';
+import { roomsToPolygons, type RoomPolygon } from './roomData';
 import type { Room } from './Room';
 import { getRoomFillColor } from './roomPalette';
 import { makePolygonGeometry } from './canvas/geometry';
-import { RoomLabels } from './canvas/labels';
+import { RoomLabels, type TitleAnchor } from './canvas/labels';
 import { CursorManager, DragDetector } from './canvas/interaction';
 import { HoverHighlighter } from './canvas/HoverHighlighter';
 import { FitView } from './canvas/FitView';
 import { MouseLamp } from './canvas/MouseLamp';
 import { SmoothWheelZoom } from './canvas/SmoothWheelZoom';
+import { AutoFitToPolygons } from './canvas/AutoFitToPolygons';
 import { getGraphicsPreset, type GraphicsPresetId } from './graphicsPresets';
 
 function ShadowConfigurator({ enabled }: { enabled: boolean }) {
@@ -25,112 +26,6 @@ function ShadowConfigurator({ enabled }: { enabled: boolean }) {
       gl.shadowMap.type = THREE.PCFSoftShadowMap;
     }
   }, [enabled, gl]);
-
-  return null;
-}
-
-function AutoFitToPolygons({
-  polygons,
-  controlsRef,
-  enabled,
-  isDragging,
-  token,
-}: {
-  polygons: RoomPolygon[] | null;
-  controlsRef: React.RefObject<OrbitControlsImpl | null>;
-  enabled: boolean;
-  isDragging: boolean;
-  token: string;
-}) {
-  const { camera, size } = useThree();
-
-  const lastTokenRef = React.useRef<string>('');
-
-  const goalRef = React.useRef<{
-    position: THREE.Vector3;
-    target: THREE.Vector3;
-    active: boolean;
-  }>({
-    position: new THREE.Vector3(),
-    target: new THREE.Vector3(),
-    active: false,
-  });
-
-  React.useEffect(() => {
-    if (!enabled) return;
-    if (isDragging) return;
-    if (!polygons || polygons.length === 0) return;
-    if (token.length === 0) {
-      lastTokenRef.current = '';
-      return;
-    }
-    if (lastTokenRef.current === token) return;
-    lastTokenRef.current = token;
-
-    const bounds = computeBounds(polygons);
-    const centerX = (bounds.minX + bounds.maxX) / 2;
-    // Polygons are created in XY and then rotated by -90° around X,
-    // so their Y maps to world -Z.
-    const centerZ = -((bounds.minY + bounds.maxY) / 2);
-
-    const boxWidth = Math.max(0.001, bounds.maxX - bounds.minX);
-    const boxHeight = Math.max(0.001, bounds.maxY - bounds.minY);
-    const fitPadding = 1.35;
-
-    // Keep top-down orientation stable.
-    camera.up.set(0, 0, -1);
-
-    const aspect = size.width / Math.max(1, size.height);
-    const persp = camera as unknown as { fov?: number; aspect?: number; updateProjectionMatrix?: () => void };
-    const fov = typeof persp.fov === 'number' ? persp.fov : 45;
-
-    const vFov = (fov * Math.PI) / 180;
-    const tanV = Math.tan(vFov / 2);
-    const tanH = tanV * aspect;
-
-    const distV = (boxHeight / 2) / Math.max(1e-6, tanV);
-    const distH = (boxWidth / 2) / Math.max(1e-6, tanH);
-    const dist = Math.max(distV, distH) * 1.15 * fitPadding;
-
-    goalRef.current.position.set(centerX, Math.max(2, dist), centerZ);
-    goalRef.current.target.set(centerX, 0, centerZ);
-    goalRef.current.active = true;
-
-    // Ensure projection matches current size.
-    if (typeof persp.aspect === 'number') persp.aspect = aspect;
-    persp.updateProjectionMatrix?.();
-  }, [camera, enabled, isDragging, polygons, size.height, size.width, token]);
-
-  useFrame((_, delta) => {
-    if (!enabled) return;
-    if (isDragging) return;
-    if (!goalRef.current.active) return;
-
-    const goalPos = goalRef.current.position;
-    const goalTarget = goalRef.current.target;
-
-    const nextX = THREE.MathUtils.damp(camera.position.x, goalPos.x, 10, delta);
-    const nextY = THREE.MathUtils.damp(camera.position.y, goalPos.y, 10, delta);
-    const nextZ = THREE.MathUtils.damp(camera.position.z, goalPos.z, 10, delta);
-    camera.position.set(nextX, nextY, nextZ);
-
-    if (controlsRef.current) {
-      const target = controlsRef.current.target;
-      target.x = THREE.MathUtils.damp(target.x, goalTarget.x, 10, delta);
-      target.y = THREE.MathUtils.damp(target.y, goalTarget.y, 10, delta);
-      target.z = THREE.MathUtils.damp(target.z, goalTarget.z, 10, delta);
-      controlsRef.current.update();
-    } else {
-      camera.lookAt(goalTarget.x, goalTarget.y, goalTarget.z);
-    }
-
-    const done =
-      camera.position.distanceToSquared(goalPos) < 0.0004 &&
-      (!controlsRef.current || controlsRef.current.target.distanceToSquared(goalTarget) < 0.0004);
-    if (done) {
-      goalRef.current.active = false;
-    }
-  });
 
   return null;
 }
@@ -147,6 +42,7 @@ export function FloorPlanCanvas({
   onOpenRoom,
   onHoverRoom,
   titleText,
+  titleAnchor = null,
   theme = 'light',
   graphicsPreset = 'medium',
   searchText = '',
@@ -158,6 +54,7 @@ export function FloorPlanCanvas({
   onOpenRoom?: (args: { roomKey: string; clientX: number; clientY: number }) => void;
   onHoverRoom?: (args: { room: Room; clientX: number; clientY: number } | null) => void;
   titleText?: string;
+  titleAnchor?: TitleAnchor | null;
   theme?: 'light' | 'dark';
   graphicsPreset?: GraphicsPresetId;
   searchText?: string;
@@ -169,12 +66,36 @@ export function FloorPlanCanvas({
 
   const preset = React.useMemo(() => getGraphicsPreset(graphicsPreset), [graphicsPreset]);
 
-  const autoFitEnabled = React.useMemo(() => {
-    return (searchText ?? '').trim().length > 0;
+  const searchToken = React.useMemo(() => {
+    return (searchText ?? '').trim();
   }, [searchText]);
 
-  const autoFitToken = React.useMemo(() => {
-    return (searchText ?? '').trim();
+  const [autoFitTrigger, setAutoFitTrigger] = React.useState(0);
+  const [isSearchTyping, setIsSearchTyping] = React.useState(false);
+  const typingTimeoutRef = React.useRef<number | null>(null);
+  const didMountRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    setAutoFitTrigger((v) => v + 1);
+
+    // Hard limit: allow auto-fit only while user is actively editing the search text.
+    if (typingTimeoutRef.current != null) {
+      window.clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    if ((searchText ?? '').length === 0) {
+      setIsSearchTyping(false);
+      return;
+    }
+
+    setIsSearchTyping(true);
+    typingTimeoutRef.current = window.setTimeout(() => {
+      setIsSearchTyping(false);
+      typingTimeoutRef.current = null;
+    }, 250);
   }, [searchText]);
 
   const matchedPolygons = React.useMemo(() => {
@@ -356,14 +277,14 @@ export function FloorPlanCanvas({
       <FitView polygons={polygons} controlsRef={controlsRef} />
 
       <AutoFitToPolygons
-        enabled={autoFitEnabled}
+        enabled={searchToken.length > 0 && isSearchTyping}
         polygons={matchedPolygons}
         controlsRef={controlsRef}
         isDragging={isDragging}
-        token={autoFitToken}
+        trigger={autoFitTrigger}
+        token={searchToken}
       />
 
-      
 
       <OrbitControls
         ref={controlsRef}
@@ -382,7 +303,7 @@ export function FloorPlanCanvas({
         maxDistance={150}
       />
 
-      {<SmoothWheelZoom
+      <SmoothWheelZoom
         controlsRef={controlsRef}
         isDragging={isDragging}
         dragRef={dragRef}
@@ -390,7 +311,7 @@ export function FloorPlanCanvas({
         maxDistance={150}
         wheelStrength={0.0014}
         smoothTime={18}
-      />}
+      />
 
       <HoverHighlighter
         active={
@@ -515,7 +436,7 @@ export function FloorPlanCanvas({
           );
         })}
 
-        <RoomLabels polygons={polygons} color={colors.label} titleText={titleText} />
+        <RoomLabels polygons={polygons} color={colors.label} titleText={titleText} titleAnchor={titleAnchor} />
       </group>
     </Canvas>
   );
