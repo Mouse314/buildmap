@@ -72,7 +72,8 @@ export function RoomInfoModal({
       className="roomModalOverlay"
       role="dialog"
       aria-modal="true"
-      onMouseDown={(e) => {
+      onPointerDown={(e) => {
+        if (e.pointerType !== 'mouse') return;
         if (e.target === e.currentTarget) onClose();
       }}
     >

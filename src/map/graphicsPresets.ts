@@ -45,7 +45,7 @@ export type GraphicsPresetConfig = {
 export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
   {
     id: 'min',
-    label: 'Минимум',
+    label: 'Сбалансированные',
     title: 'Максимальная производительность',
     dpr: { mode: 'fixed', value: 1 },
     shadowsEnabled: false,
@@ -60,8 +60,8 @@ export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
   },
   {
     id: 'medium',
-    label: 'Среднее',
-    title: 'Баланс (как сейчас)',
+    label: 'Выше среднего',
+    title: 'Улучшенное качество',
     dpr: { mode: 'adaptive', baseMax: 1.5, declineTo: 1.0 },
     shadowsEnabled: false,
     mouseLampEnabled: true,
@@ -84,9 +84,9 @@ export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
   },
   {
     id: 'max',
-    label: 'Максимум',
-    title: 'Все эффекты (может быть тяжелее)',
-    dpr: { mode: 'fixed', value: 2.0 },
+    label: 'Максимальные',
+    title: 'Максимальное качество (рекомендуется только для мощных устройств)',
+    dpr: { mode: 'fixed', value: 1.5 },
     shadowsEnabled: true,
     mouseLampEnabled: true,
     postFx: {

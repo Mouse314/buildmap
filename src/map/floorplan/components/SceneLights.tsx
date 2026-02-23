@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { MouseLamp } from '../../canvas/MouseLamp';
 import { LIGHT_POS } from '../config/constants';
 

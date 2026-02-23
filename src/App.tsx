@@ -26,9 +26,8 @@ function App() {
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
 
-  const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('medium')
+  const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('min')
 
-  const [floorsOpen, setFloorsOpen] = React.useState(true)
   const [graphicsOpen, setGraphicsOpen] = React.useState(true)
 
   const [manifest, setManifest] = React.useState<RoomDataManifest | null>(null)
@@ -44,6 +43,11 @@ function App() {
   const [modalAnchor, setModalAnchor] = React.useState<{ x: number; y: number } | null>(
     null,
   )
+
+  const isTouchDevice = React.useMemo(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia?.('(pointer: coarse)').matches ?? false
+  }, [])
 
   const selectedRoom = React.useMemo(() => {
     if (selectedRoomKey == null) return null
@@ -237,6 +241,7 @@ function App() {
         onSearchTextChange={setSearchText}
         onClearSearch={() => {
           setSearchText('')
+          setSelectedCategory('__all__')
           requestAnimationFrame(() => searchInputRef.current?.focus())
         }}
         searchInputRef={searchInputRef}
@@ -253,13 +258,13 @@ function App() {
           setSelectedCategory(category)
           setSearchText('')
         }}
+        graphicsPreset={graphicsPreset}
+        onSelectPreset={setGraphicsPreset}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
       />
 
       <FloorsPanel
-        floorsOpen={floorsOpen}
-        onToggle={() => setFloorsOpen((v) => !v)}
         floorOptions={floorOptions}
         selectedFloor={selectedFloor}
         floorLabel={floorLabel}
@@ -303,7 +308,7 @@ function App() {
         />
       </div>
 
-      {!selectedRoom && hoveredRoom && hoverAnchor ? (
+      {!isTouchDevice && !selectedRoom && hoveredRoom && hoverAnchor ? (
         <RoomHoverTooltip room={hoveredRoom} anchor={hoverAnchor} />
       ) : null}
 

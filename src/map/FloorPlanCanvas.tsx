@@ -124,6 +124,11 @@ export function FloorPlanCanvas({
     return window.devicePixelRatio || 1;
   }, []);
 
+  const isTouchDevice = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  }, []);
+
   const initialDpr = React.useMemo(() => {
     if (preset.dpr.mode === 'fixed') return Math.min(deviceDpr, preset.dpr.value);
     return Math.min(deviceDpr, preset.dpr.baseMax);
@@ -131,18 +136,32 @@ export function FloorPlanCanvas({
 
   const [dpr, setDpr] = React.useState<number>(initialDpr);
   const [effectsEnabled, setEffectsEnabled] = React.useState<boolean>(preset.postFx.enabled);
+  const dprRef = React.useRef<number>(initialDpr);
+  const effectsEnabledRef = React.useRef<boolean>(preset.postFx.enabled);
+  const dragQualitySnapshotRef = React.useRef<{ dpr: number; effects: boolean } | null>(null);
+  const dragQualityRestoreTimeoutRef = React.useRef<number | null>(null);
 
   const enableNightLampShadows = preset.shadowsEnabled && theme === 'dark' && graphicsPreset === 'max';
   const allowAdaptiveQuality = preset.dpr.mode === 'adaptive';
+  const dragBoostOnMinPreset = graphicsPreset === 'min';
 
   React.useEffect(() => {
     setDpr(initialDpr);
     setEffectsEnabled(preset.postFx.enabled);
   }, [initialDpr, preset.postFx.enabled]);
 
+  React.useEffect(() => {
+    dprRef.current = dpr;
+  }, [dpr]);
+
+  React.useEffect(() => {
+    effectsEnabledRef.current = effectsEnabled;
+  }, [effectsEnabled]);
+
   const colors = React.useMemo(() => getSceneColors(theme, graphicsPreset), [graphicsPreset, theme]);
 
   const clickCandidateRef = React.useRef<{ roomKey: string; clientX: number; clientY: number } | null>(null);
+  const suppressMouseTapUntilRef = React.useRef<number>(0);
   const dragRef = React.useRef<{ down: boolean; startX: number; startY: number; moved: boolean }>(
     { down: false, startX: 0, startY: 0, moved: false },
   );
@@ -154,6 +173,51 @@ export function FloorPlanCanvas({
     clickCandidateRef.current = null;
     onHoverRoom?.(null);
   }, [isDragging, onHoverRoom]);
+
+  React.useEffect(() => {
+    if (!dragBoostOnMinPreset) {
+      if (dragQualityRestoreTimeoutRef.current != null) {
+        window.clearTimeout(dragQualityRestoreTimeoutRef.current);
+        dragQualityRestoreTimeoutRef.current = null;
+      }
+      dragQualitySnapshotRef.current = null;
+      return;
+    }
+
+    if (isDragging) {
+      if (dragQualityRestoreTimeoutRef.current != null) {
+        window.clearTimeout(dragQualityRestoreTimeoutRef.current);
+        dragQualityRestoreTimeoutRef.current = null;
+      }
+
+      dragQualitySnapshotRef.current = {
+        dpr: dprRef.current,
+        effects: effectsEnabledRef.current,
+      };
+
+      setEffectsEnabled(false);
+      setDpr((prev) => Math.min(prev, 0.85));
+      return;
+    }
+
+    if (!dragQualitySnapshotRef.current) return;
+    dragQualityRestoreTimeoutRef.current = window.setTimeout(() => {
+      const snapshot = dragQualitySnapshotRef.current;
+      if (!snapshot) return;
+      setDpr(snapshot.dpr);
+      setEffectsEnabled(snapshot.effects);
+      dragQualitySnapshotRef.current = null;
+      dragQualityRestoreTimeoutRef.current = null;
+    }, 140);
+  }, [dragBoostOnMinPreset, isDragging]);
+
+  React.useEffect(() => {
+    return () => {
+      if (dragQualityRestoreTimeoutRef.current != null) {
+        window.clearTimeout(dragQualityRestoreTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const hoveredPolyKeyRef = React.useRef<string | null>(null);
   React.useEffect(() => {
@@ -190,6 +254,9 @@ export function FloorPlanCanvas({
         alpha: false,
         stencil: false,
         preserveDrawingBuffer: false,
+      }}
+      onCreated={({ gl }) => {
+        gl.domElement.style.touchAction = 'none';
       }}
       onPointerMissed={() => {
         setHoveredPolyKey(null);
@@ -245,14 +312,18 @@ export function FloorPlanCanvas({
         ref={controlsRef}
         enableRotate={false}
         enablePan
-        enableZoom={false}
+        enableZoom={isTouchDevice}
         enableDamping
         dampingFactor={0.08}
-        panSpeed={1.2}
+        panSpeed={isTouchDevice ? 1.5 : 1.2}
         mouseButtons={{
           LEFT: THREE.MOUSE.PAN,
           MIDDLE: THREE.MOUSE.PAN,
           RIGHT: THREE.MOUSE.ROTATE,
+        }}
+        touches={{
+          ONE: THREE.TOUCH.PAN,
+          TWO: THREE.TOUCH.DOLLY_PAN,
         }}
         minDistance={10}
         maxDistance={150}
@@ -264,7 +335,7 @@ export function FloorPlanCanvas({
         dragRef={dragRef}
         minDistance={10}
         maxDistance={150}
-        wheelStrength={0.0014}
+        wheelStrength={isTouchDevice ? 0 : 0.0014}
         smoothTime={18}
       />
 
@@ -329,7 +400,9 @@ export function FloorPlanCanvas({
                 onPointerDown={
                   item.interactive
                     ? (e) => {
-                        if (e.nativeEvent.button !== 0) return;
+                        const pointerType = (e.nativeEvent as PointerEvent).pointerType ?? 'mouse';
+                        if (pointerType === 'mouse' && performance.now() < suppressMouseTapUntilRef.current) return;
+                        if (pointerType === 'mouse' && e.nativeEvent.button !== 0) return;
                         if (isDragging) return;
                         clickCandidateRef.current = {
                           roomKey: item.key,
@@ -342,7 +415,9 @@ export function FloorPlanCanvas({
                 onPointerUp={
                   item.interactive
                     ? (e) => {
-                        if (e.nativeEvent.button !== 0) return;
+                        const pointerType = (e.nativeEvent as PointerEvent).pointerType ?? 'mouse';
+                        if (pointerType === 'mouse' && performance.now() < suppressMouseTapUntilRef.current) return;
+                        if (pointerType === 'mouse' && e.nativeEvent.button !== 0) return;
                         e.stopPropagation();
                         if (isDragging) return;
 
@@ -351,7 +426,13 @@ export function FloorPlanCanvas({
                         if (!cand || cand.roomKey !== item.key) return;
                         if (dragRef.current.moved) return;
 
-                        const nextKey = selectedRoomKey === item.key ? null : item.key;
+                        if (pointerType !== 'mouse') {
+                          suppressMouseTapUntilRef.current = performance.now() + 500;
+                        }
+
+                        const nextKey = pointerType === 'mouse'
+                          ? (selectedRoomKey === item.key ? null : item.key)
+                          : item.key;
                         onSelectRoomKey(nextKey);
                         if (nextKey != null) {
                           onOpenRoom?.({ roomKey: nextKey, clientX: cand.clientX, clientY: cand.clientY });

@@ -29,6 +29,7 @@ export function GraphicsPanel({ graphicsOpen, onToggle, graphicsPreset, onSelect
           <div className="graphicsButtons">
             {GRAPHICS_PRESETS.map((p) => {
               const selected = graphicsPreset === p.id;
+              const needsWarning = p.id === 'medium' || p.id === 'max';
               return (
                 <button
                   key={p.id}
@@ -41,9 +42,14 @@ export function GraphicsPanel({ graphicsOpen, onToggle, graphicsPreset, onSelect
                   title={p.title}
                 >
                   {p.label}
+                  {needsWarning ? <span className="graphicsWarningMark" aria-hidden> ⚠️</span> : null}
                 </button>
               );
             })}
+          </div>
+          <div className="graphicsWarningText">
+            <span className="graphicsWarningMark" aria-hidden>⚠️</span>
+            Возможно снижение плавности
           </div>
         </div>
       ) : null}

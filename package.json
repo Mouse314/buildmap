@@ -6,7 +6,7 @@
   "scripts": {
     "generate:rooms": "node scripts/generate-room-json.mjs",
     "predev": "npm run generate:rooms",
-    "dev": "vite",
+    "dev": "vite --host --port 5173",
     "prebuild": "npm run generate:rooms",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

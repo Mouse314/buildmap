@@ -207,20 +207,21 @@
 
 .topBar {
   position: absolute;
-  z-index: 50;
+  z-index: 120;
   display: flex;
   width: calc(100% - 100px);
   translate: 50px 10px;
   gap: 30px;
   padding: 10px;
   align-items: center;
+  justify-content: space-between;
 }
 
 
 .sidePanel {
   position: absolute;
   z-index: 50;
-  min-width: 190px;
+  /* min-width: 100px; */
   border-radius: 22px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.55);
@@ -234,12 +235,12 @@
 
 .sidePanelLeft {
   left: 10px;
-  top: 70px;
+  top: 100px;
 }
 
 .sidePanelRight {
   right: 10px;
-  top: 70px;
+  top: 100px;
 }
 
 .sidePanelHeader {
@@ -250,7 +251,7 @@
 }
 
 .sidePanelTitle {
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   opacity: 0.9;
   user-select: none;
@@ -298,6 +299,19 @@
   padding: 0 12px;
 }
 
+.graphicsWarningMark {
+  margin-left: 6px;
+  line-height: 1;
+}
+
+.graphicsWarningText {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+  opacity: 0.88;
+}
+
 .graphicsButtonSelected {
   background: rgba(167, 167, 167, 0.72);
   border-color: rgba(206, 209, 255, 0.55);
@@ -330,7 +344,7 @@
 
 .floorButtonSelected {
   border-color: rgba(206, 209, 255, 0.55);
-  background: rgba(167, 167, 167, 0.72);
+  background: rgba(59, 161, 156, 0.72);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(206, 209, 255, 0.55);
 }
 
@@ -351,6 +365,21 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
 }
 
+.buildSelector {
+  font-size: large;
+  font-weight: 700;
+}
+
+.topSelectAccentWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  transition: 1s ease-out;
+}
+
 .topSelectAccentWrap[data-active='true'] .topSelectCategory {
   border-color: var(--accent-color);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px var(--accent-color);
@@ -363,10 +392,11 @@
 }
 
 .topSearchWrap{
+  padding: 5px;
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 10px;
   width: 100%;
   background-color: rgba(163, 163, 163, 0.582);
@@ -383,7 +413,7 @@
   z-index: 80;
   border-radius: 18px;
   border: 1px solid rgba(206, 209, 255, 0.35);
-  background: rgba(167, 167, 167, 0.72);
+  background: rgba(167, 167, 167, 0.386);
   backdrop-filter: blur(6px) saturate(120%);
   -webkit-backdrop-filter: blur(6px) saturate(120%);
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
@@ -546,8 +576,9 @@
   align-items: center;
   justify-content: center;
   width: auto;
+  min-width: 200px;
   height: 40px;
-  padding: 0 14px;
+  padding: 10px;
   border-radius: 50vh;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.55);
@@ -558,6 +589,7 @@
   color: #111;
   font-weight: 600;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
 }
 
 .topThemeButton {
@@ -565,9 +597,155 @@
   white-space: nowrap;
 }
 
+.topDesktopOnly {
+  display: flex;
+}
+
+.mobileControlsButton {
+  display: none;
+  min-width: 42px;
+  width: 42px;
+  padding: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
 .topButton:hover {
   transition: 150ms ease-out;
   background: rgba(167, 167, 167, 0.66);
+}
+
+.bugReportOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(11, 15, 25, 0.22);
+}
+
+.bugReportModal {
+  width: min(560px, calc(100% - 40px));
+  border-radius: 22px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(7px) saturate(120%);
+  -webkit-backdrop-filter: blur(7px) saturate(120%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+  padding: 14px;
+  color: #111;
+}
+
+.bugReportTitle {
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.bugReportInput {
+  width: calc(100% - 28px);
+  min-height: 140px;
+  resize: vertical;
+  border-radius: 14px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.3);
+  color: inherit;
+  padding: 10px 12px;
+  outline: none;
+  font: inherit;
+}
+
+.bugReportInput:focus {
+  border-color: rgba(206, 209, 255, 0.55);
+}
+
+.bugReportActions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.bugReportButton {
+  min-width: 120px;
+}
+
+.mobileControlsOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(11, 15, 25, 0.22);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mobileControlsPanel {
+  width: min(320px, calc(100% - 24px));
+  height: 100%;
+  border-left: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(7px) saturate(120%);
+  -webkit-backdrop-filter: blur(7px) saturate(120%);
+  box-shadow: -12px 0 30px rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobileControlsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mobileControlsTitle {
+  font-weight: 800;
+}
+
+.mobileControlsClose {
+  min-width: 40px;
+  width: 40px;
+  padding: 0;
+}
+
+.mobileControlsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobileControlsRow {
+  width: 100%;
+}
+
+.mobileControlsSectionTitle {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.mobileGraphicsButtons {
+  width: 100%;
+}
+
+.mobileControlsRow .topButton,
+.mobileControlsRow .topSelect,
+.mobileControlsRow .topCountBadge {
+  width: 100%;
+  min-width: 0;
+}
+
+.mobileControlsRow .graphicsButton {
+  width: 100%;
+  min-width: 0;
+}
+
+.mobileControlsPanel .glassDropdownMenu {
+  width: auto;
+  min-width: 0;
+  left: 0;
+  right: 0;
 }
 
 /* Ensure selected graphics preset overrides .topButton defaults (order + specificity) */
@@ -579,6 +757,10 @@
 
 .glassDropdown {
   position: relative;
+}
+
+.glassDropdown[data-open='true'] {
+  z-index: 140;
 }
 
 .glassDropdownButton {
@@ -709,6 +891,82 @@
 
 .appRoot[data-theme='dark'] .topSearch::placeholder {
   color: rgba(243, 244, 246, 0.6);
+}
+
+.appRoot[data-theme='dark'] .bugReportModal,
+.appRoot[data-theme='dark'] .bugReportInput {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 18, 0.72);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
+}
+
+.appRoot[data-theme='dark'] .bugReportInput:focus {
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+.appRoot[data-theme='dark'] .bugReportInput::placeholder {
+  color: rgba(243, 244, 246, 0.6);
+}
+
+.appRoot[data-theme='dark'] .mobileControlsPanel {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 18, 0.72);
+  box-shadow: -10px 0 50px rgba(41, 35, 78, 0.55);
+}
+
+@media (max-width: 1080px) {
+  .topBar {
+    width: calc(100% - 20px);
+    translate: 10px 10px;
+    gap: 10px;
+  }
+
+  .topDesktopOnly {
+    display: none !important;
+  }
+
+  .mobileControlsButton {
+    display: flex;
+  }
+
+  .topSelectAccentWrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .topSelectAccentWrap .topCountBadge,
+  .topSelectAccentWrap .searchWrapper {
+    display: none;
+  }
+
+  .topSearchWrap {
+    padding: 4px;
+  }
+
+  .topSearch {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .smartSearchPanelOpen {
+    max-height: min(56vh, 420px);
+  }
+
+  .sidePanelRight {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidePanelLeft,
+  .sidePanelRight {
+    top: 64px;
+  }
+
+  .topBar {
+    padding: 6px;
+  }
 }
 
 .appRoot[data-theme='dark'] .roomModalHeader {
