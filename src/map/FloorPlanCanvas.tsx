@@ -1,50 +1,26 @@
-﻿import { Canvas, useThree } from '@react-three/fiber';
+﻿import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerformanceMonitor, PerspectiveCamera, Stats } from '@react-three/drei';
-import { Bloom, EffectComposer, SSAO } from '@react-three/postprocessing';
 import * as React from 'react';
 import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { computeBounds, roomsToPolygons, type RoomPolygon } from './roomData';
-import type { Room } from './Room';
-import { getRoomFillColor } from './roomPalette';
-import { makePolygonGeometry } from './canvas/geometry';
+import { computeBounds, roomsToPolygons, type RoomPolygon } from './rooms/utils/roomData';
+import type { Room } from './rooms/utils/Room';
 import { RoomLabels, type TitleAnchor } from './canvas/labels';
 import { CursorManager, DragDetector } from './canvas/interaction';
 import { HoverHighlighter } from './canvas/HoverHighlighter';
 import { FitView } from './canvas/FitView';
-import { MouseLamp } from './canvas/MouseLamp';
 import { SmoothWheelZoom } from './canvas/SmoothWheelZoom';
 import { AutoFitToPolygons } from './canvas/AutoFitToPolygons';
 import { PanBounds, type PanBoundsRect } from './canvas/PanBounds';
 import { getGraphicsPreset, type GraphicsPresetId } from './graphicsPresets';
-
-function ShadowConfigurator({ enabled }: { enabled: boolean }) {
-  const { gl } = useThree();
-
-  React.useEffect(() => {
-    gl.shadowMap.enabled = enabled;
-    if (enabled) {
-      gl.shadowMap.type = THREE.PCFSoftShadowMap;
-    }
-  }, [enabled, gl]);
-
-  return null;
-}
-
-const NON_HOVERABLE_ROOM_IDS = new Set<number>([1, 100, 200]);
-const WALL_ROOM_ID = 100;
-const WALL_EXTRUDE_DEPTH = 1.2;
-const HIDDEN_ROOM_IDS = new Set<number>([300, 301]);
-
-const MIN_INTERACTIVE_AREA_M2 = 2;
-
-function isInteractiveRoomArea(areaM2: number | undefined): boolean {
-  return !(typeof areaM2 === 'number' && Number.isFinite(areaM2) && areaM2 < MIN_INTERACTIVE_AREA_M2);
-}
-
-// Pan clamp (tweak these later if needed)
-const PAN_BOUNDS_PADDING_X = 20;
-const PAN_BOUNDS_PADDING_Z = 20;
+import { ShadowConfigurator } from './floorplan/components/ShadowConfigurator';
+import { SceneEffects } from './floorplan/components/SceneEffects';
+import { SceneLights } from './floorplan/components/SceneLights';
+import { useSearchAutoFit } from './floorplan/hooks/useSearchAutoFit';
+import { buildRenderItems } from './floorplan/utils/renderItems';
+import { getSceneColors } from './floorplan/utils/sceneColors';
+import { isInteractiveRoomArea } from './floorplan/utils/interactivity';
+import { PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
 
 export function FloorPlanCanvas({
   rooms,
@@ -81,33 +57,7 @@ export function FloorPlanCanvas({
     return (searchText ?? '').trim();
   }, [searchText]);
 
-  const [autoFitTrigger, setAutoFitTrigger] = React.useState(0);
-  const [isSearchTyping, setIsSearchTyping] = React.useState(false);
-  const typingTimeoutRef = React.useRef<number | null>(null);
-  const didMountRef = React.useRef(false);
-  React.useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    setAutoFitTrigger((v) => v + 1);
-
-    // Hard limit: allow auto-fit only while user is actively editing the search text.
-    if (typingTimeoutRef.current != null) {
-      window.clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
-    }
-    if ((searchText ?? '').length === 0) {
-      setIsSearchTyping(false);
-      return;
-    }
-
-    setIsSearchTyping(true);
-    typingTimeoutRef.current = window.setTimeout(() => {
-      setIsSearchTyping(false);
-      typingTimeoutRef.current = null;
-    }, 250);
-  }, [searchText]);
+  const { autoFitTrigger, isSearchTyping } = useSearchAutoFit(searchText);
 
   const matchedPolygons = React.useMemo(() => {
     if (!matchedKeys) return null;
@@ -150,7 +100,7 @@ export function FloorPlanCanvas({
   const [dpr, setDpr] = React.useState<number>(initialDpr);
   const [effectsEnabled, setEffectsEnabled] = React.useState<boolean>(preset.postFx.enabled);
 
-  const shadowsEnabled = preset.shadowsEnabled;
+  const enableNightLampShadows = preset.shadowsEnabled && theme === 'dark' && graphicsPreset === 'max';
   const allowAdaptiveQuality = preset.dpr.mode === 'adaptive';
 
   React.useEffect(() => {
@@ -158,12 +108,7 @@ export function FloorPlanCanvas({
     setEffectsEnabled(preset.postFx.enabled);
   }, [initialDpr, preset.postFx.enabled]);
 
-  const colors = React.useMemo(() => {
-    const background = theme === 'dark' ? '#0b0f19' : '#747474';
-    const label = theme === 'dark' ? '#f3f4f6' : '#111111';
-    const dimFill = theme === 'dark' ? '#111827' : '#d1d5db';
-    return { background, label, dimFill };
-  }, [theme]);
+  const colors = React.useMemo(() => getSceneColors(theme, graphicsPreset), [graphicsPreset, theme]);
 
   const clickCandidateRef = React.useRef<{ roomKey: string; clientX: number; clientY: number } | null>(null);
   const dragRef = React.useRef<{ down: boolean; startX: number; startY: number; moved: boolean }>(
@@ -183,38 +128,7 @@ export function FloorPlanCanvas({
     hoveredPolyKeyRef.current = hoveredPolyKey;
   }, [hoveredPolyKey]);
 
-  const renderItems = React.useMemo(() => {
-    const items: Array<{
-      key: string;
-      polygon: RoomPolygon;
-      geometry: THREE.BufferGeometry;
-      color: string;
-      interactive: boolean;
-    }> = [];
-
-    for (let idx = 0; idx < polygons.length; idx++) {
-      const poly = polygons[idx];
-      if (poly.roomID === 200) continue;
-      if (HIDDEN_ROOM_IDS.has(poly.roomID)) continue;
-      const isWall = poly.roomID === WALL_ROOM_ID;
-      const geom = makePolygonGeometry(poly.points, {
-        extrudeDepth: isWall ? WALL_EXTRUDE_DEPTH : 0,
-      });
-      if (!geom) continue;
-      const room = rooms[idx];
-      const key = room?.key ?? `${poly.roomID}-${idx}`;
-      const interactive = !NON_HOVERABLE_ROOM_IDS.has(poly.roomID) && isInteractiveRoomArea(room?.areaM2);
-      items.push({
-        key,
-        polygon: poly,
-        geometry: geom,
-        color: getRoomFillColor(poly.roomID),
-        interactive,
-      });
-    }
-
-    return items;
-  }, [polygons, rooms]);
+  const renderItems = React.useMemo(() => buildRenderItems(polygons, rooms), [polygons, rooms]);
 
   const renderItemByKey = React.useMemo(() => {
     const map = new Map<string, (typeof renderItems)[number]>();
@@ -236,7 +150,7 @@ export function FloorPlanCanvas({
 
   return (
     <Canvas
-      shadows={shadowsEnabled}
+      shadows={enableNightLampShadows}
       dpr={dpr}
       gl={{
         antialias: false,
@@ -250,7 +164,7 @@ export function FloorPlanCanvas({
         onHoverRoom?.(null);
       }}
     >
-      <ShadowConfigurator enabled={shadowsEnabled} />
+      <ShadowConfigurator enabled={enableNightLampShadows} />
 
       {allowAdaptiveQuality && (
         <PerformanceMonitor
@@ -271,35 +185,15 @@ export function FloorPlanCanvas({
       <CursorManager hovered={Boolean(hoveredItem)} dragging={isDragging} />
       <DragDetector dragRef={dragRef} setIsDragging={setIsDragging} />
       <PerspectiveCamera makeDefault near={0.1} far={5000} fov={45} position={new THREE.Vector3(0, 150, 0)} />
-      <ambientLight intensity={theme === 'dark' ? 0.12 : 2} />
+      <SceneLights
+        theme={theme}
+        mouseLampEnabled={preset.mouseLampEnabled}
+        graphicsPreset={graphicsPreset}
+        ambientIntensity={colors.ambientIntensity}
+        dirIntensity={colors.dirIntensity}
+      />
 
-      {theme === 'dark' && preset.mouseLampEnabled && <MouseLamp height={1} intensity={20} />}
-
-      {effectsEnabled && (
-        <EffectComposer enableNormalPass multisampling={preset.postFx.multisampling}>
-          {preset.postFx.ssao ? (
-            <SSAO
-              samples={preset.postFx.ssao.samples}
-              radius={preset.postFx.ssao.radius}
-              intensity={preset.postFx.ssao.intensity}
-              luminanceInfluence={preset.postFx.ssao.luminanceInfluence}
-            />
-          ) : (
-            <></>
-          )}
-          {preset.postFx.bloom ? (
-            <Bloom
-              intensity={preset.postFx.bloom.intensity}
-              luminanceThreshold={preset.postFx.bloom.luminanceThreshold}
-              luminanceSmoothing={preset.postFx.bloom.luminanceSmoothing}
-              radius={preset.postFx.bloom.radius}
-              mipmapBlur={preset.postFx.bloom.mipmapBlur}
-            />
-          ) : (
-            <></>
-          )}
-        </EffectComposer>
-      )}
+      <SceneEffects enabled={effectsEnabled} preset={preset} graphicsPreset={graphicsPreset} />
 
       <FitView polygons={polygons} controlsRef={controlsRef} />
 
@@ -385,83 +279,88 @@ export function FloorPlanCanvas({
           const isLabel = item.polygon.roomID === 200;
 
           const shouldDim = matchedKeys != null && !isMatched && !isSelected && !isHovered && !isWall && !isLabel;
-          const fillColor = shouldDim ? colors.dimFill : item.color;
+          const fillColor = isWall && theme === 'dark'
+            ? '#212630'
+            : shouldDim
+              ? colors.dimFill
+              : item.color;
           const fillOpacity = shouldDim ? 0.6 : 1.0;
 
           return (
-            <mesh
-              key={item.key}
-              geometry={item.geometry}
-              rotation={[-Math.PI / 2, 0, 0]}
-              castShadow={shadowsEnabled && isWall}
-              receiveShadow={shadowsEnabled}
-              raycast={!isDragging && item.interactive ? THREE.Mesh.prototype.raycast : nullRaycast}
-              onPointerDown={
-                item.interactive
-                  ? (e) => {
-                      if (e.nativeEvent.button !== 0) return;
-                      if (isDragging) return;
-                      clickCandidateRef.current = {
-                        roomKey: item.key,
-                        clientX: e.nativeEvent.clientX,
-                        clientY: e.nativeEvent.clientY,
-                      };
-                    }
-                  : undefined
-              }
-              onPointerUp={
-                item.interactive
-                  ? (e) => {
-                      if (e.nativeEvent.button !== 0) return;
-                      e.stopPropagation();
-                      if (isDragging) return;
-
-                      const cand = clickCandidateRef.current;
-                      clickCandidateRef.current = null;
-                      if (!cand || cand.roomKey !== item.key) return;
-                      if (dragRef.current.moved) return;
-
-                      const nextKey = selectedRoomKey === item.key ? null : item.key;
-                      onSelectRoomKey(nextKey);
-                      if (nextKey != null) {
-                        onOpenRoom?.({ roomKey: nextKey, clientX: cand.clientX, clientY: cand.clientY });
+            <React.Fragment key={item.key}>
+              <mesh
+                geometry={item.geometry}
+                rotation={[-Math.PI / 2, 0, 0]}
+                castShadow={enableNightLampShadows && isWall}
+                receiveShadow={enableNightLampShadows && !isWall}
+                raycast={!isDragging && item.interactive ? THREE.Mesh.prototype.raycast : nullRaycast}
+                onPointerDown={
+                  item.interactive
+                    ? (e) => {
+                        if (e.nativeEvent.button !== 0) return;
+                        if (isDragging) return;
+                        clickCandidateRef.current = {
+                          roomKey: item.key,
+                          clientX: e.nativeEvent.clientX,
+                          clientY: e.nativeEvent.clientY,
+                        };
                       }
-                    }
-                  : undefined
-              }
-              onPointerOver={
-                item.interactive
-                  ? (e) => {
-                      if (isDragging) return;
-                      e.stopPropagation();
-                      if (hoveredPolyKeyRef.current === item.key) return;
-                      setHoveredPolyKey(item.key);
+                    : undefined
+                }
+                onPointerUp={
+                  item.interactive
+                    ? (e) => {
+                        if (e.nativeEvent.button !== 0) return;
+                        e.stopPropagation();
+                        if (isDragging) return;
 
-                      const room = rooms.find((r) => r.key === item.key);
-                      if (room) {
-                        onHoverRoom?.({ room, clientX: e.nativeEvent.clientX, clientY: e.nativeEvent.clientY });
+                        const cand = clickCandidateRef.current;
+                        clickCandidateRef.current = null;
+                        if (!cand || cand.roomKey !== item.key) return;
+                        if (dragRef.current.moved) return;
+
+                        const nextKey = selectedRoomKey === item.key ? null : item.key;
+                        onSelectRoomKey(nextKey);
+                        if (nextKey != null) {
+                          onOpenRoom?.({ roomKey: nextKey, clientX: cand.clientX, clientY: cand.clientY });
+                        }
                       }
-                    }
-                  : undefined
-              }
-              onPointerOut={
-                item.interactive
-                  ? (e) => {
-                      if (isDragging) return;
-                      e.stopPropagation();
-                      setHoveredPolyKey(null);
-                      onHoverRoom?.(null);
-                    }
-                  : undefined
-              }
-            >
-              <meshPhongMaterial
-                color={fillColor}
-                transparent
-                opacity={fillOpacity}
-                side={THREE.DoubleSide}
-              />
-            </mesh>
+                    : undefined
+                }
+                onPointerOver={
+                  item.interactive
+                    ? (e) => {
+                        if (isDragging) return;
+                        e.stopPropagation();
+                        if (hoveredPolyKeyRef.current === item.key) return;
+                        setHoveredPolyKey(item.key);
+
+                        const room = rooms.find((r) => r.key === item.key);
+                        if (room) {
+                          onHoverRoom?.({ room, clientX: e.nativeEvent.clientX, clientY: e.nativeEvent.clientY });
+                        }
+                      }
+                    : undefined
+                }
+                onPointerOut={
+                  item.interactive
+                    ? (e) => {
+                        if (isDragging) return;
+                        e.stopPropagation();
+                        setHoveredPolyKey(null);
+                        onHoverRoom?.(null);
+                      }
+                    : undefined
+                }
+              >
+                <meshPhongMaterial
+                  color={fillColor}
+                  transparent
+                  opacity={fillOpacity}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+            </React.Fragment>
           );
         })}
 

@@ -3,12 +3,12 @@ export type GraphicsPresetId = 'min' | 'medium' | 'max';
 export type PostFxConfig = {
   enabled: boolean;
   multisampling: number;
-  ssao:
+  n8ao:
     | {
-        samples: number;
-        radius: number;
+        aoRadius: number;
+        distanceFalloff: number;
         intensity: number;
-        luminanceInfluence: number;
+        screenSpaceRadius: boolean;
       }
     | null;
   bloom:
@@ -18,6 +18,12 @@ export type PostFxConfig = {
         luminanceSmoothing: number;
         radius: number;
         mipmapBlur: boolean;
+      }
+    | null;
+  vignette:
+    | {
+        offset: number;
+        darkness: number;
       }
     | null;
 };
@@ -47,8 +53,9 @@ export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
     postFx: {
       enabled: false,
       multisampling: 0,
-      ssao: null,
+      n8ao: null,
       bloom: null,
+      vignette: null,
     },
   },
   {
@@ -61,18 +68,17 @@ export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
     postFx: {
       enabled: true,
       multisampling: 0,
-      ssao: {
-        samples: 8,
-        radius: 2.0,
-        intensity: 3.0,
-        luminanceInfluence: 0.0,
-      },
+      n8ao: null,
       bloom: {
-        intensity: 0.08,
+        intensity: 0.06,
         luminanceThreshold: 0.55,
-        luminanceSmoothing: 0.7,
+        luminanceSmoothing: 0.75,
         radius: 0.2,
         mipmapBlur: true,
+      },
+      vignette: {
+        offset: 0.38,
+        darkness: 0.52,
       },
     },
   },
@@ -86,18 +92,22 @@ export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
     postFx: {
       enabled: true,
       multisampling: 4,
-      ssao: {
-        samples: 16,
-        radius: 2.2,
-        intensity: 4.0,
-        luminanceInfluence: 0.0,
+      n8ao: {
+        aoRadius: 2.5,
+        distanceFalloff: 1.2,
+        intensity: 4.5,
+        screenSpaceRadius: false,
       },
       bloom: {
-        intensity: 0.12,
-        luminanceThreshold: 0.5,
-        luminanceSmoothing: 0.7,
-        radius: 0.2,
+        intensity: 0.16,
+        luminanceThreshold: 0.48,
+        luminanceSmoothing: 0.72,
+        radius: 0.28,
         mipmapBlur: true,
+      },
+      vignette: {
+        offset: 0.32,
+        darkness: 0.62,
       },
     },
   },

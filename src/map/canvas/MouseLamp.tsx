@@ -5,9 +5,11 @@ import * as THREE from 'three';
 export function MouseLamp({
   height = 1,
   intensity = 55,
+  shadowMapSize = 512,
 }: {
   height?: number;
   intensity?: number;
+  shadowMapSize?: number;
 }) {
   const lightRef = React.useRef<THREE.SpotLight | null>(null);
   const targetRef = React.useRef<THREE.Object3D | null>(null);
@@ -55,8 +57,8 @@ export function MouseLamp({
         distance={height * 32}
         decay={2}
         position={[0, height, 0]}
-        shadow-mapSize-width={512}
-        shadow-mapSize-height={512}
+        shadow-mapSize-width={shadowMapSize}
+        shadow-mapSize-height={shadowMapSize}
         shadow-bias={-0.00015}
         shadow-camera-near={0.5}
         shadow-camera-far={height * 12}

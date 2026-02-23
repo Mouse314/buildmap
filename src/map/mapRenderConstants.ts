@@ -1,0 +1,6 @@
+export const WALL_EXTRUDE_DEPTH = 2.0;
+
+export const LABEL_FLOAT_ABOVE_WALL = 0.25;
+export const LABEL_TEXT_Y = WALL_EXTRUDE_DEPTH + LABEL_FLOAT_ABOVE_WALL;
+
+export const TITLE_LABEL_Y = 0.1;

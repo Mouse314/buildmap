@@ -2,7 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as React from 'react';
 import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { computeBounds, type RoomPolygon } from '../roomData';
+import { computeBounds, type RoomPolygon } from '../rooms/utils/roomData';
 
 export function AutoFitToPolygons({
   polygons,
