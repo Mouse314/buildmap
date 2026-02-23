@@ -10,6 +10,8 @@ import { TopBar } from './components/app/TopBar'
 import { FloorsPanel } from './components/app/FloorsPanel'
 import { GraphicsPanel } from './components/app/GraphicsPanel'
 import { buildLabel, findTitleAnchorFromFloor1, floorLabel, isInteractiveRoom } from './app/utils/roomLabels'
+import { useSmartSearch } from './app/search/useSmartSearch'
+import type { SearchIndexedRoom } from './app/search/types'
 
 import type { Room } from './map/rooms/utils/Room'
 
@@ -35,6 +37,9 @@ function App() {
   const [titleAnchor, setTitleAnchor] = React.useState<{ x: number; y: number } | null>(null)
   const [selectedCategory, setSelectedCategory] = React.useState<string>('__all__')
   const [searchText, setSearchText] = React.useState<string>('')
+  const [searchResultJumpTrigger, setSearchResultJumpTrigger] = React.useState(0)
+  const [roomsLoading, setRoomsLoading] = React.useState(false)
+  const [pendingSearchJump, setPendingSearchJump] = React.useState<SearchIndexedRoom | null>(null)
 
   const [modalAnchor, setModalAnchor] = React.useState<{ x: number; y: number } | null>(
     null,
@@ -104,6 +109,8 @@ function App() {
     return set
   }, [isFiltering, rooms, searchText, selectedCategory])
 
+  const smartSearchData = useSmartSearch({ manifest, selectedBuild, searchText, isInteractiveRoom })
+
   const totalRooms = React.useMemo(() => rooms.filter(isInteractiveRoom).length, [rooms])
   const matchedRooms = matchedKeys ? matchedKeys.size : totalRooms
 
@@ -146,21 +153,36 @@ function App() {
 
   React.useEffect(() => {
     let cancelled = false
+    setRoomsLoading(true)
     setError(null)
     loadRoomsFromPublic({ buildId: selectedBuild, floorId: selectedFloor })
       .then((data) => {
         if (cancelled) return
         setRooms(data)
+        setRoomsLoading(false)
       })
       .catch((e: unknown) => {
         if (cancelled) return
         setError(e instanceof Error ? e.message : String(e))
+        setRoomsLoading(false)
       })
 
     return () => {
       cancelled = true
     }
   }, [selectedBuild, selectedFloor])
+
+  React.useEffect(() => {
+    if (!pendingSearchJump) return
+    if (selectedBuild !== pendingSearchJump.buildId) return
+    if (selectedFloor !== pendingSearchJump.floorId) return
+    if (roomsLoading) return
+
+    requestAnimationFrame(() => {
+      setSearchResultJumpTrigger((v) => v + 1)
+      setPendingSearchJump(null)
+    })
+  }, [pendingSearchJump, roomsLoading, selectedBuild, selectedFloor])
 
   React.useEffect(() => {
     let cancelled = false
@@ -218,6 +240,19 @@ function App() {
           requestAnimationFrame(() => searchInputRef.current?.focus())
         }}
         searchInputRef={searchInputRef}
+        smartSearchData={smartSearchData}
+        floorLabel={floorLabel}
+        onPickSearchRoom={(item) => {
+          setSelectedCategory('__all__')
+          setSelectedBuild(item.buildId)
+          setSelectedFloor(item.floorId)
+          setSearchText(item.roomNo.length > 0 ? item.roomNo : item.description)
+          setPendingSearchJump(item)
+        }}
+        onPickSearchCategory={(category) => {
+          setSelectedCategory(category)
+          setSearchText('')
+        }}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
       />
@@ -245,6 +280,7 @@ function App() {
           graphicsPreset={graphicsPreset}
           searchText={searchText}
           matchedKeys={matchedKeys}
+          searchResultJumpTrigger={searchResultJumpTrigger}
           titleText={titleText}
           titleAnchor={titleAnchor}
           selectedRoomKey={selectedRoomKey}

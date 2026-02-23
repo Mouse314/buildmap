@@ -20,7 +20,7 @@ import { useSearchAutoFit } from './floorplan/hooks/useSearchAutoFit';
 import { buildRenderItems } from './floorplan/utils/renderItems';
 import { getSceneColors } from './floorplan/utils/sceneColors';
 import { isInteractiveRoomArea } from './floorplan/utils/interactivity';
-import { PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
+import { HIDDEN_ROOM_IDS, PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
 
 export function FloorPlanCanvas({
   rooms,
@@ -33,6 +33,7 @@ export function FloorPlanCanvas({
   theme = 'light',
   graphicsPreset = 'medium',
   searchText = '',
+  searchResultJumpTrigger = 0,
   matchedKeys = null,
 }: {
   rooms: Room[];
@@ -45,6 +46,7 @@ export function FloorPlanCanvas({
   theme?: 'light' | 'dark';
   graphicsPreset?: GraphicsPresetId;
   searchText?: string;
+  searchResultJumpTrigger?: number;
   matchedKeys?: Set<string> | null;
 }) {
   const polygons = React.useMemo(() => roomsToPolygons(rooms), [rooms]);
@@ -58,10 +60,40 @@ export function FloorPlanCanvas({
   }, [searchText]);
 
   const { autoFitTrigger, isSearchTyping } = useSearchAutoFit(searchText);
+  const [isSearchJumping, setIsSearchJumping] = React.useState(false);
+  const jumpTimeoutRef = React.useRef<number | null>(null);
+
+  const floorPolygonsForFit = React.useMemo(() => {
+    const list: RoomPolygon[] = [];
+    for (let i = 0; i < polygons.length; i++) {
+      const poly = polygons[i];
+      if (poly.roomID === 200) continue;
+      if (HIDDEN_ROOM_IDS.has(poly.roomID)) continue;
+      const areaOk = isInteractiveRoomArea(rooms[i]?.areaM2);
+      if (!areaOk) continue;
+      list.push(poly);
+    }
+    return list;
+  }, [polygons, rooms]);
+
+  React.useEffect(() => {
+    if (!searchResultJumpTrigger) return;
+    setIsSearchJumping(true);
+    if (jumpTimeoutRef.current != null) {
+      window.clearTimeout(jumpTimeoutRef.current);
+    }
+    jumpTimeoutRef.current = window.setTimeout(() => {
+      setIsSearchJumping(false);
+      jumpTimeoutRef.current = null;
+    }, 450);
+  }, [searchResultJumpTrigger]);
+
+  const autoFitEnabled = searchToken.length > 0 && (isSearchTyping || isSearchJumping);
+  const combinedAutoFitTrigger = autoFitTrigger + searchResultJumpTrigger;
 
   const matchedPolygons = React.useMemo(() => {
     if (!matchedKeys) return null;
-    if (matchedKeys.size === 0) return [];
+    if (matchedKeys.size === 0) return floorPolygonsForFit;
     const list: RoomPolygon[] = [];
     for (let i = 0; i < rooms.length; i++) {
       const roomKey = rooms[i]?.key;
@@ -71,7 +103,7 @@ export function FloorPlanCanvas({
       }
     }
     return list;
-  }, [matchedKeys, polygons, rooms]);
+  }, [floorPolygonsForFit, matchedKeys, polygons, rooms]);
 
   const panBounds = React.useMemo<PanBoundsRect | null>(() => {
     if (!polygons || polygons.length === 0) return null;
@@ -198,11 +230,11 @@ export function FloorPlanCanvas({
       <FitView polygons={polygons} controlsRef={controlsRef} />
 
       <AutoFitToPolygons
-        enabled={searchToken.length > 0 && isSearchTyping}
+        enabled={autoFitEnabled}
         polygons={matchedPolygons}
         controlsRef={controlsRef}
         isDragging={isDragging}
-        trigger={autoFitTrigger}
+        trigger={combinedAutoFitTrigger}
         token={searchToken}
       />
 
