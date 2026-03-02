@@ -155,6 +155,25 @@
   opacity: 0.9;
 }
 
+.roomModalActions {
+  margin-top: 10px;
+}
+
+.roomModalRouteBtn {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 2px solid rgba(206, 209, 255, 0.35);
+  background: rgba(255, 255, 255, 0.28);
+  color: #111;
+  font-weight: 700;
+}
+
+.roomModalRouteBtn:hover {
+  transition: 150ms ease-out;
+  background: rgba(255, 255, 255, 0.42);
+}
+
 .roomHoverTip {
   position: fixed;
   z-index: 900;
@@ -243,6 +262,181 @@
   top: 100px;
 }
 
+.mapModeSwitchWrap {
+  position: absolute;
+  z-index: 125;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 16px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 8px;
+  max-width: calc(100% - 20px);
+}
+
+.routeHintsWrap {
+  position: absolute;
+  z-index: 126;
+  left: 50%;
+  bottom: 132px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(92vw, 620px);
+}
+
+.routeHintItem {
+  border-radius: 12px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.mapModeBtn {
+  height: 36px;
+  min-width: 108px;
+  border-radius: 12px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.22);
+  color: #111;
+  font-weight: 700;
+  padding: 0 12px;
+}
+
+.mapModeBtnActive {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(206, 209, 255, 0.7);
+}
+
+.mapModeRouteMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 260px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.routeEndpointSwitch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.routeEndpointBtn,
+.routeMainEntranceBtn {
+  height: 30px;
+  border-radius: 10px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.2);
+  color: #111;
+  font-weight: 700;
+  padding: 0 9px;
+}
+
+.routeEndpointBtnActive {
+  background: rgba(255, 255, 255, 0.44);
+  border-color: rgba(206, 209, 255, 0.7);
+}
+
+.routeMainEntranceBtn {
+  margin-left: auto;
+}
+
+.routeMetaLine,
+.routeMetaDistance {
+  line-height: 1.25;
+}
+
+.routeStairJumpGroup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 5px;
+  border-radius: 16px;
+  border: 2px solid rgba(206, 209, 255, 0.34);
+  background: rgba(167, 167, 167, 0.45);
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
+}
+
+.routeStairJumpBtn {
+  min-width: 88px;
+  height: 42px;
+  border-radius: 14px;
+  border: 2px solid rgba(206, 209, 255, 0.72);
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  text-align: center;
+  box-shadow: 0 9px 20px rgba(0, 0, 0, 0.24);
+}
+
+.routeStairJumpBtn:hover {
+  transition: 150ms ease-out;
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.routeStairJumpEmoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.routeStairJumpText {
+  font-size: 0.72rem;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+@media (max-width: 920px) {
+  .mapModeSwitchWrap {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: min(96vw, 560px);
+  }
+
+  .mapModeRouteMeta {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .routeHintsWrap {
+    width: min(96vw, 560px);
+    bottom: 132px;
+  }
+
+  .routeEndpointSwitch {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .routeMainEntranceBtn {
+    margin-left: 0;
+  }
+}
+
 .sidePanelHeader {
   display: flex;
   align-items: center;
@@ -310,6 +504,10 @@
   font-weight: 600;
   line-height: 1.25;
   opacity: 0.88;
+}
+
+.graphicsExtraToggles {
+  margin-top: 10px;
 }
 
 .graphicsButtonSelected {

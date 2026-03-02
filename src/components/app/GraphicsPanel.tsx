@@ -5,9 +5,18 @@ type GraphicsPanelProps = {
   onToggle: () => void;
   graphicsPreset: GraphicsPresetId;
   onSelectPreset: (preset: GraphicsPresetId) => void;
+  showGraphOverlay: boolean;
+  onToggleGraphOverlay: () => void;
 };
 
-export function GraphicsPanel({ graphicsOpen, onToggle, graphicsPreset, onSelectPreset }: GraphicsPanelProps) {
+export function GraphicsPanel({
+  graphicsOpen,
+  onToggle,
+  graphicsPreset,
+  onSelectPreset,
+  showGraphOverlay,
+  onToggleGraphOverlay,
+}: GraphicsPanelProps) {
   return (
     <div className="sidePanel sidePanelRight" aria-label="Настройки графики">
       <div className="sidePanelHeader">
@@ -50,6 +59,17 @@ export function GraphicsPanel({ graphicsOpen, onToggle, graphicsPreset, onSelect
           <div className="graphicsWarningText">
             <span className="graphicsWarningMark" aria-hidden>⚠️</span>
             Возможно снижение плавности
+          </div>
+          <div className="graphicsExtraToggles">
+            <button
+              type="button"
+              className={showGraphOverlay ? 'topButton graphicsButton graphicsButtonSelected' : 'topButton graphicsButton'}
+              aria-pressed={showGraphOverlay}
+              onClick={onToggleGraphOverlay}
+              title="Показать или скрыть сетку графа"
+            >
+              Сетка графа
+            </button>
           </div>
         </div>
       ) : null}

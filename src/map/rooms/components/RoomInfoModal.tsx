@@ -18,10 +18,12 @@ export function RoomInfoModal({
   room,
   anchor,
   onClose,
+  onBuildRoute,
 }: {
   room: Room;
   anchor: { x: number; y: number };
   onClose: () => void;
+  onBuildRoute?: (room: Room) => void;
 }) {
   const roomNo = text(room.roomNo);
   const category = text(room.category);
@@ -109,6 +111,18 @@ export function RoomInfoModal({
             <div className="roomModalLabel">Площадь</div>
             <div className="roomModalValue">{areaText}</div>
           </div>
+
+          {onBuildRoute ? (
+            <div className="roomModalActions">
+              <button
+                type="button"
+                className="roomModalRouteBtn"
+                onClick={() => onBuildRoute(room)}
+              >
+                Построить маршрут
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

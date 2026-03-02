@@ -1,9 +1,10 @@
-﻿import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerformanceMonitor, PerspectiveCamera, Stats } from '@react-three/drei';
+﻿import { Canvas, useFrame } from '@react-three/fiber';
+import { Html, Line, OrbitControls, PerformanceMonitor, PerspectiveCamera, Stats } from '@react-three/drei';
 import * as React from 'react';
 import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { computeBounds, roomsToPolygons, type RoomPolygon } from './rooms/utils/roomData';
+import type { RoomGraph } from './rooms/utils/roomData';
 import type { Room } from './rooms/utils/Room';
 import { RoomLabels, type TitleAnchor } from './canvas/labels';
 import { CursorManager, DragDetector } from './canvas/interaction';
@@ -21,9 +22,36 @@ import { buildRenderItems } from './floorplan/utils/renderItems';
 import { getSceneColors } from './floorplan/utils/sceneColors';
 import { isInteractiveRoomArea } from './floorplan/utils/interactivity';
 import { HIDDEN_ROOM_IDS, PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
+import { buildRoundedRoutePoints, buildRouteJumpGroups } from '../navigation/mapRouteUi';
+
+function RouteShaderTicker({ material }: { material: THREE.ShaderMaterial }) {
+  useFrame((_, delta) => {
+    material.uniforms.uTime.value += delta;
+  });
+  return null;
+}
+
+function RouteTube({ points, material }: { points: THREE.Vector3[]; material: THREE.ShaderMaterial }) {
+  const geometry = React.useMemo(() => {
+    const rounded = buildRoundedRoutePoints(points);
+    const control = rounded.length >= 3 ? rounded : [rounded[0], rounded[0].clone().lerp(rounded[1], 0.5), rounded[1]];
+    const curve = new THREE.CatmullRomCurve3(control, false, 'centripetal', 0.05);
+    const tubularSegments = Math.max(30, control.length * 18);
+    return new THREE.TubeGeometry(curve, tubularSegments, 0.36, 16, false);
+  }, [points]);
+
+  React.useEffect(() => {
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
+
+  return <mesh geometry={geometry} material={material} renderOrder={23} />;
+}
 
 export function FloorPlanCanvas({
   rooms,
+  roomGraph = null,
   selectedRoomKey,
   onSelectRoomKey,
   onOpenRoom,
@@ -35,8 +63,13 @@ export function FloorPlanCanvas({
   searchText = '',
   searchResultJumpTrigger = 0,
   matchedKeys = null,
+  routeSegments = [],
+  routeFloorJumps = [],
+  onRouteFloorJump,
+  showGraphOverlay = false,
 }: {
   rooms: Room[];
+  roomGraph?: RoomGraph | null;
   selectedRoomKey: string | null;
   onSelectRoomKey: (roomKey: string | null) => void;
   onOpenRoom?: (args: { roomKey: string; clientX: number; clientY: number }) => void;
@@ -48,6 +81,10 @@ export function FloorPlanCanvas({
   searchText?: string;
   searchResultJumpTrigger?: number;
   matchedKeys?: Set<string> | null;
+  routeSegments?: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }>;
+  routeFloorJumps?: Array<{ x: number; y: number; targetFloorId: string; direction: 'up' | 'down' }>;
+  onRouteFloorJump?: (targetFloorId: string) => void;
+  showGraphOverlay?: boolean;
 }) {
   const polygons = React.useMemo(() => roomsToPolygons(rooms), [rooms]);
   const [hoveredPolyKey, setHoveredPolyKey] = React.useState<string | null>(null);
@@ -224,7 +261,151 @@ export function FloorPlanCanvas({
     hoveredPolyKeyRef.current = hoveredPolyKey;
   }, [hoveredPolyKey]);
 
-  const renderItems = React.useMemo(() => buildRenderItems(polygons, rooms), [polygons, rooms]);
+  const wallExtrudeEnabled = graphicsPreset === 'medium' || graphicsPreset === 'max';
+  const renderItems = React.useMemo(
+    () => buildRenderItems(polygons, rooms, { wallExtrudeEnabled }),
+    [polygons, rooms, wallExtrudeEnabled],
+  );
+
+  const roomKeysSet = React.useMemo(() => {
+    const set = new Set<string>();
+    for (const room of rooms) {
+      set.add(room.key);
+    }
+    return set;
+  }, [rooms]);
+
+  const graphNodeMap = React.useMemo(() => {
+    const map = new Map<
+      string,
+      { x: number; y: number; roomID: number | null; kind: 'room' | 'street'; label: string | null }
+    >();
+    if (!roomGraph) return map;
+
+    for (const node of roomGraph.nodes) {
+      const kind = node.kind === 'street' ? 'street' : 'room';
+      if (kind === 'room' && !roomKeysSet.has(node.key)) continue;
+      map.set(node.key, {
+        x: node.x,
+        y: node.y,
+        roomID: node.roomID,
+        kind,
+        label: node.label ?? null,
+      });
+    }
+
+    return map;
+  }, [roomGraph, roomKeysSet]);
+
+  const graphEdges = React.useMemo(() => {
+    if (!roomGraph) return [] as Array<{ key: string; points: THREE.Vector3[] }>;
+    const edges: Array<{ key: string; points: THREE.Vector3[] }> = [];
+
+    for (let idx = 0; idx < roomGraph.edges.length; idx++) {
+      const edge = roomGraph.edges[idx];
+      const from = graphNodeMap.get(edge.from);
+      const to = graphNodeMap.get(edge.to);
+      if (!from || !to) continue;
+
+      edges.push({
+        key: `g-edge-${idx}-${edge.from}-${edge.to}`,
+        points: [new THREE.Vector3(from.x, from.y, 0), new THREE.Vector3(to.x, to.y, 0)],
+      });
+    }
+
+    return edges;
+  }, [graphNodeMap, roomGraph]);
+
+  const graphNodes = React.useMemo(() => {
+    return Array.from(graphNodeMap.entries()).map(([key, node]) => ({
+      key,
+      roomID: node.roomID,
+      kind: node.kind,
+      label: node.label,
+      position: new THREE.Vector3(node.x, node.y, 0),
+    }));
+  }, [graphNodeMap]);
+
+  const routePaths = React.useMemo(() => {
+    const paths: Array<{ key: string; points: THREE.Vector3[] }> = [];
+    const epsilon = 1e-4;
+    const equal2D = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+      return Math.abs(a.x - b.x) <= epsilon && Math.abs(a.y - b.y) <= epsilon;
+    };
+
+    let current: Array<{ x: number; y: number }> = [];
+    for (let idx = 0; idx < routeSegments.length; idx++) {
+      const seg = routeSegments[idx];
+      if (current.length === 0) {
+        current.push(seg.from, seg.to);
+        continue;
+      }
+
+      const last = current[current.length - 1];
+      if (equal2D(last, seg.from)) {
+        current.push(seg.to);
+      } else {
+        if (current.length >= 2) {
+          paths.push({
+            key: `route-path-${paths.length}`,
+            points: current.map((p) => new THREE.Vector3(p.x, p.y, 0)),
+          });
+        }
+        current = [seg.from, seg.to];
+      }
+    }
+
+    if (current.length >= 2) {
+      paths.push({
+        key: `route-path-${paths.length}`,
+        points: current.map((p) => new THREE.Vector3(p.x, p.y, 0)),
+      });
+    }
+    return paths;
+  }, [routeSegments]);
+
+  const routeJumpGroups = React.useMemo(() => buildRouteJumpGroups(routeFloorJumps), [routeFloorJumps]);
+
+  const routeShaderMaterial = React.useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+        uniform float uTime;
+
+        void main() {
+          float along = vUv.x;
+          float flow = 0.68 + 0.6 * sin((along * 100.0) - (uTime * 5.2));
+          float pulse = 0.86 + 0.3 * sin((uTime * 3.6) + (along * 9.0));
+          float headPos = fract(uTime * 0.22);
+          float distToHead = abs(along - headPos);
+          float wrapped = min(distToHead, 1.0 - distToHead);
+          float headGlow = exp(-wrapped * 26.0);
+          float intensity = (flow * pulse) + (0.45 * headGlow);
+          gl_FragColor = vec4(vec3(intensity), 0.95);
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      blending: THREE.AdditiveBlending,
+    });
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      routeShaderMaterial.dispose();
+    };
+  }, [routeShaderMaterial]);
 
   const renderItemByKey = React.useMemo(() => {
     const map = new Map<string, (typeof renderItems)[number]>();
@@ -264,6 +445,7 @@ export function FloorPlanCanvas({
       }}
     >
       <ShadowConfigurator enabled={enableNightLampShadows} />
+      <RouteShaderTicker material={routeShaderMaterial} />
 
       {allowAdaptiveQuality && (
         <PerformanceMonitor
@@ -478,6 +660,72 @@ export function FloorPlanCanvas({
         })}
 
         <RoomLabels polygons={polygons} color={colors.label} titleText={titleText} titleAnchor={titleAnchor} />
+
+        {showGraphOverlay ? (
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.24, 0]}>
+            {graphEdges.map((edge) => (
+              <Line
+                key={edge.key}
+                points={edge.points}
+                color={colors.dimFill}
+                transparent
+                opacity={0.9}
+                lineWidth={1.2}
+                renderOrder={12}
+              />
+            ))}
+
+            {graphNodes.map((node) => (
+              <mesh key={`g-node-${node.key}`} position={node.position} renderOrder={13}>
+                {node.kind === 'street' ? (
+                  <boxGeometry args={[0.34, 0.34, 0.34]} />
+                ) : (
+                  <sphereGeometry args={[0.18, 12, 12]} />
+                )}
+                <meshBasicMaterial color={node.kind === 'street' ? colors.dimFill : colors.label} depthWrite={false} />
+              </mesh>
+            ))}
+          </group>
+        ) : null}
+
+        {routePaths.length > 0 ? (
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.42, 0]}>
+            {routePaths.map((path) => (
+              <RouteTube
+                key={path.key}
+                points={path.points}
+                material={routeShaderMaterial}
+              />
+            ))}
+          </group>
+        ) : null}
+
+        {routeJumpGroups.length > 0 ? (
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.56, 0]}>
+            {routeJumpGroups.map((group) => (
+              <Html key={group.key} position={[group.x, group.y, 0]} sprite center>
+                <div className="routeStairJumpGroup">
+                  {group.buttons.map((jump) => (
+                    <button
+                      key={jump.key}
+                      type="button"
+                      className="routeStairJumpBtn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRouteFloorJump?.(jump.targetFloorId);
+                      }}
+                      title={jump.title}
+                      aria-label={jump.title}
+                    >
+                      <span className="routeStairJumpEmoji" aria-hidden>{jump.emoji}</span>
+                      <span className="routeStairJumpText">{jump.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </Html>
+            ))}
+          </group>
+        ) : null}
       </group>
     </Canvas>
   );

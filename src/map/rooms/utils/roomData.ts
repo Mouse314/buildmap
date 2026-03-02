@@ -59,6 +59,124 @@ export function roomDataPaths(buildId: string, floorId: string): { jsonPath: str
   };
 }
 
+export type RoomGraphNode = {
+  key: string;
+  roomID: number | null;
+  roomNo: string | null;
+  kind?: 'room' | 'street';
+  label?: string | null;
+  x: number;
+  y: number;
+};
+
+export type RoomGraphEdge = {
+  from: string;
+  to: string;
+  via?: { x: number; y: number } | null;
+};
+
+export type RoomGraph = {
+  version: number;
+  generatedAt: string;
+  nodes: RoomGraphNode[];
+  edges: RoomGraphEdge[];
+  adjacency: Record<string, string[]>;
+};
+
+export function roomGraphPath(buildId: string, floorId: string): string {
+  const prefix = `${buildId.replace(/^\/+/, '').replace(/\/+$/, '')}/${floorId
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')}`;
+  return publicAssetUrl(`${prefix}/room_graph.json`);
+}
+
+export async function loadRoomGraphFromPublic(
+  opts: { buildId?: string; floorId?: string; path?: string } = {},
+): Promise<RoomGraph | null> {
+  const fromBuildFloor =
+    typeof opts.buildId === 'string' &&
+    opts.buildId.length > 0 &&
+    typeof opts.floorId === 'string' &&
+    opts.floorId.length > 0
+      ? roomGraphPath(opts.buildId, opts.floorId)
+      : null;
+
+  const graphPath = opts.path ?? fromBuildFloor ?? publicAssetUrl('room_graph.json');
+
+  try {
+    const response = await fetch(graphPath);
+    if (!response.ok) return null;
+    const raw: unknown = await response.json();
+    if (!raw || typeof raw !== 'object') return null;
+
+    const data = raw as Record<string, unknown>;
+    const nodesRaw = Array.isArray(data.nodes) ? data.nodes : null;
+    const edgesRaw = Array.isArray(data.edges) ? data.edges : null;
+    if (!nodesRaw || !edgesRaw) return null;
+
+    const nodes: RoomGraphNode[] = [];
+    for (const n of nodesRaw) {
+      if (!n || typeof n !== 'object') continue;
+      const anyN = n as Record<string, unknown>;
+      const key = typeof anyN.key === 'string' ? anyN.key : '';
+      const roomIDRaw = anyN.roomID;
+      const roomID = roomIDRaw == null ? null : Number(roomIDRaw);
+      const x = Number(anyN.x);
+      const y = Number(anyN.y);
+      const roomNo = typeof anyN.roomNo === 'string' ? anyN.roomNo : null;
+      const kind = anyN.kind === 'street' ? 'street' : 'room';
+      const label = typeof anyN.label === 'string' ? anyN.label : null;
+      if (key.length === 0 || !Number.isFinite(x) || !Number.isFinite(y)) {
+        continue;
+      }
+      if (kind === 'room' && !Number.isFinite(Number(roomID))) {
+        continue;
+      }
+      nodes.push({ key, roomID: kind === 'street' ? null : Number(roomID), roomNo, kind, label, x, y });
+    }
+
+    const edges: RoomGraphEdge[] = [];
+    for (const e of edgesRaw) {
+      if (!e || typeof e !== 'object') continue;
+      const anyE = e as Record<string, unknown>;
+      const from = typeof anyE.from === 'string' ? anyE.from : '';
+      const to = typeof anyE.to === 'string' ? anyE.to : '';
+      if (from.length === 0 || to.length === 0) continue;
+      const viaRaw = anyE.via;
+      let via: { x: number; y: number } | null | undefined = undefined;
+      if (viaRaw && typeof viaRaw === 'object') {
+        const anyVia = viaRaw as Record<string, unknown>;
+        const vx = Number(anyVia.x);
+        const vy = Number(anyVia.y);
+        if (Number.isFinite(vx) && Number.isFinite(vy)) {
+          via = { x: vx, y: vy };
+        }
+      }
+      edges.push({ from, to, via });
+    }
+
+    const adjacencyRaw = data.adjacency;
+    const adjacency: Record<string, string[]> = {};
+    if (adjacencyRaw && typeof adjacencyRaw === 'object') {
+      const anyAdj = adjacencyRaw as Record<string, unknown>;
+      for (const [k, v] of Object.entries(anyAdj)) {
+        if (!Array.isArray(v)) continue;
+        adjacency[k] = v.map((x) => String(x));
+      }
+    }
+
+    return {
+      version: Number.isFinite(Number(data.version)) ? Number(data.version) : 1,
+      generatedAt: typeof data.generatedAt === 'string' ? data.generatedAt : '',
+      nodes,
+      edges,
+      adjacency,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function parseWorldCoordsXY(value: string): Array<{ x: number; y: number }> {
   const matches = value.match(/-?\d+(?:\.\d+)?/g);
   if (!matches || matches.length < 6) return [];

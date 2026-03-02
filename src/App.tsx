@@ -1,7 +1,13 @@
 import * as React from 'react'
 import './App.css'
 import { FloorPlanCanvas } from './map/FloorPlanCanvas'
-import { loadRoomDataManifest, loadRoomsFromPublic, type RoomDataManifest } from './map/rooms/utils/roomData'
+import {
+  loadRoomDataManifest,
+  loadRoomGraphFromPublic,
+  loadRoomsFromPublic,
+  type RoomDataManifest,
+  type RoomGraph,
+} from './map/rooms/utils/roomData'
 import { RoomInfoModal } from './map/rooms/components/RoomInfoModal'
 import { RoomHoverTooltip } from './map/rooms/components/RoomHoverTooltip'
 import { getRoomFillColor } from './map/rooms/utils/roomPalette'
@@ -12,8 +18,13 @@ import { GraphicsPanel } from './components/app/GraphicsPanel'
 import { buildLabel, findTitleAnchorFromFloor1, floorLabel, isInteractiveRoom } from './app/utils/roomLabels'
 import { useSmartSearch } from './app/search/useSmartSearch'
 import type { SearchIndexedRoom } from './app/search/types'
+import { buildRouteHints } from './navigation/hints'
+import { computeRoute } from './navigation/routeEngine'
+import type { LoadedFloorData, RouteEndpoint, RouteFloorJump, RouteSegment, RouteTarget } from './navigation/types'
 
 import type { Room } from './map/rooms/utils/Room'
+
+type MapMode = 'normal' | 'routes'
 
 function App() {
   const [rooms, setRooms] = React.useState<Room[]>([])
@@ -39,6 +50,17 @@ function App() {
   const [searchResultJumpTrigger, setSearchResultJumpTrigger] = React.useState(0)
   const [roomsLoading, setRoomsLoading] = React.useState(false)
   const [pendingSearchJump, setPendingSearchJump] = React.useState<SearchIndexedRoom | null>(null)
+  const [roomGraph, setRoomGraph] = React.useState<RoomGraph | null>(null)
+  const [mapMode, setMapMode] = React.useState<MapMode>('normal')
+  const [buildFloorData, setBuildFloorData] = React.useState<LoadedFloorData[]>([])
+  const [routeFrom, setRouteFrom] = React.useState<RouteTarget | null>(null)
+  const [routeTo, setRouteTo] = React.useState<RouteTarget | null>(null)
+  const [activeRouteEndpoint, setActiveRouteEndpoint] = React.useState<RouteEndpoint>('to')
+  const [routeDistanceM, setRouteDistanceM] = React.useState<number | null>(null)
+  const [routeSegments, setRouteSegments] = React.useState<RouteSegment[]>([])
+  const [routeFloorJumps, setRouteFloorJumps] = React.useState<RouteFloorJump[]>([])
+  const [routeHints, setRouteHints] = React.useState<string[]>([])
+  const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
 
   const [modalAnchor, setModalAnchor] = React.useState<{ x: number; y: number } | null>(
     null,
@@ -118,6 +140,27 @@ function App() {
   const totalRooms = React.useMemo(() => rooms.filter(isInteractiveRoom).length, [rooms])
   const matchedRooms = matchedKeys ? matchedKeys.size : totalRooms
 
+  const buildRouteTargetFromRoom = React.useCallback((room: Room, buildId: string, floorId: string): RouteTarget => {
+    const roomNo = (room.roomNo ?? '').trim()
+    return {
+      buildId,
+      floorId,
+      roomKey: room.key,
+      label: roomNo.length > 0 ? `№ ${roomNo}` : (room.description ?? room.category ?? 'кабинет'),
+    }
+  }, [])
+
+  const applyRouteEndpoint = React.useCallback((endpoint: RouteEndpoint, target: RouteTarget) => {
+    if (endpoint === 'from') {
+      setRouteFrom(target)
+      setActiveRouteEndpoint('to')
+      setRouteTo((prev) => (prev && prev.buildId !== target.buildId ? null : prev))
+      return
+    }
+    setRouteTo(target)
+    setRouteFrom((prev) => (prev && prev.buildId !== target.buildId ? null : prev))
+  }, [])
+
   React.useEffect(() => {
     if (selectedRoomKey == null) return
     const r = rooms.find((x) => x.key === selectedRoomKey)
@@ -169,6 +212,120 @@ function App() {
         if (cancelled) return
         setError(e instanceof Error ? e.message : String(e))
         setRoomsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedBuild, selectedFloor])
+
+  React.useEffect(() => {
+    let cancelled = false
+    const floors = (manifest?.builds ?? []).find((b) => b.id === selectedBuild)?.floors ?? []
+    if (floors.length === 0) {
+      setBuildFloorData([])
+      return () => {
+        cancelled = true
+      }
+    }
+
+    Promise.all(
+      floors.map(async (floorId) => {
+        const [loadedRooms, loadedGraph] = await Promise.all([
+          loadRoomsFromPublic({ buildId: selectedBuild, floorId }),
+          loadRoomGraphFromPublic({ buildId: selectedBuild, floorId }),
+        ])
+        return {
+          floorId,
+          rooms: loadedRooms,
+          graph: loadedGraph,
+        }
+      }),
+    )
+      .then((data) => {
+        if (cancelled) return
+        setBuildFloorData(
+          data
+            .filter((x): x is LoadedFloorData => Boolean(x.graph))
+            .map((x) => ({ floorId: x.floorId, rooms: x.rooms, graph: x.graph as RoomGraph })),
+        )
+      })
+      .catch(() => {
+        if (cancelled) return
+        setBuildFloorData([])
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [manifest, selectedBuild])
+
+  React.useEffect(() => {
+    if (mapMode !== 'routes') {
+      setRouteSegments([])
+      setRouteFloorJumps([])
+      setRouteHints([])
+      setRouteDistanceM(null)
+      return
+    }
+    if (!routeTo) {
+      setRouteSegments([])
+      setRouteFloorJumps([])
+      setRouteHints([])
+      setRouteDistanceM(null)
+      return
+    }
+    if (routeTo.buildId !== selectedBuild) {
+      setRouteSegments([])
+      setRouteFloorJumps([])
+      setRouteHints([])
+      setRouteDistanceM(null)
+      return
+    }
+    if (routeFrom && routeFrom.buildId !== selectedBuild) {
+      setRouteSegments([])
+      setRouteFloorJumps([])
+      setRouteHints([])
+      setRouteDistanceM(null)
+      return
+    }
+
+    const result = computeRoute({
+      buildId: selectedBuild,
+      floorsData: buildFloorData,
+      source: routeFrom,
+      target: routeTo,
+    })
+
+    if (!result) {
+      setRouteSegments([])
+      setRouteFloorJumps([])
+      setRouteHints([])
+      setRouteDistanceM(null)
+      return
+    }
+
+    setRouteDistanceM(result.distance)
+    setRouteSegments(result.segments.filter((s) => s.floorId === selectedFloor))
+    setRouteFloorJumps(result.floorJumps.filter((j) => j.floorId === selectedFloor))
+    setRouteHints(buildRouteHints({
+      routeFrom,
+      routeTo,
+      buildFloorData,
+      routeDistanceM: result.distance,
+    }))
+  }, [buildFloorData, mapMode, routeFrom, routeTo, selectedBuild, selectedFloor])
+
+  React.useEffect(() => {
+    let cancelled = false
+    loadRoomGraphFromPublic({ buildId: selectedBuild, floorId: selectedFloor })
+      .then((graph) => {
+        if (cancelled) return
+        setRoomGraph(graph)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setRoomGraph(null)
       })
 
     return () => {
@@ -253,6 +410,14 @@ function App() {
           setSelectedFloor(item.floorId)
           setSearchText(item.roomNo.length > 0 ? item.roomNo : item.description)
           setPendingSearchJump(item)
+          if (mapMode === 'routes') {
+            applyRouteEndpoint(activeRouteEndpoint, {
+              buildId: item.buildId,
+              floorId: item.floorId,
+              roomKey: item.key,
+              label: item.roomNo.length > 0 ? `№ ${item.roomNo}` : item.description,
+            })
+          }
         }}
         onPickSearchCategory={(category) => {
           setSelectedCategory(category)
@@ -276,22 +441,35 @@ function App() {
         onToggle={() => setGraphicsOpen((v) => !v)}
         graphicsPreset={graphicsPreset}
         onSelectPreset={setGraphicsPreset}
+        showGraphOverlay={showGraphOverlay}
+        onToggleGraphOverlay={() => setShowGraphOverlay((v) => !v)}
       />
 
       <div className="appMain">
         <FloorPlanCanvas
           rooms={rooms}
+          roomGraph={roomGraph}
           theme={theme}
           graphicsPreset={graphicsPreset}
           searchText={searchText}
           matchedKeys={matchedKeys}
           searchResultJumpTrigger={searchResultJumpTrigger}
+          routeSegments={routeSegments}
+          routeFloorJumps={routeFloorJumps}
+          onRouteFloorJump={(targetFloorId) => setSelectedFloor(targetFloorId)}
+          showGraphOverlay={showGraphOverlay}
           titleText={titleText}
           titleAnchor={titleAnchor}
           selectedRoomKey={selectedRoomKey}
           onSelectRoomKey={(key) => {
             setSelectedRoomKey(key)
             if (key == null) setModalAnchor(null)
+            if (key != null && mapMode === 'routes') {
+              const room = rooms.find((r) => r.key === key)
+              if (room && isInteractiveRoom(room)) {
+                applyRouteEndpoint(activeRouteEndpoint, buildRouteTargetFromRoom(room, selectedBuild, selectedFloor))
+              }
+            }
           }}
           onOpenRoom={({ clientX, clientY }) => {
             setModalAnchor({ x: clientX, y: clientY })
@@ -316,12 +494,72 @@ function App() {
         <RoomInfoModal
           room={selectedRoom}
           anchor={modalAnchor}
+          onBuildRoute={(room) => {
+            setMapMode('routes')
+            applyRouteEndpoint(activeRouteEndpoint, buildRouteTargetFromRoom(room, selectedBuild, selectedFloor))
+          }}
           onClose={() => {
             setSelectedRoomKey(null)
             setModalAnchor(null)
           }}
         />
       ) : null}
+
+      {mapMode === 'routes' && routeHints.length > 0 ? (
+        <div className="routeHintsWrap" aria-live="polite">
+          {routeHints.map((hint, idx) => (
+            <div key={`route-hint-${idx}`} className="routeHintItem">{hint}</div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="mapModeSwitchWrap">
+        <button
+          type="button"
+          className={mapMode === 'normal' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
+          onClick={() => setMapMode('normal')}
+        >
+          Обычный
+        </button>
+        <button
+          type="button"
+          className={mapMode === 'routes' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
+          onClick={() => setMapMode('routes')}
+        >
+          Маршруты
+        </button>
+        {mapMode === 'routes' ? (
+          <div className="mapModeRouteMeta">
+            <div className="routeEndpointSwitch">
+              <button
+                type="button"
+                className={activeRouteEndpoint === 'from' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
+                onClick={() => setActiveRouteEndpoint('from')}
+              >
+                Откуда
+              </button>
+              <button
+                type="button"
+                className={activeRouteEndpoint === 'to' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
+                onClick={() => setActiveRouteEndpoint('to')}
+              >
+                Куда
+              </button>
+              <button
+                type="button"
+                className="routeMainEntranceBtn"
+                onClick={() => setRouteFrom(null)}
+                title="Сбросить точку старта к главному входу"
+              >
+                От главного входа
+              </button>
+            </div>
+            <div className="routeMetaLine">Откуда: {routeFrom ? routeFrom.label : 'Главный вход'}</div>
+            <div className="routeMetaLine">Куда: {routeTo ? routeTo.label : 'Выберите кабинет или воспользуйтесь поиском'}</div>
+            {routeDistanceM != null ? <div className="routeMetaDistance">Длина: {routeDistanceM.toFixed(1)} м</div> : null}
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

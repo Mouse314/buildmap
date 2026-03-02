@@ -42,6 +42,182 @@ function splitSemicolon(line: string): string[] {
   return line.split(';').map((s) => s.trim());
 }
 
+const WALL_ROOM_ID = 100;
+const LABEL_ROOM_ID = 200;
+const HIDDEN_ROOM_IDS = new Set<number>([300, 301]);
+
+function round3(value: number): number {
+  return Number(value.toFixed(3));
+}
+
+function segmentOverlapLength(
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+  c: { x: number; y: number },
+  d: { x: number; y: number },
+  eps = 1e-5,
+): number {
+  const ux = b.x - a.x;
+  const uy = b.y - a.y;
+  const vx = d.x - c.x;
+  const vy = d.y - c.y;
+
+  const crossUV = ux * vy - uy * vx;
+  if (Math.abs(crossUV) > eps) return 0;
+
+  const crossACU = (c.x - a.x) * uy - (c.y - a.y) * ux;
+  if (Math.abs(crossACU) > eps) return 0;
+
+  const lenSq = ux * ux + uy * uy;
+  if (lenSq <= eps) return 0;
+
+  const tC = ((c.x - a.x) * ux + (c.y - a.y) * uy) / lenSq;
+  const tD = ((d.x - a.x) * ux + (d.y - a.y) * uy) / lenSq;
+
+  const left = Math.max(0, Math.min(tC, tD));
+  const right = Math.min(1, Math.max(tC, tD));
+  const tOverlap = right - left;
+  if (tOverlap <= 0) return 0;
+
+  return Math.sqrt(lenSq) * tOverlap;
+}
+
+function polygonSegments(points: Array<{ x: number; y: number }>): Array<[{ x: number; y: number }, { x: number; y: number }]> {
+  const out: Array<[{ x: number; y: number }, { x: number; y: number }]> = [];
+  if (!Array.isArray(points) || points.length < 2) return out;
+  for (let i = 0; i < points.length; i++) {
+    out.push([points[i], points[(i + 1) % points.length]]);
+  }
+  return out;
+}
+
+function polygonCentroid(points: Array<{ x: number; y: number }>): { x: number; y: number } {
+  if (!Array.isArray(points) || points.length < 3) return { x: 0, y: 0 };
+
+  let area2 = 0;
+  let cx = 0;
+  let cy = 0;
+
+  for (let i = 0; i < points.length; i++) {
+    const p1 = points[i];
+    const p2 = points[(i + 1) % points.length];
+    const cross = p1.x * p2.y - p2.x * p1.y;
+    area2 += cross;
+    cx += (p1.x + p2.x) * cross;
+    cy += (p1.y + p2.y) * cross;
+  }
+
+  if (Math.abs(area2) < 1e-8) {
+    const sum = points.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
+    return { x: sum.x / points.length, y: sum.y / points.length };
+  }
+
+  const factor = 1 / (3 * area2);
+  return {
+    x: cx * factor,
+    y: cy * factor,
+  };
+}
+
+function arePolygonsAdjacent(
+  a: { points: Array<{ x: number; y: number }>; vertexIndices?: number[] },
+  b: { points: Array<{ x: number; y: number }>; vertexIndices?: number[] },
+): boolean {
+  const sharedVertices = sharedVertexCount(a.vertexIndices, b.vertexIndices);
+  if (sharedVertices >= 2) return true;
+
+  const aSegments = polygonSegments(a.points);
+  const bSegments = polygonSegments(b.points);
+
+  let maxSharedBoundary = 0;
+  for (const [a1, a2] of aSegments) {
+    for (const [b1, b2] of bSegments) {
+      const overlap = segmentOverlapLength(a1, a2, b1, b2);
+      if (overlap > maxSharedBoundary) maxSharedBoundary = overlap;
+      if (maxSharedBoundary >= 0.2) return true;
+    }
+  }
+
+  if (maxSharedBoundary >= 0.05) return true;
+
+  return false;
+}
+
+function sharedVertexCount(aIndices?: number[], bIndices?: number[]): number {
+  if (!Array.isArray(aIndices) || !Array.isArray(bIndices)) return 0;
+  if (aIndices.length === 0 || bIndices.length === 0) return 0;
+
+  const aSet = new Set(aIndices);
+  let count = 0;
+  for (const value of bIndices) {
+    if (aSet.has(value)) {
+      count += 1;
+      if (count >= 2) return count;
+    }
+  }
+  return count;
+}
+
+type RoomGraph = {
+  version: number;
+  generatedAt: string;
+  nodes: Array<{ key: string; roomID: number; roomNo: string | null; x: number; y: number }>;
+  edges: Array<{ from: string; to: string }>;
+  adjacency: Record<string, string[]>;
+};
+
+function buildRoomGraph(rooms: RoomJson[]): RoomGraph {
+  const candidates = rooms.filter((room) => {
+    if (!room || !Array.isArray(room.points) || room.points.length < 3) return false;
+    if (room.roomID === WALL_ROOM_ID || room.roomID === LABEL_ROOM_ID) return false;
+    if (HIDDEN_ROOM_IDS.has(room.roomID)) return false;
+    return true;
+  });
+
+  const nodes = candidates.map((room) => {
+    const center = polygonCentroid(room.points);
+    return {
+      key: room.key,
+      roomID: room.roomID,
+      roomNo: room.roomNo ?? null,
+      x: round3(center.x),
+      y: round3(center.y),
+    };
+  });
+
+  const edges: RoomGraph['edges'] = [];
+  for (let i = 0; i < candidates.length; i++) {
+    for (let j = i + 1; j < candidates.length; j++) {
+      const left = candidates[i];
+      const right = candidates[j];
+      if (!arePolygonsAdjacent(left, right)) continue;
+
+      edges.push({
+        from: left.key,
+        to: right.key,
+      });
+    }
+  }
+
+  const adjacency: Record<string, string[]> = Object.fromEntries(nodes.map((n) => [n.key, []]));
+  for (const edge of edges) {
+    adjacency[edge.from].push(edge.to);
+    adjacency[edge.to].push(edge.from);
+  }
+
+  for (const node of nodes) {
+    adjacency[node.key].sort((a, b) => a.localeCompare(b));
+  }
+
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    nodes,
+    edges,
+    adjacency,
+  };
+}
+
 type RoomJson = {
   key: string;
   blenderID?: number;
@@ -178,6 +354,9 @@ async function main() {
     const rooms = parseCsvToRooms(text);
     const outJsonPath = path.join(path.dirname(file), 'room_data.json');
     await fs.writeFile(outJsonPath, JSON.stringify(rooms, null, 2) + '\n', 'utf8');
+    const graph = buildRoomGraph(rooms);
+    const graphPath = path.join(path.dirname(file), 'room_graph.json');
+    await fs.writeFile(graphPath, JSON.stringify(graph, null, 2) + '\n', 'utf8');
 
     totalRooms += rooms.length;
     fileCount += 1;
@@ -201,7 +380,7 @@ async function main() {
 
   // eslint-disable-next-line no-console
   console.log(
-    `[generate-room-json] Wrote ${totalRooms} rooms across ${fileCount} floor files; manifest -> public/room_data_manifest.json`,
+    `[generate-room-json] Wrote ${totalRooms} rooms and room_graph.json across ${fileCount} floor files; manifest -> public/room_data_manifest.json`,
   );
 }
 

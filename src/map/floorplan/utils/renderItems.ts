@@ -15,8 +15,13 @@ export type RenderItem = {
   interactive: boolean;
 };
 
-export function buildRenderItems(polygons: RoomPolygon[], rooms: Room[]): RenderItem[] {
+export function buildRenderItems(
+  polygons: RoomPolygon[],
+  rooms: Room[],
+  opts: { wallExtrudeEnabled?: boolean } = {},
+): RenderItem[] {
   const items: RenderItem[] = [];
+  const wallExtrudeEnabled = opts.wallExtrudeEnabled ?? true;
 
   for (let idx = 0; idx < polygons.length; idx++) {
     const poly = polygons[idx];
@@ -25,7 +30,7 @@ export function buildRenderItems(polygons: RoomPolygon[], rooms: Room[]): Render
 
     const isWall = poly.roomID === WALL_ROOM_ID;
     const geom = makePolygonGeometry(poly.points, {
-      extrudeDepth: isWall ? WALL_EXTRUDE_DEPTH : 0,
+      extrudeDepth: isWall && wallExtrudeEnabled ? WALL_EXTRUDE_DEPTH : 0,
     });
     if (!geom) continue;
 
