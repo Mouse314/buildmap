@@ -659,7 +659,13 @@ export function FloorPlanCanvas({
           );
         })}
 
-        <RoomLabels polygons={polygons} color={colors.label} titleText={titleText} titleAnchor={titleAnchor} />
+        <RoomLabels
+          polygons={polygons}
+          color={colors.label}
+          titleText={titleText}
+          titleAnchor={titleAnchor}
+          labelsOnPlan={!wallExtrudeEnabled}
+        />
 
         {showGraphOverlay ? (
           <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.24, 0]}>

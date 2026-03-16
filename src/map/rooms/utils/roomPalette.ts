@@ -18,6 +18,7 @@ export const ROOM_COLORS: Partial<Record<RoomId, string>> = {
   17: '#db2777',
   18: '#b26808',
   19: '#2c6a7a',
+  20: '#04eb58',
   100: '#2e2e2e',
   200: '#763131',
   300: '#280a6e',

@@ -83,11 +83,13 @@ function RoomLabel({
   showDescription,
   color,
   titleText,
+  labelY,
 }: {
   polygon: RoomPolygon;
   showDescription: boolean;
   color: string;
   titleText?: string;
+  labelY: number;
 }) {
   const centroid = React.useMemo(() => polygonCentroid(polygon.points), [polygon.points]);
   const roomID = polygon.roomID;
@@ -130,7 +132,7 @@ function RoomLabel({
     if (!effectiveShowDescription || wrappedDescription.length === 0) return null;
     return (
       <Text
-        position={[centroid.x, LABEL_TEXT_Y, -centroid.y]}
+        position={[centroid.x, labelY, -centroid.y]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={0.5}
         lineHeight={1.1}
@@ -150,7 +152,7 @@ function RoomLabel({
     return (
       <group>
         <Text
-          position={[centroid.x, LABEL_TEXT_Y, -centroid.y]}
+          position={[centroid.x, labelY, -centroid.y]}
           rotation={[-Math.PI / 2, 0, 0]}
           fontSize={1}
           lineHeight={1}
@@ -165,7 +167,7 @@ function RoomLabel({
         </Text>
 
         <Text
-          position={[centroid.x, LABEL_TEXT_Y, -centroid.y]}
+          position={[centroid.x, labelY, -centroid.y]}
           rotation={[-Math.PI / 2, 0, 0]}
           fontSize={0.5}
           lineHeight={1.05}
@@ -184,7 +186,7 @@ function RoomLabel({
 
   return (
     <Text
-      position={[centroid.x, LABEL_TEXT_Y, -centroid.y]}
+      position={[centroid.x, labelY, -centroid.y]}
       rotation={[-Math.PI / 2, 0, 0]}
       fontSize={1}
       lineHeight={1.1}
@@ -209,11 +211,13 @@ export function RoomLabels({
   color,
   titleText,
   titleAnchor,
+  labelsOnPlan = false,
 }: {
   polygons: RoomPolygon[];
   color: string;
   titleText?: string;
   titleAnchor?: TitleAnchor | null;
+  labelsOnPlan?: boolean;
 }) {
   const { camera } = useThree();
   const [mode, setMode] = React.useState<0 | 1 | 2>(0);
@@ -237,6 +241,7 @@ export function RoomLabels({
   });
 
   const showDescription = mode === 2;
+  const labelY = labelsOnPlan ? TITLE_LABEL_Y : LABEL_TEXT_Y;
   const visiblePolysRaw = mode === 0 ? polygons.filter(isSpecialLabel) : polygons;
   const shouldForceTitle = Boolean(titleAnchor && (titleText ?? '').trim().length > 0);
   const visiblePolys = shouldForceTitle
@@ -271,6 +276,7 @@ export function RoomLabels({
           showDescription={showDescription}
           color={color}
           titleText={titleText}
+          labelY={labelY}
         />
       ))}
     </group>

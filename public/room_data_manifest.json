@@ -7,6 +7,12 @@
         "floor2",
         "floor3"
       ]
+    },
+    {
+      "id": "build16",
+      "floors": [
+        "floor1"
+      ]
     }
   ]
 }
