@@ -74,6 +74,11 @@ export function TopBar({
     const [bugReportOpen, setBugReportOpen] = React.useState(false);
     const [bugReportText, setBugReportText] = React.useState('');
     const searchWrapRef = React.useRef<HTMLDivElement | null>(null);
+    function formatSearchPrimary(item: SearchIndexedRoom): string {
+        const roomPart = item.roomNo.length > 0 ? `№ ${item.roomNo}` : 'Без номера';
+        const details = item.description.length > 0 ? item.description : item.category;
+        return details.length > 0 ? `${roomPart} · ${details}` : roomPart;
+    }
 
     React.useEffect(() => {
         const onDocPointerDown = (e: MouseEvent) => {
@@ -200,13 +205,7 @@ export function TopBar({
                                                     }}
                                                 >
                                                     <span className="smartSearchPrimary">
-                                                        {[
-                                                            item.roomNo.length > 0 ? `№ ${item.roomNo}` : 'Без номера',
-                                                            item.category,
-                                                            item.description,
-                                                        ]
-                                                            .filter((v) => v.length > 0)
-                                                            .join(' · ')}
+                                                            {formatSearchPrimary(item)}
                                                     </span>
                                                     <span className="smartSearchSecondary">{floorLabel(item.floorId)}</span>
                                                 </button>
@@ -233,13 +232,7 @@ export function TopBar({
                                                         }}
                                                     >
                                                         <span className="smartSearchPrimary">
-                                                            {[
-                                                                item.roomNo.length > 0 ? `№ ${item.roomNo}` : 'Без номера',
-                                                                item.category,
-                                                                item.description,
-                                                            ]
-                                                                .filter((v) => v.length > 0)
-                                                                .join(' · ')}
+                                                                {formatSearchPrimary(item)}
                                                         </span>
                                                         <span className="smartSearchSecondary">{buildLabel(item.buildId)} · {floorLabel(item.floorId)}</span>
                                                     </button>

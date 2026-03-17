@@ -1,0 +1,1483 @@
+{
+  "generatedAt": "2026-03-17T13:43:46.017Z",
+  "stats": {
+    "totalRows": 85,
+    "mappedRows": 22,
+    "unmappedRows": 63
+  },
+  "institutes": [
+    {
+      "id": "office-1",
+      "type": "institute",
+      "name": "институт биологии и биотехнологии",
+      "cabinet": "1-500",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/biologicheskiy-2.html",
+      "parsedCabinet": {
+        "buildId": "build1",
+        "roomNo": "500",
+        "floorId": "floor5",
+        "normalizedRoomNo": "500",
+        "roomDigits": "500"
+      },
+      "location": null,
+      "children": [
+        {
+          "id": "office-2",
+          "type": "department",
+          "name": "кафедра биотехнологии",
+          "cabinet": "1-416А",
+          "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/biologicheskiy-2/kafedra-biotehnologii.html",
+          "parsedCabinet": {
+            "buildId": "build1",
+            "roomNo": "416А",
+            "floorId": "floor4",
+            "normalizedRoomNo": "416A",
+            "roomDigits": "416"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-3",
+          "type": "department",
+          "name": "кафедра микробиологии",
+          "cabinet": "1-118",
+          "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/biologicheskiy-2/kafedra-mikrobiologii.html",
+          "parsedCabinet": {
+            "buildId": "build1",
+            "roomNo": "118",
+            "floorId": "floor1",
+            "normalizedRoomNo": "118",
+            "roomDigits": "118"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-4",
+          "type": "department",
+          "name": "кафедра биологии и методики обучения биологии",
+          "cabinet": "4-407",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/biologicheskiy-2/kafedra-biologii-i-metodiki-obucheniya-biologii.html",
+          "parsedCabinet": {
+            "buildId": "build4",
+            "roomNo": "407",
+            "floorId": "floor4",
+            "normalizedRoomNo": "407",
+            "roomDigits": "407"
+          },
+          "location": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "office-5",
+      "type": "institute",
+      "name": "институт химии и экологии",
+      "cabinet": "",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/himicheskiy-2.html",
+      "parsedCabinet": null,
+      "location": null,
+      "children": [
+        {
+          "id": "office-6",
+          "type": "department",
+          "name": "Кафедра химии и технологии переработки полимеров",
+          "cabinet": "1-521А",
+          "link": "https://www.vyatsu.ru/nash-universitet/nauchnaya-deyatel-nost-1/konkursyi/kafedra-himii-i-tehnologii-pererabotki-elastomerov.html",
+          "parsedCabinet": {
+            "buildId": "build1",
+            "roomNo": "521А",
+            "floorId": "floor5",
+            "normalizedRoomNo": "521A",
+            "roomDigits": "521"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-7",
+          "type": "department",
+          "name": "Кафедра технологии неорганических веществ и электрохимических производств",
+          "cabinet": "1-506",
+          "link": "https://www.vyatsu.ru/nash-universitet/nauchnaya-deyatel-nost-1/konkursyi/kafedra-tehnologii-elektrohimicheskih-proizvodstv-1.html",
+          "parsedCabinet": {
+            "buildId": "build1",
+            "roomNo": "506",
+            "floorId": "floor5",
+            "normalizedRoomNo": "506",
+            "roomDigits": "506"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-8",
+          "type": "department",
+          "name": "Кафедра промышленной и прикладной экологии",
+          "cabinet": "1-425",
+          "link": "https://www.vyatsu.ru/nash-universitet/nauchnaya-deyatel-nost-1/konkursyi/kafedra-tehnologii-zaschityi-biosferyi.html",
+          "parsedCabinet": {
+            "buildId": "build1",
+            "roomNo": "425",
+            "floorId": "floor4",
+            "normalizedRoomNo": "425",
+            "roomDigits": "425"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-9",
+          "type": "department",
+          "name": "Кафедра фундаментальной химии и методики обучения химии",
+          "cabinet": "15-420",
+          "link": "https://www.vyatsu.ru/internet-gazeta/nashi-novosti/obschestvennaya-zhizn/kafedra-fundamental-noy-himii-i-metodiki-obucheniy.html",
+          "parsedCabinet": {
+            "buildId": "build15",
+            "roomNo": "420",
+            "floorId": "floor4",
+            "normalizedRoomNo": "420",
+            "roomDigits": "420"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-10",
+          "type": "department",
+          "name": "Кафедра географии и методики обучения географии",
+          "cabinet": "15-319",
+          "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-geografii-i-metodiki-obucheniya-geografii.html",
+          "parsedCabinet": {
+            "buildId": "build15",
+            "roomNo": "319",
+            "floorId": "floor3",
+            "normalizedRoomNo": "319",
+            "roomDigits": "319"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-11",
+          "type": "department",
+          "name": "Кафедра экологии и природопользования",
+          "cabinet": "15-272",
+          "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-ekologii-i-prirodopol-zovaniya.html",
+          "parsedCabinet": {
+            "buildId": "build15",
+            "roomNo": "272",
+            "floorId": "floor2",
+            "normalizedRoomNo": "272",
+            "roomDigits": "272"
+          },
+          "location": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "office-12",
+      "type": "institute",
+      "name": "политехнический институт",
+      "cabinet": "8-208",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/pi-1.html",
+      "parsedCabinet": {
+        "buildId": "build8",
+        "roomNo": "208",
+        "floorId": "floor2",
+        "normalizedRoomNo": "208",
+        "roomDigits": "208"
+      },
+      "location": null,
+      "children": [
+        {
+          "id": "office-13",
+          "type": "faculty",
+          "name": "Электротехнический факультет",
+          "cabinet": "8-407",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/etf.html",
+          "parsedCabinet": {
+            "buildId": "build8",
+            "roomNo": "407",
+            "floorId": "floor4",
+            "normalizedRoomNo": "407",
+            "roomDigits": "407"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-14",
+              "type": "department",
+              "name": "Кафедра электропривода и автоматизации промышленных установок",
+              "cabinet": "7-12",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/favt-2/kafedra-elektroprivod-i-avtomatika-promyishlennyih.html",
+              "parsedCabinet": {
+                "buildId": "build7",
+                "roomNo": "12",
+                "floorId": "floor1",
+                "normalizedRoomNo": "12",
+                "roomDigits": "12"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-15",
+              "type": "department",
+              "name": "Кафедра электротехники и электроники",
+              "cabinet": "1-412",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/etf/kafedra-elektrotehniki-i-elektroniki-1.html",
+              "parsedCabinet": {
+                "buildId": "build1",
+                "roomNo": "412",
+                "floorId": "floor4",
+                "normalizedRoomNo": "412",
+                "roomDigits": "412"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-16",
+              "type": "department",
+              "name": "Кафедра электроснабжения",
+              "cabinet": "8-108",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/etf/novosti-fakul-teta-etf/kafedra-elektrosnabzheniya-1.html",
+              "parsedCabinet": {
+                "buildId": "build8",
+                "roomNo": "108",
+                "floorId": "floor1",
+                "normalizedRoomNo": "108",
+                "roomDigits": "108"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-17",
+              "type": "department",
+              "name": "Кафедра электрических машин и аппаратов",
+              "cabinet": "8-302",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/etf/novosti-fakul-teta-etf/kafedra-elektricheskih-mashin-i-apparatov.html",
+              "parsedCabinet": {
+                "buildId": "build8",
+                "roomNo": "302",
+                "floorId": "floor3",
+                "normalizedRoomNo": "302",
+                "roomDigits": "302"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-18",
+              "type": "department",
+              "name": "Кафедра электрических станций",
+              "cabinet": "8-502",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-elektricheskih-stantsiy-1.html",
+              "parsedCabinet": {
+                "buildId": "build8",
+                "roomNo": "502",
+                "floorId": "floor5",
+                "normalizedRoomNo": "502",
+                "roomDigits": "502"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-19",
+              "type": "department",
+              "name": "Кафедра электроэнергетических систем",
+              "cabinet": "8-403",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/etf/kafedra-elektroenergeticheskih-sistem.html",
+              "parsedCabinet": {
+                "buildId": "build8",
+                "roomNo": "403",
+                "floorId": "floor4",
+                "normalizedRoomNo": "403",
+                "roomDigits": "403"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-20",
+              "type": "department",
+              "name": "Кафедра теплотехники и гидравлики",
+              "cabinet": "8-406",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-teplotehniki-i-gidravliki.html",
+              "parsedCabinet": {
+                "buildId": "build8",
+                "roomNo": "406",
+                "floorId": "floor4",
+                "normalizedRoomNo": "406",
+                "roomDigits": "406"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-21",
+          "type": "faculty",
+          "name": "Факультет строительства и архитектуры",
+          "cabinet": "6-205",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fsa-1.html",
+          "parsedCabinet": {
+            "buildId": "build6",
+            "roomNo": "205",
+            "floorId": "floor2",
+            "normalizedRoomNo": "205",
+            "roomDigits": "205"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-22",
+              "type": "department",
+              "name": "Кафедра архитектуры и градостроительства",
+              "cabinet": "6-404",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fsa-1/kafedra-arhitekturyi/kafedra-arhitekturyi.html",
+              "parsedCabinet": {
+                "buildId": "build6",
+                "roomNo": "404",
+                "floorId": "floor4",
+                "normalizedRoomNo": "404",
+                "roomDigits": "404"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-23",
+              "type": "department",
+              "name": "Кафедра Механики и инженерной графики",
+              "cabinet": "1-605",
+              "link": "https://www.vyatsu.ru/internet-gazeta/nashi-novosti/obschestvennaya-zhizn/kafedra-nachertatel-noy-geometrii-i-chercheniya-1.html",
+              "parsedCabinet": {
+                "buildId": "build1",
+                "roomNo": "605",
+                "floorId": "floor6",
+                "normalizedRoomNo": "605",
+                "roomDigits": "605"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-24",
+              "type": "department",
+              "name": "Кафедра промышленной безопасности и инженерных систем",
+              "cabinet": "1-418",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fsa-1/kafedra-arhitekturyi/kafedra-promyishlennoy-ekologii-i-bezopasnosti.html",
+              "parsedCabinet": {
+                "buildId": "build1",
+                "roomNo": "418",
+                "floorId": "floor4",
+                "normalizedRoomNo": "418",
+                "roomDigits": "418"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-25",
+              "type": "department",
+              "name": "Кафедра строительного производства",
+              "cabinet": "6-303",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fsa-1/kafedra-arhitekturyi/kafedra-stroitel-nogo-proizvodstva.html",
+              "parsedCabinet": {
+                "buildId": "build6",
+                "roomNo": "303",
+                "floorId": "floor3",
+                "normalizedRoomNo": "303",
+                "roomDigits": "303"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-26",
+              "type": "department",
+              "name": "Кафедра строительных конструкций и машин",
+              "cabinet": "6-408",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fsa-1/kafedra-arhitekturyi/kafedra-stroitel-nyih-konstruktsiy.html",
+              "parsedCabinet": {
+                "buildId": "build6",
+                "roomNo": "408",
+                "floorId": "floor4",
+                "normalizedRoomNo": "408",
+                "roomDigits": "408"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-27",
+          "type": "faculty",
+          "name": "Факультет технологии, инжиниринга и дизайна",
+          "cabinet": "10-202А",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fam-2/o-fakul-tete-avtomatizatsii-mashinostroeniya-fam.html",
+          "parsedCabinet": {
+            "buildId": "build10",
+            "roomNo": "202А",
+            "floorId": "floor2",
+            "normalizedRoomNo": "202A",
+            "roomDigits": "202"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-28",
+              "type": "department",
+              "name": "Кафедра информационных технологий в машиностроении",
+              "cabinet": "10-210",
+              "link": "https://www.vyatsu.ru/nash-universitet/nauchnaya-deyatel-nost-1/konkursyi/kafedra-informatsionnyih-tehnologiy-v-mashinostroe.html",
+              "parsedCabinet": {
+                "buildId": "build10",
+                "roomNo": "210",
+                "floorId": "floor2",
+                "normalizedRoomNo": "210",
+                "roomDigits": "210"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-29",
+              "type": "department",
+              "name": "Кафедра машин и технологии деревообработки",
+              "cabinet": "10-204",
+              "link": "http://www.vyatsu.ru/nash-universitet/nauchnaya-deyatel-nost-1/konkursyi/kafedra-mashin-i-tehnologii-derevoobrabotki.html",
+              "parsedCabinet": {
+                "buildId": "build10",
+                "roomNo": "204",
+                "floorId": "floor2",
+                "normalizedRoomNo": "204",
+                "roomDigits": "204"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-30",
+              "type": "department",
+              "name": "Кафедра технологии машиностроения",
+              "cabinet": "10-208",
+              "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/fam-2/kafedra-tehnologii-mashinostroeniya-2.html",
+              "parsedCabinet": {
+                "buildId": "build10",
+                "roomNo": "208",
+                "floorId": "floor2",
+                "normalizedRoomNo": "208",
+                "roomDigits": "208"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-31",
+              "type": "department",
+              "name": "Кафедра технологии и дизайна",
+              "cabinet": "4-702",
+              "link": "http://www.vyatsu.ru/nash-universitet/nauchnaya-deyatel-nost-1/konkursyi/kafedra-hudozhestvenoy-obrabotki-materialov.html",
+              "parsedCabinet": {
+                "buildId": "build4",
+                "roomNo": "702",
+                "floorId": "floor7",
+                "normalizedRoomNo": "702",
+                "roomDigits": "702"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-32",
+              "type": "department",
+              "name": "Кафедра дизайна и изобразительного искусства",
+              "cabinet": "17-272",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fakul-tet-tehnologiy-inzhiniringa-i-dizayna/kafedra-dizayna-i-izobrazitel-nogo-iskusstva",
+              "parsedCabinet": {
+                "buildId": "build17",
+                "roomNo": "272",
+                "floorId": "floor2",
+                "normalizedRoomNo": "272",
+                "roomDigits": "272"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-33",
+              "type": "department",
+              "name": "Кафедра технологии и методики преподавания технологии",
+              "cabinet": "17-271",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fakul-tet-tehnologiy-inzhiniringa-i-dizayna/kafedra-tehnologii-i-metodiki-prepodavaniya-tehnol",
+              "parsedCabinet": {
+                "buildId": "build17",
+                "roomNo": "271",
+                "floorId": "floor2",
+                "normalizedRoomNo": "271",
+                "roomDigits": "271"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-34",
+              "type": "department",
+              "name": "Кафедра материаловедения и основ конструирования",
+              "cabinet": "1-103",
+              "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/fam-2/kafedra-materialovedeniya-i-osnov-konstruirovaniya.html",
+              "parsedCabinet": {
+                "buildId": "build1",
+                "roomNo": "103",
+                "floorId": "floor1",
+                "normalizedRoomNo": "103",
+                "roomDigits": "103"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-35",
+      "type": "institute",
+      "name": "Институт математики и информационных систем",
+      "cabinet": "2-204",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/institut-matematiki-i-informatsionnyih-sistem.html",
+      "parsedCabinet": {
+        "buildId": "build2",
+        "roomNo": "204",
+        "floorId": "floor2",
+        "normalizedRoomNo": "204",
+        "roomDigits": "204"
+      },
+      "location": null,
+      "children": [
+        {
+          "id": "office-36",
+          "type": "faculty",
+          "name": "Факультет компьютерных и физико-математических наук",
+          "cabinet": "14-235",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/institut-matematiki-i-informatsionnyih-sistem/fakul-tet-komp-yuternyih-i-fiziko-matematicheskih.html",
+          "parsedCabinet": {
+            "buildId": "build14",
+            "roomNo": "235",
+            "floorId": "floor2",
+            "normalizedRoomNo": "235",
+            "roomDigits": "235"
+          },
+          "location": {
+            "buildId": "build14",
+            "floorId": "floor2",
+            "roomKey": "bl:339",
+            "roomNo": "235"
+          },
+          "children": [
+            {
+              "id": "office-37",
+              "type": "department",
+              "name": "Кафедра цифровых технологий в образовании",
+              "cabinet": "16-423",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/institut-matematiki-i-informatsionnyih-sistem/kafedra-informatsionnyih-tehnologiy-i-metodiki-obu.html",
+              "parsedCabinet": {
+                "buildId": "build16",
+                "roomNo": "423",
+                "floorId": "floor4",
+                "normalizedRoomNo": "423",
+                "roomDigits": "423"
+              },
+              "location": {
+                "buildId": "build16",
+                "floorId": "floor4",
+                "roomKey": "bl:371",
+                "roomNo": "423"
+              },
+              "children": []
+            },
+            {
+              "id": "office-38",
+              "type": "department",
+              "name": "Кафедра прикладной математики и информатики",
+              "cabinet": "14-139",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/institut-matematiki-i-informatsionnyih-sistem/kafedra-fundamental-noy-informatiki-i-prikladnoy-m-1",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "139",
+                "floorId": "floor1",
+                "normalizedRoomNo": "139",
+                "roomDigits": "139"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor1",
+                "roomKey": "bl:337",
+                "roomNo": "139"
+              },
+              "children": []
+            },
+            {
+              "id": "office-39",
+              "type": "department",
+              "name": "Кафедра фундаментальной математики",
+              "cabinet": "14-203",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/institut-matematiki-i-informatsionnyih-sistem/kafedra-fundamental-noy-i-komp-yuternoy-matematiki/kafedra-fundamental-noy-i-komp-yuternoy-matematiki.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "203",
+                "floorId": "floor2",
+                "normalizedRoomNo": "203",
+                "roomDigits": "203"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor2",
+                "roomKey": "bl:320",
+                "roomNo": "203"
+              },
+              "children": []
+            },
+            {
+              "id": "office-40",
+              "type": "department",
+              "name": "Кафедра физики",
+              "cabinet": "14-342",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-fiziki-1.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "342",
+                "floorId": "floor3",
+                "normalizedRoomNo": "342",
+                "roomDigits": "342"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor3",
+                "roomKey": "bl:612",
+                "roomNo": "342"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-41",
+          "type": "faculty",
+          "name": "Факультет автоматики и вычислительной техники",
+          "cabinet": "2-200",
+          "link": "https://www.vyatsu.ru/abiturientu/univers/fakul-tetyi-kafedryi/about-favt.html",
+          "parsedCabinet": {
+            "buildId": "build2",
+            "roomNo": "200",
+            "floorId": "floor2",
+            "normalizedRoomNo": "200",
+            "roomDigits": "200"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-42",
+              "type": "department",
+              "name": "Кафедра систем автоматизации управления",
+              "cabinet": "2-400",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/favt-2/kafedra-avtomatiki-i-telemehaniki-1.html.html",
+              "parsedCabinet": {
+                "buildId": "build2",
+                "roomNo": "400",
+                "floorId": "floor4",
+                "normalizedRoomNo": "400",
+                "roomDigits": "400"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-43",
+              "type": "department",
+              "name": "Кафедра электронных вычислительных машин",
+              "cabinet": "2-305",
+              "link": "https://www.vyatsu.ru/studentu-1/obschestvennyie-organizatsii/anonsyi-meropriyatiy-1/kafedra-evm.html.html",
+              "parsedCabinet": {
+                "buildId": "build2",
+                "roomNo": "305",
+                "floorId": "floor3",
+                "normalizedRoomNo": "305",
+                "roomDigits": "305"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-44",
+              "type": "department",
+              "name": "Кафедра радиоэлектронных средств",
+              "cabinet": "3-213",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fpmt-2/department-of-radio-electronic.html",
+              "parsedCabinet": {
+                "buildId": "build3",
+                "roomNo": "213",
+                "floorId": "floor2",
+                "normalizedRoomNo": "213",
+                "roomDigits": "213"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-45",
+      "type": "institute",
+      "name": "Институт экономики и менеджмента",
+      "cabinet": "16-312",
+      "link": "https://www.vyatsu.ru/abiturientu/univers/fakul-tetyi-kafedryi/sotsial-no-ekonomicheskiy-fakul-tet.html",
+      "parsedCabinet": {
+        "buildId": "build16",
+        "roomNo": "312",
+        "floorId": "floor3",
+        "normalizedRoomNo": "312",
+        "roomDigits": "312"
+      },
+      "location": {
+        "buildId": "build16",
+        "floorId": "floor3",
+        "roomKey": "bl:426",
+        "roomNo": "312"
+      },
+      "children": [
+        {
+          "id": "office-46",
+          "type": "faculty",
+          "name": "Факультет экономики и финансов",
+          "cabinet": "16-200",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/sef-2/fakul-tet-ekonomiki-i-finansov.html",
+          "parsedCabinet": {
+            "buildId": "build16",
+            "roomNo": "200",
+            "floorId": "floor2",
+            "normalizedRoomNo": "200",
+            "roomDigits": "200"
+          },
+          "location": {
+            "buildId": "build16",
+            "floorId": "floor2",
+            "roomKey": "bl:217",
+            "roomNo": "200"
+          },
+          "children": [
+            {
+              "id": "office-47",
+              "type": "department",
+              "name": "Кафедра экономики",
+              "cabinet": "16-305",
+              "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/sef-2/kafedra-ekonomiki-1.html",
+              "parsedCabinet": {
+                "buildId": "build16",
+                "roomNo": "305",
+                "floorId": "floor3",
+                "normalizedRoomNo": "305",
+                "roomDigits": "305"
+              },
+              "location": {
+                "buildId": "build16",
+                "floorId": "floor3",
+                "roomKey": "bl:447",
+                "roomNo": "305"
+              },
+              "children": []
+            },
+            {
+              "id": "office-48",
+              "type": "department",
+              "name": "Кафедра финансов и экономической безопасности",
+              "cabinet": "16-223",
+              "link": "http://www.vyatsu.ru/sotrudniku/doska/kafedra-ekonomiki-ucheta-i-finansov.html",
+              "parsedCabinet": {
+                "buildId": "build16",
+                "roomNo": "223",
+                "floorId": "floor2",
+                "normalizedRoomNo": "223",
+                "roomDigits": "223"
+              },
+              "location": {
+                "buildId": "build16",
+                "floorId": "floor2",
+                "roomKey": "bl:358",
+                "roomNo": "223"
+              },
+              "children": []
+            },
+            {
+              "id": "office-49",
+              "type": "department",
+              "name": "Кафедра бухгалтерского учета, анализа и аудита",
+              "cabinet": "16-213",
+              "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/sef-2/kafedra-buhgalterskogo-ucheta-analiza-i-audita-1.html",
+              "parsedCabinet": {
+                "buildId": "build16",
+                "roomNo": "213",
+                "floorId": "floor2",
+                "normalizedRoomNo": "213",
+                "roomDigits": "213"
+              },
+              "location": {
+                "buildId": "build16",
+                "floorId": "floor2",
+                "roomKey": "bl:396",
+                "roomNo": "213"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-50",
+          "type": "faculty",
+          "name": "Факультет менеджмента и сервиса",
+          "cabinet": "14-126",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/sef-2/fakul-tet-menedzhmenta-i-servisa.html",
+          "parsedCabinet": {
+            "buildId": "build14",
+            "roomNo": "126",
+            "floorId": "floor1",
+            "normalizedRoomNo": "126",
+            "roomDigits": "126"
+          },
+          "location": {
+            "buildId": "build14",
+            "floorId": "floor1",
+            "roomKey": "bl:277",
+            "roomNo": "126"
+          },
+          "children": [
+            {
+              "id": "office-51",
+              "type": "department",
+              "name": "Кафедра менеджмента и маркетинга",
+              "cabinet": "14-111В",
+              "link": "http://www.vyatsu.ru/studentu-1/nauka-i-praktika/sef-2/kafedra-menedzhmenta-i-marketinga.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "111В",
+                "floorId": "floor1",
+                "normalizedRoomNo": "111B",
+                "roomDigits": "111"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor1",
+                "roomKey": "bl:507",
+                "roomNo": "111а"
+              },
+              "children": []
+            },
+            {
+              "id": "office-52",
+              "type": "department",
+              "name": "Кафедра государственного и муниципального управления",
+              "cabinet": "14-107Б",
+              "link": "http://www.vyatsu.ru/sotrudniku/doska/kafedra-regional-noy-ekonomiki-i-upravleniya.html.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "107Б",
+                "floorId": "floor1",
+                "normalizedRoomNo": "107Б",
+                "roomDigits": "107"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor1",
+                "roomKey": "bl:583",
+                "roomNo": "107"
+              },
+              "children": []
+            },
+            {
+              "id": "office-53",
+              "type": "department",
+              "name": "Кафедра туризма и управления персоналом",
+              "cabinet": "14-124",
+              "link": "https://www.vyatsu.ru/sotrudniku/doska/kafedra-servisa-i-torgovogo-dela.html.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "124",
+                "floorId": "floor1",
+                "normalizedRoomNo": "124",
+                "roomDigits": "124"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor1",
+                "roomKey": "bl:271",
+                "roomNo": "124"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-54",
+      "type": "institute",
+      "name": "Педагогический институт",
+      "cabinet": "15-423А",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/pedagogicheskiy-institut.html",
+      "parsedCabinet": {
+        "buildId": "build15",
+        "roomNo": "423А",
+        "floorId": "floor4",
+        "normalizedRoomNo": "423A",
+        "roomDigits": "423"
+      },
+      "location": null,
+      "children": [
+        {
+          "id": "office-55",
+          "type": "faculty",
+          "name": "Факультет педагогики и психологии",
+          "cabinet": "15-439",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fakul-tet-pedagogiki-i-psihologii.html",
+          "parsedCabinet": {
+            "buildId": "build15",
+            "roomNo": "439",
+            "floorId": "floor4",
+            "normalizedRoomNo": "439",
+            "roomDigits": "439"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-56",
+              "type": "department",
+              "name": "Кафедра педагогики",
+              "cabinet": "15-432",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-pedagogiki-1.html",
+              "parsedCabinet": {
+                "buildId": "build15",
+                "roomNo": "432",
+                "floorId": "floor4",
+                "normalizedRoomNo": "432",
+                "roomDigits": "432"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-57",
+              "type": "department",
+              "name": "Кафедра дошкольного, начального и дефектологического образования образования",
+              "cabinet": "15-429",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/fakul-tet-pedagogiki-i-psihologii.html",
+              "parsedCabinet": {
+                "buildId": "build15",
+                "roomNo": "429",
+                "floorId": "floor4",
+                "normalizedRoomNo": "429",
+                "roomDigits": "429"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-58",
+              "type": "department",
+              "name": "Кафедра психологии",
+              "cabinet": "15-435",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-prakticheskoy-psihologii.html",
+              "parsedCabinet": {
+                "buildId": "build15",
+                "roomNo": "435",
+                "floorId": "floor4",
+                "normalizedRoomNo": "435",
+                "roomDigits": "435"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-59",
+              "type": "department",
+              "name": "Базовая кафедра педагогических технологий и предметных методик",
+              "cabinet": "Лицей 21-133А",
+              "link": "https://www.vyatsu.ru/internet-gazeta/bazovaya-kafedra-pedagogicheskih-tehnologiy-i-pred-1.html",
+              "parsedCabinet": {
+                "buildId": "build21",
+                "roomNo": "133А",
+                "floorId": "floor1",
+                "normalizedRoomNo": "133A",
+                "roomDigits": "133"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-60",
+          "type": "faculty",
+          "name": "Факультет физической культуры и спорта",
+          "cabinet": "19-103",
+          "link": "https://www.vyatsu.ru/studentu-1/fakul-tet-fizicheskoy-kul-turyi-i-sporta.html",
+          "parsedCabinet": {
+            "buildId": "build19",
+            "roomNo": "103",
+            "floorId": "floor1",
+            "normalizedRoomNo": "103",
+            "roomDigits": "103"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-61",
+              "type": "department",
+              "name": "Кафедра физического воспитания",
+              "cabinet": "УСК-204",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/internet-gazeta-onlinegf/kafedra-fizicheskogo-vospitaniya-2.html",
+              "parsedCabinet": null,
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-62",
+              "type": "department",
+              "name": "Кафедра спортивных дисциплин и адаптивной физической культуры",
+              "cabinet": "19-253",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/kafedra-adaptivnoy-fizicheskoy-kul-turyi-i-metodik.html",
+              "parsedCabinet": {
+                "buildId": "build19",
+                "roomNo": "253",
+                "floorId": "floor2",
+                "normalizedRoomNo": "253",
+                "roomDigits": "253"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-63",
+              "type": "department",
+              "name": "Кафедра медико-биологических дисциплин",
+              "cabinet": "19-202",
+              "link": "https://www.vyatsu.ru/internet-gazeta/nashi-novosti/obschestvennaya-zhizn/kafedra-mediko-biologicheskih-distsiplin.html",
+              "parsedCabinet": {
+                "buildId": "build19",
+                "roomNo": "202",
+                "floorId": "floor2",
+                "normalizedRoomNo": "202",
+                "roomDigits": "202"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-64",
+      "type": "institute",
+      "name": "Институт гуманитарных и социальных наук",
+      "cabinet": "14-229",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2.html",
+      "parsedCabinet": {
+        "buildId": "build14",
+        "roomNo": "229",
+        "floorId": "floor2",
+        "normalizedRoomNo": "229",
+        "roomDigits": "229"
+      },
+      "location": {
+        "buildId": "build14",
+        "floorId": "floor2",
+        "roomKey": "bl:625",
+        "roomNo": "229"
+      },
+      "children": [
+        {
+          "id": "office-65",
+          "type": "faculty",
+          "name": "Факультет истории, политических наук и культурологии",
+          "cabinet": "14-207",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/fakul-tet-istorii-politicheskih-nauk-i-kul-turolog.html",
+          "parsedCabinet": {
+            "buildId": "build14",
+            "roomNo": "207",
+            "floorId": "floor2",
+            "normalizedRoomNo": "207",
+            "roomDigits": "207"
+          },
+          "location": {
+            "buildId": "build14",
+            "floorId": "floor2",
+            "roomKey": "bl:804",
+            "roomNo": "207"
+          },
+          "children": [
+            {
+              "id": "office-66",
+              "type": "department",
+              "name": "Кафедра культурологии, социологии и философии",
+              "cabinet": "14-212",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/internet-gazeta-onlinegf/kafedra-kul-turologii.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "212",
+                "floorId": "floor2",
+                "normalizedRoomNo": "212",
+                "roomDigits": "212"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor2",
+                "roomKey": "bl:573",
+                "roomNo": "212"
+              },
+              "children": []
+            },
+            {
+              "id": "office-67",
+              "type": "department",
+              "name": "Кафедра истории и политических наук",
+              "cabinet": "14-216",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/kafedra-vseobschey-istorii-i-politicheskih-nauk.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "216",
+                "floorId": "floor2",
+                "normalizedRoomNo": "216",
+                "roomDigits": "216"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor2",
+                "roomKey": "bl:757",
+                "roomNo": "216"
+              },
+              "children": []
+            },
+            {
+              "id": "office-68",
+              "type": "department",
+              "name": "Кафедра социальной работы и молодежной политики",
+              "cabinet": "14-232",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/kafedra-sotsial-noy-rabotyi-i-molodezhnoy-politiki.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "232",
+                "floorId": "floor2",
+                "normalizedRoomNo": "232",
+                "roomDigits": "232"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor2",
+                "roomKey": "bl:621",
+                "roomNo": "232"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-69",
+          "type": "faculty",
+          "name": "Факультет филологии и медиакоммуникаций",
+          "cabinet": "14-326",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/fakul-tet-filologii-i-mediakommunikatsiy.html",
+          "parsedCabinet": {
+            "buildId": "build14",
+            "roomNo": "326",
+            "floorId": "floor3",
+            "normalizedRoomNo": "326",
+            "roomDigits": "326"
+          },
+          "location": {
+            "buildId": "build14",
+            "floorId": "floor3",
+            "roomKey": "bl:487",
+            "roomNo": "326"
+          },
+          "children": [
+            {
+              "id": "office-70",
+              "type": "department",
+              "name": "Кафедра русского языка, культуры речи и методики обучения",
+              "cabinet": "14-325",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-russkogo-yazyika-kul-turyi-rechi-i-metodik.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "325",
+                "floorId": "floor3",
+                "normalizedRoomNo": "325",
+                "roomDigits": "325"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor3",
+                "roomKey": "bl:489",
+                "roomNo": "325"
+              },
+              "children": []
+            },
+            {
+              "id": "office-71",
+              "type": "department",
+              "name": "Кафедра русской и зарубежной литературы и методики обучения",
+              "cabinet": "",
+              "link": "https://www.vyatsu.ru/internet-gazeta/kafedra-russkoy-i-zarubezhnoy-literaturyi-i-metodi-1.html",
+              "parsedCabinet": null,
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-72",
+              "type": "department",
+              "name": "Кафедра журналистики и интегрированных коммуникаций",
+              "cabinet": "14-317",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/kafedra-filologii-zhurnalistiki-i-intergirovannyih.html",
+              "parsedCabinet": {
+                "buildId": "build14",
+                "roomNo": "317",
+                "floorId": "floor3",
+                "normalizedRoomNo": "317",
+                "roomDigits": "317"
+              },
+              "location": {
+                "buildId": "build14",
+                "floorId": "floor3",
+                "roomKey": "bl:301",
+                "roomNo": "317"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-73",
+          "type": "faculty",
+          "name": "Факультет лингвистики",
+          "cabinet": "15-234",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/fakul-tet-lingvistiki.html",
+          "parsedCabinet": {
+            "buildId": "build15",
+            "roomNo": "234",
+            "floorId": "floor2",
+            "normalizedRoomNo": "234",
+            "roomDigits": "234"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-74",
+              "type": "department",
+              "name": "Кафедра иностранных языков неязыковых направлений",
+              "cabinet": "20-207",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/internet-gazeta-onlinegf/kafedra-inostrannyih-yazyikov-1.html",
+              "parsedCabinet": {
+                "buildId": "build20",
+                "roomNo": "207",
+                "floorId": "floor2",
+                "normalizedRoomNo": "207",
+                "roomDigits": "207"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-75",
+              "type": "department",
+              "name": "Кафедра лингвистики и перевода",
+              "cabinet": "15-220",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/kafedra-lingvistiki-i-perevoda.html",
+              "parsedCabinet": {
+                "buildId": "build15",
+                "roomNo": "220",
+                "floorId": "floor2",
+                "normalizedRoomNo": "220",
+                "roomDigits": "220"
+              },
+              "location": null,
+              "children": []
+            },
+            {
+              "id": "office-76",
+              "type": "department",
+              "name": "Кафедра иностранных языков и методики обучения иностранным языкам",
+              "cabinet": "15-238",
+              "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/kafedra-inostrannyih-yazyikov-i-metodiki-obucheniy.html",
+              "parsedCabinet": {
+                "buildId": "build15",
+                "roomNo": "238",
+                "floorId": "floor2",
+                "normalizedRoomNo": "238",
+                "roomDigits": "238"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "office-77",
+          "type": "faculty",
+          "name": "Факультет международного образования",
+          "cabinet": "13-201",
+          "link": "https://www.vyatsu.ru/nash-universitet/obrazovatelnaya-deyatel-nost/dovuzovskoe-obrazovanie-1/o-podgotovitel-nom-fakul-tete-vyatgu.html",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "201",
+            "floorId": "floor2",
+            "normalizedRoomNo": "201",
+            "roomDigits": "201"
+          },
+          "location": null,
+          "children": [
+            {
+              "id": "office-78",
+              "type": "department",
+              "name": "Кафедра русского языка как иностранного (РКИ)",
+              "cabinet": "13-109",
+              "link": "https://www.vyatsu.ru/nash-universitet/obrazovatelnaya-deyatel-nost/dovuzovskoe-obrazovanie-1/kafedra-russkogo-yazyika-kak-inostrannogo-rki.html",
+              "parsedCabinet": {
+                "buildId": "build13",
+                "roomNo": "109",
+                "floorId": "floor1",
+                "normalizedRoomNo": "109",
+                "roomDigits": "109"
+              },
+              "location": null,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-79",
+      "type": "institute",
+      "name": "Юридический институт",
+      "cabinet": "13-107А",
+      "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/yuridicheskiy.html",
+      "parsedCabinet": {
+        "buildId": "build13",
+        "roomNo": "107А",
+        "floorId": "floor1",
+        "normalizedRoomNo": "107A",
+        "roomDigits": "107"
+      },
+      "location": null,
+      "children": [
+        {
+          "id": "office-80",
+          "type": "department",
+          "name": "Кафедра уголовного права, процесса и национальной безопасности",
+          "cabinet": "13-603",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/yuridicheskiy/kafedra-ugolovno-pravovyih-distsiplin.html",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "603",
+            "floorId": "floor6",
+            "normalizedRoomNo": "603",
+            "roomDigits": "603"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-81",
+          "type": "department",
+          "name": "Кафедра судебных экспертиз",
+          "cabinet": "13-603",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/yuridicheskiy/kafedra-sudebnyih-ekspertiz",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "603",
+            "floorId": "floor6",
+            "normalizedRoomNo": "603",
+            "roomDigits": "603"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-82",
+          "type": "department",
+          "name": "Кафедра теории и истории государства и права",
+          "cabinet": "13-611",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/kafedra-politologii.html",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "611",
+            "floorId": "floor6",
+            "normalizedRoomNo": "611",
+            "roomDigits": "611"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-83",
+          "type": "department",
+          "name": "Кафедра гражданского права и процесса",
+          "cabinet": "13-203",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/yuridicheskiy/kafedra-grazhdanskogo-prava-i-protsessa.html",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "203",
+            "floorId": "floor2",
+            "normalizedRoomNo": "203",
+            "roomDigits": "203"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-84",
+          "type": "department",
+          "name": "Кафедра конституционного, административного права и правового обеспечения государственной службы",
+          "cabinet": "13-202",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/yuridicheskiy/kafedra-konstitutsionnogo-administrativnogo-prava.html",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "202",
+            "floorId": "floor2",
+            "normalizedRoomNo": "202",
+            "roomDigits": "202"
+          },
+          "location": null,
+          "children": []
+        },
+        {
+          "id": "office-85",
+          "type": "department",
+          "name": "Кафедра трудового и социального права",
+          "cabinet": "13-605",
+          "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/yuridicheskiy/kafedra-trudovogo-i-sotsial-nogo-prava.html",
+          "parsedCabinet": {
+            "buildId": "build13",
+            "roomNo": "605",
+            "floorId": "floor6",
+            "normalizedRoomNo": "605",
+            "roomDigits": "605"
+          },
+          "location": null,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

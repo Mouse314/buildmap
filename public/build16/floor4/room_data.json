@@ -14205,6 +14205,7 @@
     "blenderID": 371,
     "roomID": 14,
     "roomNo": "423",
+    "description": "Кафедра цифровых технологий в образовании",
     "areClosed": false,
     "areaM2": 9.49,
     "vertexIndices": [
@@ -14263,7 +14264,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:372",

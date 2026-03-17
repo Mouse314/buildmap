@@ -11834,6 +11834,7 @@
     "blenderID": 271,
     "roomID": 15,
     "roomNo": "124",
+    "description": "Кафедра туризма и управления персоналом",
     "areClosed": false,
     "areaM2": 18.49,
     "vertexIndices": [
@@ -11892,7 +11893,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:272",
@@ -12069,6 +12071,7 @@
     "blenderID": 277,
     "roomID": 15,
     "roomNo": "126",
+    "description": "Факультет менеджмента и сервиса",
     "areClosed": false,
     "areaM2": 29.22,
     "vertexIndices": [
@@ -12132,7 +12135,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:278",
@@ -14948,7 +14952,7 @@
     "blenderID": 337,
     "roomID": 14,
     "roomNo": "139",
-    "description": "Кафедра ПМИ",
+    "description": "Кафедра прикладной математики и информатики",
     "areClosed": false,
     "areaM2": 64.36,
     "vertexIndices": [
@@ -15022,7 +15026,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:338",
@@ -22766,6 +22771,7 @@
     "blenderID": 507,
     "roomID": 8,
     "roomNo": "111а",
+    "description": "Кафедра менеджмента и маркетинга",
     "areClosed": false,
     "areaM2": 22.31,
     "vertexIndices": [
@@ -22814,7 +22820,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:508",
@@ -26126,6 +26133,7 @@
     "blenderID": 583,
     "roomID": 15,
     "roomNo": "107",
+    "description": "Кафедра государственного и муниципального управления",
     "areClosed": false,
     "areaM2": 21.09,
     "vertexIndices": [
@@ -26174,7 +26182,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:584",

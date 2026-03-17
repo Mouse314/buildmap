@@ -42,6 +42,155 @@ function splitSemicolon(line) {
   return line.split(';').map((s) => s.trim());
 }
 
+function normalizeLettersToLatin(value) {
+  const map = {
+    А: 'A',
+    В: 'B',
+    Е: 'E',
+    К: 'K',
+    М: 'M',
+    Н: 'H',
+    О: 'O',
+    Р: 'P',
+    С: 'C',
+    Т: 'T',
+    У: 'Y',
+    Х: 'X',
+  };
+  return value
+    .toUpperCase()
+    .split('')
+    .map((ch) => map[ch] ?? ch)
+    .join('');
+}
+
+function normalizeRoomNo(value) {
+  return normalizeLettersToLatin(String(value ?? '').replace(/\s+/g, '').replace(/^№/u, ''));
+}
+
+function digitsOnly(value) {
+  return String(value ?? '').replace(/\D+/g, '');
+}
+
+function parseCabinet(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return null;
+  const match = text.match(/(\d+)\s*-\s*([0-9A-Za-zА-Яа-я]+)/u);
+  if (!match) return null;
+  const buildNumber = Number.parseInt(match[1], 10);
+  if (!Number.isFinite(buildNumber)) return null;
+  const roomNo = String(match[2] ?? '').trim();
+  if (!roomNo) return null;
+
+  const firstDigit = roomNo.match(/^\d/u)?.[0] ?? null;
+  const floorId = firstDigit ? `floor${firstDigit}` : null;
+
+  return {
+    buildId: `build${buildNumber}`,
+    roomNo,
+    floorId,
+    normalizedRoomNo: normalizeRoomNo(roomNo),
+    roomDigits: digitsOnly(roomNo),
+  };
+}
+
+function makeOfficeNode(id, type, name, cabinet, link) {
+  const parsedCabinet = parseCabinet(cabinet);
+  return {
+    id,
+    type,
+    name: String(name ?? '').trim(),
+    cabinet: String(cabinet ?? '').trim(),
+    link: String(link ?? '').trim(),
+    parsedCabinet,
+    location: null,
+    children: [],
+  };
+}
+
+function parseOfficesHierarchy(csvText) {
+  const lines = String(csvText ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length <= 1) {
+    return { institutes: [], indexedByBuild: new Map(), allNodes: [] };
+  }
+
+  const rows = lines.slice(1);
+  const institutes = [];
+  const allNodes = [];
+  const indexedByBuild = new Map();
+
+  let currentInstitute = null;
+  let currentFaculty = null;
+  let nodeSeq = 1;
+
+  const registerNode = (node) => {
+    allNodes.push(node);
+    const cabinet = node.parsedCabinet;
+    if (!cabinet) return;
+
+    const existing = indexedByBuild.get(cabinet.buildId) ?? { exact: new Map(), byDigits: new Map() };
+
+    const exactList = existing.exact.get(cabinet.normalizedRoomNo) ?? [];
+    exactList.push(node);
+    existing.exact.set(cabinet.normalizedRoomNo, exactList);
+
+    if (cabinet.roomDigits.length > 0) {
+      const digitsList = existing.byDigits.get(cabinet.roomDigits) ?? [];
+      digitsList.push(node);
+      existing.byDigits.set(cabinet.roomDigits, digitsList);
+    }
+
+    indexedByBuild.set(cabinet.buildId, existing);
+  };
+
+  for (const raw of rows) {
+    const cols = splitSemicolon(raw);
+    const instituteName = cols[0] ?? '';
+    const facultyName = cols[1] ?? '';
+    const departmentName = cols[2] ?? '';
+    const cabinet = cols[3] ?? '';
+    const link = cols[4] ?? '';
+
+    if (instituteName.length > 0) {
+      currentInstitute = makeOfficeNode(`office-${nodeSeq++}`, 'institute', instituteName, cabinet, link);
+      currentFaculty = null;
+      institutes.push(currentInstitute);
+      registerNode(currentInstitute);
+      continue;
+    }
+
+    if (facultyName.length > 0) {
+      const faculty = makeOfficeNode(`office-${nodeSeq++}`, 'faculty', facultyName, cabinet, link);
+      if (currentInstitute) {
+        currentInstitute.children.push(faculty);
+      } else {
+        institutes.push(faculty);
+      }
+      currentFaculty = faculty;
+      registerNode(faculty);
+      continue;
+    }
+
+    if (departmentName.length > 0) {
+      const department = makeOfficeNode(`office-${nodeSeq++}`, 'department', departmentName, cabinet, link);
+      if (currentFaculty) {
+        currentFaculty.children.push(department);
+      } else if (currentInstitute) {
+        currentInstitute.children.push(department);
+      } else {
+        institutes.push(department);
+      }
+      registerNode(department);
+    }
+  }
+
+  return { institutes, indexedByBuild, allNodes };
+}
+
 const WALL_ROOM_ID = 100;
 const LABEL_ROOM_ID = 200;
 const HIDDEN_ROOM_IDS = new Set([300, 301]);
@@ -319,6 +468,15 @@ async function main() {
   const rootDir = process.cwd();
 
   const publicDir = path.join(rootDir, 'public');
+  const officesCsvPath = path.join(publicDir, 'offices.csv');
+  let officesCsvText = '';
+  try {
+    officesCsvText = await fs.readFile(officesCsvPath, 'utf8');
+  } catch {
+    officesCsvText = '';
+  }
+
+  const officesTree = parseOfficesHierarchy(officesCsvText);
 
   async function* walk(dir) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -411,6 +569,8 @@ async function main() {
   const buildToFloors = new Map();
   let totalRooms = 0;
   let fileCount = 0;
+  let annotatedRooms = 0;
+  let locatedOfficeNodes = 0;
 
   for await (const file of walk(publicDir)) {
     if (path.basename(file) !== 'room_data.csv') continue;
@@ -425,6 +585,61 @@ async function main() {
 
     const text = await fs.readFile(file, 'utf8');
     const rooms = parseCsvToRooms(text);
+
+    const buildIndex = officesTree.indexedByBuild.get(buildId) ?? null;
+    if (buildIndex) {
+      for (const room of rooms) {
+        const rawRoomNo = String(room.roomNo ?? '').trim();
+        if (!rawRoomNo) continue;
+
+        const normalized = normalizeRoomNo(rawRoomNo);
+        const digits = digitsOnly(rawRoomNo);
+        const candidates = [];
+
+        for (const node of buildIndex.exact.get(normalized) ?? []) {
+          candidates.push(node);
+        }
+
+        if (digits.length > 0) {
+          for (const node of buildIndex.byDigits.get(digits) ?? []) {
+            if (!candidates.includes(node)) candidates.push(node);
+          }
+        }
+
+        const matchedNodes = [];
+        for (const node of candidates) {
+          if (node.location) continue;
+
+          const nodeCabinet = node.parsedCabinet;
+          if (!nodeCabinet) continue;
+
+          if (nodeCabinet.floorId && nodeCabinet.floorId !== floorId) {
+            continue;
+          }
+
+          node.location = {
+            buildId,
+            floorId,
+            roomKey: room.key,
+            roomNo: rawRoomNo,
+          };
+          matchedNodes.push(node);
+          locatedOfficeNodes += 1;
+        }
+
+        if (matchedNodes.length === 0) continue;
+
+        const names = matchedNodes.map((node) => node.name).filter((name) => name.length > 0);
+        if (names.length > 0) {
+          room.description = names.join(' | ');
+        }
+
+        const hasDepartment = matchedNodes.some((node) => node.type === 'department');
+        room.category = hasDepartment ? 'преподавательская' : 'администрация';
+        annotatedRooms += 1;
+      }
+    }
+
     const jsonPath = path.join(path.dirname(file), 'room_data.json');
     await fs.writeFile(jsonPath, JSON.stringify(rooms, null, 2) + '\n', 'utf8');
     const graph = buildRoomGraph(rooms);
@@ -448,8 +663,21 @@ async function main() {
   const manifestPath = path.join(publicDir, 'room_data_manifest.json');
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
+  const officesOut = {
+    generatedAt: new Date().toISOString(),
+    stats: {
+      totalRows: officesTree.allNodes.length,
+      mappedRows: officesTree.allNodes.filter((node) => Boolean(node.location)).length,
+      unmappedRows: officesTree.allNodes.filter((node) => !node.location).length,
+    },
+    institutes: officesTree.institutes,
+  };
+
+  const officesJsonPath = path.join(publicDir, 'offices_hierarchy.json');
+  await fs.writeFile(officesJsonPath, JSON.stringify(officesOut, null, 2) + '\n', 'utf8');
+
   console.log(
-    `[generate-room-json] Wrote ${totalRooms} rooms and room_graph.json across ${fileCount} floor files; manifest -> public/room_data_manifest.json`,
+    `[generate-room-json] Wrote ${totalRooms} rooms and room_graph.json across ${fileCount} floor files; annotated rooms: ${annotatedRooms}; mapped offices: ${locatedOfficeNodes}; manifest -> public/room_data_manifest.json; offices -> public/offices_hierarchy.json`,
   );
 }
 

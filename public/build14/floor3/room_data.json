@@ -11221,6 +11221,7 @@
     "blenderID": 301,
     "roomID": 14,
     "roomNo": "317",
+    "description": "Кафедра журналистики и интегрированных коммуникаций",
     "areClosed": false,
     "areaM2": 61.03,
     "vertexIndices": [
@@ -11284,7 +11285,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:302",
@@ -18105,7 +18107,7 @@
     "blenderID": 487,
     "roomID": 15,
     "roomNo": "326",
-    "description": "Деканат",
+    "description": "Факультет филологии и медиакоммуникаций",
     "areClosed": false,
     "areaM2": 23.26,
     "vertexIndices": [
@@ -18154,7 +18156,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:488",
@@ -18205,6 +18208,7 @@
     "blenderID": 489,
     "roomID": 14,
     "roomNo": "325",
+    "description": "Кафедра русского языка, культуры речи и методики обучения",
     "areClosed": false,
     "areaM2": 34.11,
     "vertexIndices": [
@@ -18303,7 +18307,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:490",
@@ -22956,6 +22961,7 @@
     "blenderID": 612,
     "roomID": 14,
     "roomNo": "342",
+    "description": "Кафедра физики",
     "areClosed": false,
     "areaM2": 42.93,
     "vertexIndices": [
@@ -22994,7 +23000,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:613",

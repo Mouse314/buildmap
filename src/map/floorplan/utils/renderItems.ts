@@ -42,7 +42,7 @@ export function buildRenderItems(
       key,
       polygon: poly,
       geometry: geom,
-      color: getRoomFillColor(poly.roomID),
+      color: getRoomFillColor(poly.roomID, room?.category),
       interactive,
     });
   }

@@ -11637,6 +11637,7 @@
     "blenderID": 320,
     "roomID": 8,
     "roomNo": "203",
+    "description": "Кафедра фундаментальной математики",
     "areClosed": false,
     "areaM2": 10.46,
     "vertexIndices": [
@@ -11680,7 +11681,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:321",
@@ -12365,7 +12367,7 @@
     "blenderID": 339,
     "roomID": 15,
     "roomNo": "235",
-    "description": "Координационный центр деканата ФКиФМН",
+    "description": "Факультет компьютерных и физико-математических наук",
     "areClosed": false,
     "areaM2": 29.13,
     "vertexIndices": [
@@ -12404,7 +12406,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:340",
@@ -21169,6 +21172,7 @@
     "blenderID": 573,
     "roomID": 14,
     "roomNo": "212",
+    "description": "Кафедра культурологии, социологии и философии",
     "areClosed": false,
     "areaM2": 39.5,
     "vertexIndices": [
@@ -21222,7 +21226,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:574",
@@ -23132,6 +23137,7 @@
     "blenderID": 621,
     "roomID": 8,
     "roomNo": "232",
+    "description": "Кафедра социальной работы и молодежной политики",
     "areClosed": false,
     "areaM2": 24.11,
     "vertexIndices": [
@@ -23195,7 +23201,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:622",
@@ -23374,6 +23381,7 @@
     "blenderID": 625,
     "roomID": 8,
     "roomNo": "229",
+    "description": "Институт гуманитарных и социальных наук",
     "areClosed": false,
     "areaM2": 26.33,
     "vertexIndices": [
@@ -23412,7 +23420,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:626",
@@ -28475,6 +28484,7 @@
     "blenderID": 757,
     "roomID": 8,
     "roomNo": "216",
+    "description": "Кафедра истории и политических наук",
     "areClosed": false,
     "areaM2": 9.31,
     "vertexIndices": [
@@ -28513,7 +28523,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:758",
@@ -30914,6 +30925,7 @@
     "blenderID": 804,
     "roomID": 1,
     "roomNo": "207",
+    "description": "Факультет истории, политических наук и культурологии",
     "areClosed": false,
     "areaM2": 7.57,
     "vertexIndices": [
@@ -30997,7 +31009,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:805",

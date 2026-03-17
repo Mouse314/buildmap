@@ -16106,6 +16106,7 @@
     "blenderID": 426,
     "roomID": 15,
     "roomNo": "312",
+    "description": "Институт экономики и менеджмента",
     "areClosed": false,
     "areaM2": 9.18,
     "vertexIndices": [
@@ -16164,7 +16165,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:427",
@@ -17219,6 +17221,7 @@
     "blenderID": 447,
     "roomID": 8,
     "roomNo": "305",
+    "description": "Кафедра экономики",
     "areClosed": false,
     "areaM2": 15.78,
     "vertexIndices": [
@@ -17262,7 +17265,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:448",

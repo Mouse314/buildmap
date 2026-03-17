@@ -7563,6 +7563,7 @@
     "blenderID": 217,
     "roomID": 15,
     "roomNo": "200",
+    "description": "Факультет экономики и финансов",
     "areClosed": false,
     "areaM2": 20.54,
     "vertexIndices": [
@@ -7611,7 +7612,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "администрация"
   },
   {
     "key": "bl:218",
@@ -13612,6 +13614,7 @@
     "blenderID": 358,
     "roomID": 8,
     "roomNo": "223",
+    "description": "Кафедра финансов и экономической безопасности",
     "areClosed": false,
     "areaM2": 18.94,
     "vertexIndices": [
@@ -13660,7 +13663,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:359",
@@ -15275,6 +15279,7 @@
     "blenderID": 396,
     "roomID": 8,
     "roomNo": "213",
+    "description": "Кафедра бухгалтерского учета, анализа и аудита",
     "areClosed": false,
     "areaM2": 15.48,
     "vertexIndices": [
@@ -15338,7 +15343,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:397",

@@ -5,6 +5,7 @@ import {
   loadRoomDataManifest,
   loadRoomGraphFromPublic,
   loadRoomsFromPublic,
+  publicAssetUrl,
   type RoomDataManifest,
   type RoomGraph,
 } from './map/rooms/utils/roomData'
@@ -15,12 +16,14 @@ import { type GraphicsPresetId } from './map/graphicsPresets'
 import { TopBar } from './components/app/TopBar'
 import { FloorsPanel } from './components/app/FloorsPanel'
 import { GraphicsPanel } from './components/app/GraphicsPanel'
+import { OfficesDirectory } from './components/app/OfficesDirectory'
 import { buildLabel, findTitleAnchorFromFloor1, floorLabel, isInteractiveRoom } from './app/utils/roomLabels'
 import { useSmartSearch } from './app/search/useSmartSearch'
 import type { SearchIndexedRoom } from './app/search/types'
 import { buildRouteHints } from './navigation/hints'
 import { computeRoute } from './navigation/routeEngine'
 import type { LoadedFloorData, RouteEndpoint, RouteFloorJump, RouteSegment, RouteTarget } from './navigation/types'
+import type { OfficeLocation, OfficeNode, OfficesHierarchyData } from './app/offices/types'
 
 import type { Room } from './map/rooms/utils/Room'
 
@@ -61,6 +64,7 @@ function App() {
   const [routeFloorJumps, setRouteFloorJumps] = React.useState<RouteFloorJump[]>([])
   const [routeHints, setRouteHints] = React.useState<string[]>([])
   const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
+  const [officesHierarchy, setOfficesHierarchy] = React.useState<OfficesHierarchyData | null>(null)
 
   const [modalAnchor, setModalAnchor] = React.useState<{ x: number; y: number } | null>(
     null,
@@ -105,7 +109,7 @@ function App() {
     if (selectedCategory === '__all__') return null
     const match = rooms.find((r) => isInteractiveRoom(r) && (r.category ?? '').trim() === selectedCategory)
     if (!match) return null
-    return getRoomFillColor(match.roomID)
+    return getRoomFillColor(match.roomID, match.category)
   }, [rooms, selectedCategory])
 
   const isFiltering = selectedCategory !== '__all__' || searchText.trim().length > 0
@@ -334,16 +338,57 @@ function App() {
   }, [selectedBuild, selectedFloor])
 
   React.useEffect(() => {
+    let cancelled = false
+
+    fetch(publicAssetUrl('offices_hierarchy.json'))
+      .then(async (response) => {
+        if (!response.ok) return null
+        const data: unknown = await response.json()
+        return data as OfficesHierarchyData
+      })
+      .then((data) => {
+        if (cancelled) return
+        setOfficesHierarchy(data)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setOfficesHierarchy(null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  React.useEffect(() => {
     if (!pendingSearchJump) return
     if (selectedBuild !== pendingSearchJump.buildId) return
     if (selectedFloor !== pendingSearchJump.floorId) return
     if (roomsLoading) return
 
     requestAnimationFrame(() => {
+      setSelectedRoomKey(pendingSearchJump.key)
+      setModalAnchor(null)
       setSearchResultJumpTrigger((v) => v + 1)
       setPendingSearchJump(null)
     })
   }, [pendingSearchJump, roomsLoading, selectedBuild, selectedFloor])
+
+  const openOfficeOnMap = React.useCallback((location: OfficeLocation, node: OfficeNode) => {
+    setMapMode('normal')
+    setSelectedCategory('__all__')
+    setSelectedBuild(location.buildId)
+    setSelectedFloor(location.floorId)
+    setSearchText(location.roomNo)
+    setPendingSearchJump({
+      key: location.roomKey,
+      buildId: location.buildId,
+      floorId: location.floorId,
+      roomNo: location.roomNo,
+      description: node.name,
+      category: node.type,
+    })
+  }, [])
 
   React.useEffect(() => {
     let cancelled = false
@@ -512,6 +557,13 @@ function App() {
           ))}
         </div>
       ) : null}
+
+      <OfficesDirectory
+        data={officesHierarchy}
+        buildLabel={buildLabel}
+        floorLabel={floorLabel}
+        onOpenCabinet={openOfficeOnMap}
+      />
 
       <div className="mapModeSwitchWrap">
         <button

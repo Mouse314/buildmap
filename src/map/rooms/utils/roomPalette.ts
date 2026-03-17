@@ -1,5 +1,10 @@
 import type { RoomId } from './Room';
 
+const CATEGORY_COLORS: Record<string, string> = {
+  администрация: '#d97706',
+  преподавательская: '#0f766e',
+};
+
 export const ROOM_COLORS: Partial<Record<RoomId, string>> = {
   1: '#1d4ed8',
   2: '#16a34a',
@@ -29,7 +34,12 @@ export const FALLBACK_ROOM_COLOR = '#9ca3af';
 
 const warnedMissing = new Set<RoomId>();
 
-export function getRoomFillColor(roomID: RoomId): string {
+export function getRoomFillColor(roomID: RoomId, category?: string): string {
+  const categoryKey = (category ?? '').trim().toLowerCase();
+  if (categoryKey.length > 0 && CATEGORY_COLORS[categoryKey]) {
+    return CATEGORY_COLORS[categoryKey];
+  }
+
   const color = ROOM_COLORS[roomID];
   if (color) return color;
 

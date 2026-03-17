@@ -377,7 +377,8 @@ export async function loadRoomsFromPublicJson(path = publicAssetUrl('room_data.j
     const roomNo = typeof anyItem.roomNo === 'string' ? anyItem.roomNo : undefined;
     const description = typeof anyItem.description === 'string' ? anyItem.description : undefined;
     const areClosed = parseUnknownBool(anyItem.areClosed);
-    const category = getCategoryByRoomId(roomID);
+    const categoryFromJson = typeof anyItem.category === 'string' ? anyItem.category.trim() : '';
+    const category = categoryFromJson.length > 0 ? categoryFromJson : getCategoryByRoomId(roomID);
 
     const areaM2 = typeof anyItem.areaM2 === 'number' && Number.isFinite(anyItem.areaM2) ? anyItem.areaM2 : undefined;
     const vertexIndices = Array.isArray(anyItem.vertexIndices)
