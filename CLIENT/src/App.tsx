@@ -78,11 +78,11 @@ type SavedGeoAnchorsFile = {
 }
 
 // Temporary test spoof. Set to null to restore real browser geolocation.
-const LOCATION_SPOOF: { lat: number; lon: number } | null = {
-  lat: 58.591126,
-  lon: 49.680707
-}
-// const LOCATION_SPOOF: { lat: number; lon: number } | null = null;
+// const LOCATION_SPOOF: { lat: number; lon: number } | null = {
+//   lat: 58.591126,
+//   lon: 49.680707
+// }
+const LOCATION_SPOOF: { lat: number; lon: number } | null = null;
 
 type RoomEditPayload = {
   roomNo?: string
