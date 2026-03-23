@@ -1,3 +1,5 @@
+# Monorepo ignore rules
+
 # Logs
 logs
 *.log
@@ -7,12 +9,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Global env files
+.env
+.env.*
 
-# Editor directories and files
+# Build artifacts and dependencies
+CLIENT/node_modules
+CLIENT/dist
+CLIENT/dist-ssr
+CLIENT/*.local
+SERVER/node_modules
+SERVER/dist
+SERVER/.env
+SERVER/.env.*
+
+# Editor and OS files
 .vscode/*
 !.vscode/extensions.json
 .idea

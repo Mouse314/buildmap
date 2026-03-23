@@ -26,11 +26,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: CLIENT/package-lock.json
 
       - name: Install dependencies
+        working-directory: CLIENT
         run: npm ci
 
       - name: Build
+        working-directory: CLIENT
         env:
           # Ensure correct asset paths on GitHub Pages: https://<user>.github.io/<repo>/
           BASE_PATH: /${{ github.event.repository.name }}/
@@ -42,7 +45,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: CLIENT/dist
 
   deploy:
     needs: build
