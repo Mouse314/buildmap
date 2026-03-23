@@ -2,10 +2,12 @@ import * as React from 'react'
 import './App.css'
 import { FloorPlanCanvas } from './map/FloorPlanCanvas'
 import {
+  computeBounds,
   loadRoomDataManifest,
   loadRoomGraphFromPublic,
   loadRoomsFromPublic,
   publicAssetUrl,
+  roomsToPolygons,
   type RoomDataManifest,
   type RoomGraph,
 } from './map/rooms/utils/roomData'
@@ -22,12 +24,65 @@ import { useSmartSearch } from './app/search/useSmartSearch'
 import type { SearchIndexedRoom } from './app/search/types'
 import { buildRouteHints } from './navigation/hints'
 import { computeRoute } from './navigation/routeEngine'
+import {
+  buildGeoCalibration,
+  formatDistanceHuman,
+  projectUserToMap,
+  type GeoAnchor,
+} from './navigation/geoProjection'
 import type { LoadedFloorData, RouteEndpoint, RouteFloorJump, RouteSegment, RouteTarget } from './navigation/types'
 import type { OfficeLocation, OfficeNode, OfficesHierarchyData } from './app/offices/types'
 
 import type { Room } from './map/rooms/utils/Room'
 
 type MapMode = 'normal' | 'routes'
+
+type GeoCornerKey = 'nw' | 'ne' | 'se' | 'sw'
+
+type GeoCornerDraft = {
+  id: GeoCornerKey
+  label: string
+  mapX: number
+  mapY: number
+  latInput: string
+  lonInput: string
+}
+
+type BuildGeoDraft = {
+  buildId: string
+  floorId: string
+  bounds: {
+    minX: number
+    maxX: number
+    minY: number
+    maxY: number
+  }
+  corners: Record<GeoCornerKey, GeoCornerDraft>
+}
+
+type UserLocationOverlay = {
+  buildId: string
+  mode: 'inside' | 'outside'
+  x: number
+  y: number
+  distanceText?: string
+  headingDeg?: number
+  accuracyText?: string
+}
+
+type SavedGeoAnchorsFile = {
+  version: number
+  buildId: string
+  floorId: string
+  corners: Partial<Record<GeoCornerKey, { lat: number | null; lon: number | null }>>
+}
+
+// Temporary test spoof. Set to null to restore real browser geolocation.
+const LOCATION_SPOOF: { lat: number; lon: number } | null = {
+  lat: 58.591126,
+  lon: 49.680707
+}
+// const LOCATION_SPOOF: { lat: number; lon: number } | null = null;
 
 type RoomEditPayload = {
   roomNo?: string
@@ -55,6 +110,298 @@ function applyRoomChangesLocal(room: Room, changes: RoomEditPayload): Room {
     areaM2: typeof changes.areaM2 === 'number' && Number.isFinite(changes.areaM2) ? changes.areaM2 : undefined,
     build: changes.build ?? null,
     floor: changes.floor ?? null,
+  }
+}
+
+function parseCoordInput(value: string): number | null {
+  const cleaned = value.trim().replace(',', '.')
+  if (cleaned.length === 0) return null
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : null
+}
+
+type XY = { x: number; y: number }
+const PLAN_CORNER_IDS: GeoCornerKey[] = ['nw', 'ne', 'se', 'sw']
+
+function snapCornerToNearestWallVertex(corner: XY, polygons: Array<{ points: XY[] }>): XY {
+  let best: XY | null = null
+  let bestDist = Number.POSITIVE_INFINITY
+
+  for (const poly of polygons) {
+    for (const p of poly.points) {
+      const dist = Math.hypot(p.x - corner.x, p.y - corner.y)
+      if (dist < bestDist) {
+        bestDist = dist
+        best = p
+      }
+    }
+  }
+
+  return best ?? corner
+}
+
+function buildSnappedCorners(bounds: { minX: number; maxX: number; minY: number; maxY: number }, polygons: Array<{ points: XY[] }>): Record<GeoCornerKey, XY> {
+  const boxCorners: Record<GeoCornerKey, XY> = {
+    nw: { x: bounds.minX, y: bounds.maxY },
+    ne: { x: bounds.maxX, y: bounds.maxY },
+    se: { x: bounds.maxX, y: bounds.minY },
+    sw: { x: bounds.minX, y: bounds.minY },
+  }
+
+  return {
+    nw: snapCornerToNearestWallVertex(boxCorners.nw, polygons),
+    ne: snapCornerToNearestWallVertex(boxCorners.ne, polygons),
+    se: snapCornerToNearestWallVertex(boxCorners.se, polygons),
+    sw: snapCornerToNearestWallVertex(boxCorners.sw, polygons),
+  }
+}
+
+function makeDefaultGeoCorners(
+  bounds: { minX: number; maxX: number; minY: number; maxY: number },
+  snapped?: Partial<Record<GeoCornerKey, XY>>,
+): Record<GeoCornerKey, GeoCornerDraft> {
+  const nw = snapped?.nw ?? { x: bounds.minX, y: bounds.maxY }
+  const ne = snapped?.ne ?? { x: bounds.maxX, y: bounds.maxY }
+  const se = snapped?.se ?? { x: bounds.maxX, y: bounds.minY }
+  const sw = snapped?.sw ?? { x: bounds.minX, y: bounds.minY }
+
+  return {
+    nw: {
+      id: 'nw',
+      label: 'Верхний левый (на плане)',
+      mapX: nw.x,
+      mapY: nw.y,
+      latInput: '',
+      lonInput: '',
+    },
+    ne: {
+      id: 'ne',
+      label: 'Верхний правый (на плане)',
+      mapX: ne.x,
+      mapY: ne.y,
+      latInput: '',
+      lonInput: '',
+    },
+    se: {
+      id: 'se',
+      label: 'Нижний правый (на плане)',
+      mapX: se.x,
+      mapY: se.y,
+      latInput: '',
+      lonInput: '',
+    },
+    sw: {
+      id: 'sw',
+      label: 'Нижний левый (на плане)',
+      mapX: sw.x,
+      mapY: sw.y,
+      latInput: '',
+      lonInput: '',
+    },
+  }
+}
+
+function parseGeoAnchorsFromFile(raw: unknown): Partial<Record<GeoCornerKey, { latInput: string; lonInput: string }>> {
+  if (!raw || typeof raw !== 'object') return {}
+  const anyRaw = raw as Record<string, unknown>
+  const cornersRaw = anyRaw.corners
+  if (!cornersRaw || typeof cornersRaw !== 'object') return {}
+  const anyCorners = cornersRaw as Record<string, unknown>
+  const ids: GeoCornerKey[] = PLAN_CORNER_IDS
+  const result: Partial<Record<GeoCornerKey, { latInput: string; lonInput: string }>> = {}
+
+  for (const id of ids) {
+    const item = anyCorners[id]
+    if (!item || typeof item !== 'object') continue
+    const anyItem = item as Record<string, unknown>
+    const lat = anyItem.lat
+    const lon = anyItem.lon
+    const latInput = typeof lat === 'number' && Number.isFinite(lat) ? String(lat) : ''
+    const lonInput = typeof lon === 'number' && Number.isFinite(lon) ? String(lon) : ''
+    result[id] = { latInput, lonInput }
+  }
+
+  return result
+}
+
+function buildGeoAnchorsFilePayload(draft: BuildGeoDraft): SavedGeoAnchorsFile {
+  const ids: GeoCornerKey[] = PLAN_CORNER_IDS
+  const corners: SavedGeoAnchorsFile['corners'] = {}
+  for (const id of ids) {
+    const corner = draft.corners[id]
+    corners[id] = {
+      lat: parseCoordInput(corner.latInput),
+      lon: parseCoordInput(corner.lonInput),
+    }
+  }
+  return {
+    version: 1,
+    buildId: draft.buildId,
+    floorId: draft.floorId,
+    corners,
+  }
+}
+
+async function loadGeoAnchorsFileFromPublic(buildId: string, floorId: string): Promise<Partial<Record<GeoCornerKey, { latInput: string; lonInput: string }>>> {
+  const candidatePaths = [
+    `${buildId}/geo_anchors.json`,
+    `${buildId}/geo_anchor.json`,
+    `${buildId}/${floorId}/geo_anchors.json`,
+    `${buildId}/${floorId}/geo_anchor.json`,
+  ]
+
+  for (const relativePath of candidatePaths) {
+    try {
+      const response = await fetch(publicAssetUrl(relativePath))
+      if (!response.ok) continue
+      const data: unknown = await response.json()
+      return parseGeoAnchorsFromFile(data)
+    } catch {
+      // Try the next path variant.
+    }
+  }
+
+  return {}
+}
+
+async function saveGeoAnchorsFileViaBrowserApi(draft: BuildGeoDraft): Promise<'saved' | 'downloaded' | 'cancelled'> {
+  const payload = buildGeoAnchorsFilePayload(draft)
+  const fileText = `${JSON.stringify(payload, null, 2)}\n`
+  const anyWindow = window as Window & {
+    showSaveFilePicker?: (opts?: unknown) => Promise<{
+      createWritable: () => Promise<{ write: (chunk: string) => Promise<void>; close: () => Promise<void> }>
+    }>
+  }
+
+  if (typeof anyWindow.showSaveFilePicker === 'function') {
+    try {
+      const handle = await anyWindow.showSaveFilePicker({
+        suggestedName: 'geo_anchors.json',
+        types: [{
+          description: 'JSON file',
+          accept: { 'application/json': ['.json'] },
+        }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(fileText)
+      await writable.close()
+      return 'saved'
+    } catch (error) {
+      const maybeName = (error as { name?: string })?.name
+      if (maybeName === 'AbortError') return 'cancelled'
+    }
+  }
+
+  const blob = new Blob([fileText], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${draft.buildId}_geo_anchors.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+  return 'downloaded'
+}
+
+function buildValidGeoAnchors(draft: BuildGeoDraft | null): GeoAnchor[] {
+  if (!draft) return []
+  const ids: GeoCornerKey[] = PLAN_CORNER_IDS
+
+  const parsedById: Partial<Record<GeoCornerKey, { lat: number; lon: number }>> = {}
+  for (const id of ids) {
+    const corner = draft.corners[id]
+    const lat = parseCoordInput(corner.latInput)
+    const lon = parseCoordInput(corner.lonInput)
+    if (lat == null || lon == null) continue
+    parsedById[id] = { lat, lon }
+  }
+
+  const result: GeoAnchor[] = []
+  for (const id of ids) {
+    const geo = parsedById[id]
+    if (!geo) continue
+    const planCorner = draft.corners[id]
+    result.push({
+      id,
+      map: { x: planCorner.mapX, y: planCorner.mapY },
+      geo,
+    })
+  }
+
+  return result
+}
+
+function toCardinalLabel(ns: 'north' | 'south', ew: 'east' | 'west'): string {
+  if (ns === 'north' && ew === 'east') return 'Северо-восток'
+  if (ns === 'north' && ew === 'west') return 'Северо-запад'
+  if (ns === 'south' && ew === 'east') return 'Юго-восток'
+  return 'Юго-запад'
+}
+
+function buildRealWorldCardinalLabels(draft: BuildGeoDraft | null): Partial<Record<GeoCornerKey, string>> {
+  if (!draft) return {}
+  const ids: GeoCornerKey[] = PLAN_CORNER_IDS
+  const parsed = ids
+    .map((id) => {
+      const c = draft.corners[id]
+      const lat = parseCoordInput(c.latInput)
+      const lon = parseCoordInput(c.lonInput)
+      if (lat == null || lon == null) return null
+      return { id, lat, lon }
+    })
+    .filter((v): v is { id: GeoCornerKey; lat: number; lon: number } => v != null)
+
+  if (parsed.length < 2) return {}
+
+  const latCenter = parsed.reduce((sum, p) => sum + p.lat, 0) / parsed.length
+  const lonCenter = parsed.reduce((sum, p) => sum + p.lon, 0) / parsed.length
+  const result: Partial<Record<GeoCornerKey, string>> = {}
+
+  for (const p of parsed) {
+    const ns: 'north' | 'south' = p.lat >= latCenter ? 'north' : 'south'
+    const ew: 'east' | 'west' = p.lon >= lonCenter ? 'east' : 'west'
+    result[p.id] = toCardinalLabel(ns, ew)
+  }
+
+  return result
+}
+
+function mapGeoPointToOverlay(
+  calibration: ReturnType<typeof buildGeoCalibration>,
+  point: { lat: number; lon: number },
+  buildId: string,
+  accuracyM?: number,
+): { overlay: UserLocationOverlay; statusText: string } {
+  const projection = projectUserToMap(calibration as NonNullable<ReturnType<typeof buildGeoCalibration>>, point)
+  const isOutside = projection.outsideDistanceM > 3
+  const accuracyText = Number.isFinite(accuracyM) ? `Точность ±${Math.round(accuracyM as number)} м` : undefined
+
+  if (isOutside) {
+    const distanceText = `До корпуса: ${formatDistanceHuman(projection.outsideDistanceM)}`
+    return {
+      overlay: {
+        buildId,
+        mode: 'outside',
+        x: projection.clamped.x,
+        y: projection.clamped.y,
+        headingDeg: projection.headingDeg,
+        distanceText,
+        accuracyText,
+      },
+      statusText: distanceText,
+    }
+  }
+
+  return {
+    overlay: {
+      buildId,
+      mode: 'inside',
+      x: projection.projected.x,
+      y: projection.projected.y,
+      accuracyText,
+    },
+    statusText: 'Текущее местоположение отображено на плане',
   }
 }
 
@@ -95,6 +442,11 @@ function App() {
   const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
   const [officesHierarchy, setOfficesHierarchy] = React.useState<OfficesHierarchyData | null>(null)
   const [isAdminMode, setIsAdminMode] = React.useState(false)
+  const [geoDraftByBuild, setGeoDraftByBuild] = React.useState<Record<string, BuildGeoDraft>>({})
+  const [geoFileStatusText, setGeoFileStatusText] = React.useState<string | null>(null)
+  const [isLocating, setIsLocating] = React.useState(false)
+  const [locationStatusText, setLocationStatusText] = React.useState<string | null>(null)
+  const [userLocationOverlay, setUserLocationOverlay] = React.useState<UserLocationOverlay | null>(null)
 
   const [modalAnchor, setModalAnchor] = React.useState<{ x: number; y: number } | null>(
     null,
@@ -179,6 +531,55 @@ function App() {
   }, [rooms, selectedCategory])
 
   const isFiltering = selectedCategory !== '__all__' || searchText.trim().length > 0
+
+  const selectedGeoDraft = geoDraftByBuild[selectedBuild] ?? null
+
+  const selectedGeoCalibration = React.useMemo(() => {
+    if (!selectedGeoDraft) return null
+    const anchors = buildValidGeoAnchors(selectedGeoDraft)
+    return buildGeoCalibration(anchors, selectedGeoDraft.bounds)
+  }, [selectedGeoDraft])
+
+  const selectedGeoFilledCount = React.useMemo(() => {
+    if (!selectedGeoDraft) return 0
+    return buildValidGeoAnchors(selectedGeoDraft).length
+  }, [selectedGeoDraft])
+
+  const selectedGeoRealCardinalLabels = React.useMemo(() => {
+    return buildRealWorldCardinalLabels(selectedGeoDraft)
+  }, [selectedGeoDraft])
+
+  const selectedGeoMarkers = React.useMemo(() => {
+    if (!isAdminMode) return null
+    if (!selectedGeoDraft) return null
+    if (selectedFloor !== selectedGeoDraft.floorId) return null
+    const ids: GeoCornerKey[] = ['nw', 'ne', 'se', 'sw']
+    return ids.map((id) => {
+      const corner = selectedGeoDraft.corners[id]
+      const lat = parseCoordInput(corner.latInput)
+      const lon = parseCoordInput(corner.lonInput)
+      return {
+        id,
+        x: corner.mapX,
+        y: corner.mapY,
+        label: corner.label,
+        isFilled: lat != null && lon != null,
+      }
+    })
+  }, [isAdminMode, selectedFloor, selectedGeoDraft])
+
+  const activeUserLocationOverlay = React.useMemo(() => {
+    if (!userLocationOverlay) return null
+    if (userLocationOverlay.buildId !== selectedBuild) return null
+    return {
+      mode: userLocationOverlay.mode,
+      x: userLocationOverlay.x,
+      y: userLocationOverlay.y,
+      distanceText: userLocationOverlay.distanceText,
+      headingDeg: userLocationOverlay.headingDeg,
+      accuracyText: userLocationOverlay.accuracyText,
+    }
+  }, [selectedBuild, userLocationOverlay])
 
   const matchedKeys = React.useMemo(() => {
     if (!isFiltering) return null
@@ -440,6 +841,64 @@ function App() {
     })
   }, [pendingSearchJump, roomsLoading, selectedBuild, selectedFloor])
 
+  React.useEffect(() => {
+    let cancelled = false
+    if (!manifest) return () => {
+      cancelled = true
+    }
+
+    const builds = manifest.builds
+    Promise.all(
+      builds.map(async (build) => {
+        const floor1Id = build.floors.find((f) => /floor1/i.test(f)) ?? build.floors[0] ?? 'floor1'
+        const [floorRooms, savedFileData] = await Promise.all([
+          loadRoomsFromPublic({ buildId: build.id, floorId: floor1Id }),
+          loadGeoAnchorsFileFromPublic(build.id, floor1Id),
+        ])
+        const allPolygons = roomsToPolygons(floorRooms)
+        const wallBasedPolygons = allPolygons.filter((poly) => poly.roomID !== 200)
+        const bounds = computeBounds(wallBasedPolygons.length > 0 ? wallBasedPolygons : allPolygons)
+        const snappedCorners = buildSnappedCorners(bounds, wallBasedPolygons.length > 0 ? wallBasedPolygons : allPolygons)
+        return {
+          buildId: build.id,
+          floorId: floor1Id,
+          bounds,
+          snappedCorners,
+          savedFileData,
+        }
+      }),
+    )
+      .then((list) => {
+        if (cancelled) return
+
+        const next: Record<string, BuildGeoDraft> = {}
+        for (const item of list) {
+          const defaults = makeDefaultGeoCorners(item.bounds, item.snappedCorners)
+          const ids: GeoCornerKey[] = PLAN_CORNER_IDS
+          for (const id of ids) {
+            const savedCorner = item.savedFileData[id]
+            if (savedCorner?.latInput != null) defaults[id].latInput = savedCorner.latInput
+            if (savedCorner?.lonInput != null) defaults[id].lonInput = savedCorner.lonInput
+          }
+          next[item.buildId] = {
+            buildId: item.buildId,
+            floorId: item.floorId,
+            bounds: item.bounds,
+            corners: defaults,
+          }
+        }
+        setGeoDraftByBuild(next)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setGeoDraftByBuild({})
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [manifest])
+
   const openOfficeOnMap = React.useCallback((location: OfficeLocation, node: OfficeNode) => {
     setMapMode('normal')
     setSelectedCategory('__all__')
@@ -455,6 +914,117 @@ function App() {
       category: node.type,
     })
   }, [])
+
+  const updateGeoCornerInput = React.useCallback((cornerId: GeoCornerKey, field: 'latInput' | 'lonInput', value: string) => {
+    setGeoDraftByBuild((prev) => {
+      const draft = prev[selectedBuild]
+      if (!draft) return prev
+      return {
+        ...prev,
+        [selectedBuild]: {
+          ...draft,
+          corners: {
+            ...draft.corners,
+            [cornerId]: {
+              ...draft.corners[cornerId],
+              [field]: value,
+            },
+          },
+        },
+      }
+    })
+  }, [selectedBuild])
+
+  const clearSelectedBuildGeoInputs = React.useCallback(() => {
+    setGeoDraftByBuild((prev) => {
+      const draft = prev[selectedBuild]
+      if (!draft) return prev
+      const ids: GeoCornerKey[] = PLAN_CORNER_IDS
+      const nextCorners = { ...draft.corners }
+      for (const id of ids) {
+        nextCorners[id] = {
+          ...nextCorners[id],
+          latInput: '',
+          lonInput: '',
+        }
+      }
+      return {
+        ...prev,
+        [selectedBuild]: {
+          ...draft,
+          corners: nextCorners,
+        },
+      }
+    })
+  }, [selectedBuild])
+
+  const saveSelectedBuildGeoToFile = React.useCallback(async () => {
+    const draft = geoDraftByBuild[selectedBuild]
+    if (!draft) return
+
+    const result = await saveGeoAnchorsFileViaBrowserApi(draft)
+    if (result === 'saved') {
+      setGeoFileStatusText(`Сохранено в файл корпуса ${draft.buildId}/geo_anchors.json`)
+      return
+    }
+    if (result === 'downloaded') {
+      setGeoFileStatusText('JSON скачан. Поместите его в папку корпуса: <build>/geo_anchors.json')
+      return
+    }
+    setGeoFileStatusText('Сохранение отменено')
+  }, [geoDraftByBuild, selectedBuild])
+
+  const locateUserOnMap = React.useCallback(() => {
+    if (!selectedGeoCalibration) {
+      setLocationStatusText('Заполните координаты 4 углов для этого корпуса в админ-режиме')
+      return
+    }
+
+    if (LOCATION_SPOOF) {
+      const mapped = mapGeoPointToOverlay(selectedGeoCalibration, LOCATION_SPOOF, selectedBuild)
+      setUserLocationOverlay(mapped.overlay)
+      setLocationStatusText(`Тестовые координаты: ${mapped.statusText}`)
+      return
+    }
+
+    if (!navigator.geolocation) {
+      setLocationStatusText('Геолокация не поддерживается в этом браузере')
+      return
+    }
+
+    setIsLocating(true)
+    setLocationStatusText('Запрашиваем доступ к геопозиции…')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const mapped = mapGeoPointToOverlay(
+          selectedGeoCalibration,
+          { lat: position.coords.latitude, lon: position.coords.longitude },
+          selectedBuild,
+          position.coords.accuracy,
+        )
+        setUserLocationOverlay(mapped.overlay)
+        setLocationStatusText(mapped.statusText)
+
+        setIsLocating(false)
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationStatusText('Доступ к геолокации запрещён пользователем')
+        } else if (error.code === error.TIMEOUT) {
+          setLocationStatusText('Не удалось определить координаты: истекло время ожидания')
+        } else {
+          setLocationStatusText('Не удалось определить текущую геопозицию')
+        }
+        setIsLocating(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0,
+      },
+    )
+  }, [selectedBuild, selectedGeoCalibration])
 
   React.useEffect(() => {
     let cancelled = false
@@ -540,6 +1110,9 @@ function App() {
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
         isAdminMode={isAdminMode}
         onToggleAdminMode={toggleAdminMode}
+        isLocating={isLocating}
+        onLocateUser={locateUserOnMap}
+        locationStatusText={locationStatusText}
       />
 
       <FloorsPanel
@@ -571,6 +1144,8 @@ function App() {
           routeFloorJumps={routeFloorJumps}
           onRouteFloorJump={(targetFloorId) => setSelectedFloor(targetFloorId)}
           showGraphOverlay={showGraphOverlay}
+          userLocationOverlay={activeUserLocationOverlay}
+          geoAnchorMarkers={selectedGeoMarkers}
           titleText={titleText}
           titleAnchor={titleAnchor}
           selectedRoomKey={selectedRoomKey}
@@ -625,6 +1200,66 @@ function App() {
           {routeHints.map((hint, idx) => (
             <div key={`route-hint-${idx}`} className="routeHintItem">{hint}</div>
           ))}
+        </div>
+      ) : null}
+
+      {locationStatusText ? (
+        <div className="locationStatusFloating" aria-live="polite">{locationStatusText}</div>
+      ) : null}
+
+      {isAdminMode && selectedGeoDraft ? (
+        <div className="geoAdminPanel">
+          <div className="geoAdminHeader">
+            <div className="geoAdminTitle">Геопривязка: {buildLabel(selectedBuild)}</div>
+            <div className="geoAdminMeta">Этаж: {floorLabel(selectedGeoDraft.floorId)} · заполнено: {selectedGeoFilledCount}/4</div>
+            {selectedFloor !== selectedGeoDraft.floorId ? (
+              <div className="geoAdminWarn">Для наглядности точек переключитесь на {floorLabel(selectedGeoDraft.floorId)}</div>
+            ) : null}
+          </div>
+
+          <div className="geoAdminRows">
+            {(PLAN_CORNER_IDS as GeoCornerKey[]).map((id) => {
+              const corner = selectedGeoDraft.corners[id]
+              return (
+                <div key={`geo-${id}`} className="geoAdminRow">
+                  <div className="geoAdminCornerLabelWrap">
+                    <div className="geoAdminCornerLabel">{corner.label}</div>
+                    <div className="geoAdminCornerGeoLabel">
+                      По карте: {selectedGeoRealCardinalLabels[id] ?? 'определится после ввода координат'}
+                    </div>
+                  </div>
+                  <input
+                    className="geoAdminInput"
+                    placeholder="Широта"
+                    value={corner.latInput}
+                    onChange={(e) => updateGeoCornerInput(id, 'latInput', e.target.value)}
+                  />
+                  <input
+                    className="geoAdminInput"
+                    placeholder="Долгота"
+                    value={corner.lonInput}
+                    onChange={(e) => updateGeoCornerInput(id, 'lonInput', e.target.value)}
+                  />
+                  <div className="geoAdminMapCoord" title="Координаты точки на плане">
+                    x: {corner.mapX.toFixed(2)} · y: {corner.mapY.toFixed(2)}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="geoAdminActions">
+            <button type="button" className="geoAdminClearBtn" onClick={clearSelectedBuildGeoInputs}>
+              Очистить координаты
+            </button>
+            <button type="button" className="geoAdminSaveBtn" onClick={saveSelectedBuildGeoToFile}>
+              Сохранить в файл корпуса
+            </button>
+            <div className="geoAdminHint">
+              Для позиционирования заполните минимум 3 угла, рекомендуется все 4.
+            </div>
+          </div>
+          {geoFileStatusText ? <div className="geoAdminFileStatus" aria-live="polite">{geoFileStatusText}</div> : null}
         </div>
       ) : null}
 

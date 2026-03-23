@@ -389,6 +389,156 @@
   color: #111;
 }
 
+.locationStatusFloating {
+  position: absolute;
+  z-index: 126;
+  left: 50%;
+  bottom: 98px;
+  transform: translateX(-50%);
+  width: min(92vw, 620px);
+  border-radius: 12px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+}
+
+.geoAdminPanel {
+  position: absolute;
+  z-index: 126;
+  left: 12px;
+  bottom: 14px;
+  width: min(96vw, 520px);
+  border-radius: 16px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 10px;
+}
+
+.geoAdminHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.geoAdminTitle {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.geoAdminMeta {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  font-weight: 700;
+}
+
+.geoAdminWarn {
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #6a4a00;
+}
+
+.geoAdminRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.geoAdminRow {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr 1.3fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.geoAdminCornerLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.geoAdminCornerLabelWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.geoAdminCornerGeoLabel {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  opacity: 0.82;
+  font-weight: 700;
+}
+
+.geoAdminInput {
+  height: 30px;
+  border-radius: 9px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.28);
+  padding: 0 8px;
+  color: #111;
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.geoAdminMapCoord {
+  font-size: 0.72rem;
+  opacity: 0.8;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.geoAdminActions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.geoAdminClearBtn {
+  height: 32px;
+  border-radius: 10px;
+  border: 2px solid rgba(206, 209, 255, 0.32);
+  background: rgba(255, 255, 255, 0.24);
+  color: #111;
+  font-weight: 700;
+  padding: 0 10px;
+}
+
+.geoAdminSaveBtn {
+  height: 32px;
+  border-radius: 10px;
+  border: 2px solid rgba(134, 223, 150, 0.65);
+  background: rgba(171, 244, 183, 0.45);
+  color: #111;
+  font-weight: 800;
+  padding: 0 10px;
+}
+
+.geoAdminHint {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  font-weight: 700;
+  opacity: 0.84;
+}
+
+.geoAdminFileStatus {
+  margin-top: 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
 .mapModeBtn {
   height: 36px;
   min-width: 108px;
@@ -673,6 +823,35 @@
   .routeHintsWrap {
     width: min(96vw, 560px);
     bottom: 132px;
+  }
+
+  .locationStatusFloating {
+    width: min(96vw, 560px);
+    bottom: 100px;
+  }
+
+  .geoAdminPanel {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    bottom: 128px;
+  }
+
+  .geoAdminRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .geoAdminMapCoord {
+    grid-column: 1 / span 2;
+  }
+
+  .geoAdminActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .geoAdminClearBtn {
+    width: 100%;
   }
 
   .routeEndpointSwitch {
@@ -1058,6 +1237,25 @@
   overflow: hidden;
 }
 
+.topButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.locationButton {
+  min-width: 186px;
+}
+
+.locationStatusText {
+  border-radius: 11px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.55);
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #111;
+}
+
 .topThemeButton {
   width: auto;
   white-space: nowrap;
@@ -1296,6 +1494,108 @@
 
 .glassDropdownItemSelected {
   background: rgba(255, 255, 255, 0.28);
+}
+
+.userLocationDot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userLocationPulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(38, 167, 255, 0.25);
+  animation: userLocationPulse 1.5s ease-out infinite;
+}
+
+.userLocationCore {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #26a7ff;
+  box-shadow: 0 0 0 3px rgba(38, 167, 255, 0.4);
+}
+
+.userLocationOutside {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  border: 2px solid rgba(206, 209, 255, 0.46);
+  background: rgba(18, 22, 36, 0.76);
+  color: #eef3ff;
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.userLocationArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 0.96rem;
+  line-height: 1;
+  transform-origin: 50% 50%;
+}
+
+.userLocationDistance {
+  white-space: nowrap;
+}
+
+.geoAnchorMapMarker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  border: 2px solid rgba(206, 209, 255, 0.6);
+  background: rgba(19, 23, 37, 0.8);
+  color: #f0f5ff;
+  padding: 3px 7px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+}
+
+.geoAnchorMapMarkerReady {
+  border-color: rgba(134, 223, 150, 0.85);
+}
+
+.geoAnchorMapDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffb440;
+  box-shadow: 0 0 0 2px rgba(255, 180, 64, 0.25);
+}
+
+.geoAnchorMapMarkerReady .geoAnchorMapDot {
+  background: #62d27a;
+  box-shadow: 0 0 0 2px rgba(98, 210, 122, 0.26);
+}
+
+.geoAnchorMapLabel {
+  line-height: 1;
+}
+
+@keyframes userLocationPulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 .appRoot[data-theme='dark'] {

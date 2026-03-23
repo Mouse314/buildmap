@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "buildId": "build16",
+  "floorId": "floor1",
+  "corners": {
+    "nw": { "lat": null, "lon": null },
+    "ne": { "lat": null, "lon": null },
+    "se": { "lat": null, "lon": null },
+    "sw": { "lat": null, "lon": null }
+  }
+}

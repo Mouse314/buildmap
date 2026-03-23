@@ -67,6 +67,8 @@ export function FloorPlanCanvas({
   routeFloorJumps = [],
   onRouteFloorJump,
   showGraphOverlay = false,
+  userLocationOverlay = null,
+  geoAnchorMarkers = null,
 }: {
   rooms: Room[];
   roomGraph?: RoomGraph | null;
@@ -85,6 +87,21 @@ export function FloorPlanCanvas({
   routeFloorJumps?: Array<{ x: number; y: number; targetFloorId: string; direction: 'up' | 'down' }>;
   onRouteFloorJump?: (targetFloorId: string) => void;
   showGraphOverlay?: boolean;
+  userLocationOverlay?: {
+    mode: 'inside' | 'outside';
+    x: number;
+    y: number;
+    distanceText?: string | null;
+    headingDeg?: number;
+    accuracyText?: string | null;
+  } | null;
+  geoAnchorMarkers?: Array<{
+    id: string;
+    x: number;
+    y: number;
+    label: string;
+    isFilled: boolean;
+  }> | null;
 }) {
   const polygons = React.useMemo(() => roomsToPolygons(rooms), [rooms]);
   const [hoveredPolyKey, setHoveredPolyKey] = React.useState<string | null>(null);
@@ -727,6 +744,43 @@ export function FloorPlanCanvas({
                       <span className="routeStairJumpText">{jump.label}</span>
                     </button>
                   ))}
+                </div>
+              </Html>
+            ))}
+          </group>
+        ) : null}
+
+        {userLocationOverlay ? (
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.64, 0]}>
+            <Html position={[userLocationOverlay.x, userLocationOverlay.y, 0]} sprite center>
+              {userLocationOverlay.mode === 'inside' ? (
+                <div className="userLocationDot" title={userLocationOverlay.accuracyText ?? 'Текущее местоположение'}>
+                  <span className="userLocationPulse" />
+                  <span className="userLocationCore" />
+                </div>
+              ) : (
+                <div className="userLocationOutside" title={userLocationOverlay.accuracyText ?? 'Пользователь вне корпуса'}>
+                  <span
+                    className="userLocationArrow"
+                    style={{ transform: `rotate(${userLocationOverlay.headingDeg ?? 0}deg)` }}
+                    aria-hidden
+                  >
+                    ➤
+                  </span>
+                  <span className="userLocationDistance">{userLocationOverlay.distanceText ?? 'вне корпуса'}</span>
+                </div>
+              )}
+            </Html>
+          </group>
+        ) : null}
+
+        {geoAnchorMarkers && geoAnchorMarkers.length > 0 ? (
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.7, 0]}>
+            {geoAnchorMarkers.map((marker) => (
+              <Html key={`geo-anchor-${marker.id}`} position={[marker.x, marker.y, 0]} sprite center>
+                <div className={marker.isFilled ? 'geoAnchorMapMarker geoAnchorMapMarkerReady' : 'geoAnchorMapMarker'}>
+                  <span className="geoAnchorMapDot" aria-hidden />
+                  <span className="geoAnchorMapLabel">{marker.label}</span>
                 </div>
               </Html>
             ))}

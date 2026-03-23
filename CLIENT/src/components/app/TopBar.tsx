@@ -46,6 +46,10 @@ type TopBarProps = {
 
     isAdminMode: boolean;
     onToggleAdminMode: () => void;
+
+    isLocating: boolean;
+    onLocateUser: () => void;
+    locationStatusText: string | null;
 };
 
 export function TopBar({
@@ -73,6 +77,9 @@ export function TopBar({
     onToggleTheme,
     isAdminMode,
     onToggleAdminMode,
+    isLocating,
+    onLocateUser,
+    locationStatusText,
 }: TopBarProps) {
     const [searchOpen, setSearchOpen] = React.useState(false);
     const [mobileControlsOpen, setMobileControlsOpen] = React.useState(false);
@@ -286,6 +293,16 @@ export function TopBar({
             </button>
 
                 <button
+                    className="topButton topDesktopOnly locationButton"
+                    type="button"
+                    onClick={onLocateUser}
+                    title={locationStatusText ?? 'Показать текущее местоположение на плане'}
+                    disabled={isLocating}
+                >
+                    {isLocating ? 'Определяем…' : 'Моё местоположение'}
+                </button>
+
+                <button
                     className={isAdminMode ? 'topButton topDesktopOnly adminModeButton adminModeButtonActive' : 'topButton topDesktopOnly adminModeButton'}
                     type="button"
                     onClick={onToggleAdminMode}
@@ -389,6 +406,23 @@ export function TopBar({
                                     {theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
                                 </button>
                             </div>
+
+                            <div className="mobileControlsRow">
+                                <button
+                                    className="topButton locationButton"
+                                    type="button"
+                                    onClick={onLocateUser}
+                                    disabled={isLocating}
+                                >
+                                    {isLocating ? 'Определяем…' : 'Моё местоположение'}
+                                </button>
+                            </div>
+
+                            {locationStatusText ? (
+                                <div className="mobileControlsRow">
+                                    <div className="locationStatusText" aria-live="polite">{locationStatusText}</div>
+                                </div>
+                            ) : null}
 
                             <div className="mobileControlsRow">
                                 <button
