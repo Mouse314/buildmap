@@ -29,6 +29,35 @@ import type { Room } from './map/rooms/utils/Room'
 
 type MapMode = 'normal' | 'routes'
 
+type RoomEditPayload = {
+  roomNo?: string
+  category?: string
+  description?: string
+  areClosed?: boolean
+  areaM2?: number
+  build?: string | null
+  floor?: string | null
+}
+
+function normalizeText(value: string | undefined): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
+function applyRoomChangesLocal(room: Room, changes: RoomEditPayload): Room {
+  return {
+    ...room,
+    roomNo: normalizeText(changes.roomNo),
+    category: normalizeText(changes.category),
+    description: normalizeText(changes.description),
+    areClosed: changes.areClosed,
+    areaM2: typeof changes.areaM2 === 'number' && Number.isFinite(changes.areaM2) ? changes.areaM2 : undefined,
+    build: changes.build ?? null,
+    floor: changes.floor ?? null,
+  }
+}
+
 function App() {
   const [rooms, setRooms] = React.useState<Room[]>([])
   const [error, setError] = React.useState<string | null>(null)
@@ -65,6 +94,7 @@ function App() {
   const [routeHints, setRouteHints] = React.useState<string[]>([])
   const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
   const [officesHierarchy, setOfficesHierarchy] = React.useState<OfficesHierarchyData | null>(null)
+  const [isAdminMode, setIsAdminMode] = React.useState(false)
 
   const [modalAnchor, setModalAnchor] = React.useState<{ x: number; y: number } | null>(
     null,
@@ -74,6 +104,42 @@ function App() {
     if (typeof window === 'undefined') return false
     return window.matchMedia?.('(pointer: coarse)').matches ?? false
   }, [])
+
+  const toggleAdminMode = React.useCallback(() => {
+    if (isAdminMode) {
+      setIsAdminMode(false)
+      return
+    }
+    const password = window.prompt('Введите пароль администратора')
+    if (password === 'poper') {
+      setIsAdminMode(true)
+      return
+    }
+    window.alert('Неверный пароль')
+  }, [isAdminMode])
+
+  const saveRoomChanges = React.useCallback(async (room: Room, changes: RoomEditPayload) => {
+    const response = await fetch('/api/admin/rooms/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        buildId: selectedBuild,
+        floorId: selectedFloor,
+        roomKey: room.key,
+        changes,
+      }),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(text || `Ошибка сохранения (${response.status})`)
+    }
+
+    const updatedRoom = applyRoomChangesLocal(room, changes)
+    setRooms((prev) => prev.map((item) => (item.key === room.key ? updatedRoom : item)))
+  }, [selectedBuild, selectedFloor])
 
   const selectedRoom = React.useMemo(() => {
     if (selectedRoomKey == null) return null
@@ -472,6 +538,8 @@ function App() {
         onSelectPreset={setGraphicsPreset}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
+        isAdminMode={isAdminMode}
+        onToggleAdminMode={toggleAdminMode}
       />
 
       <FloorsPanel
@@ -539,6 +607,8 @@ function App() {
         <RoomInfoModal
           room={selectedRoom}
           anchor={modalAnchor}
+          isAdminMode={isAdminMode}
+          onSaveRoom={(changes) => saveRoomChanges(selectedRoom, changes)}
           onBuildRoute={(room) => {
             setMapMode('routes')
             applyRouteEndpoint(activeRouteEndpoint, buildRouteTargetFromRoom(room, selectedBuild, selectedFloor))

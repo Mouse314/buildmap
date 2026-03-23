@@ -43,6 +43,9 @@ type TopBarProps = {
 
     theme: 'light' | 'dark';
     onToggleTheme: () => void;
+
+    isAdminMode: boolean;
+    onToggleAdminMode: () => void;
 };
 
 export function TopBar({
@@ -68,6 +71,8 @@ export function TopBar({
     onSelectPreset,
     theme,
     onToggleTheme,
+    isAdminMode,
+    onToggleAdminMode,
 }: TopBarProps) {
     const [searchOpen, setSearchOpen] = React.useState(false);
     const [mobileControlsOpen, setMobileControlsOpen] = React.useState(false);
@@ -280,6 +285,14 @@ export function TopBar({
                 {theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
             </button>
 
+                <button
+                    className={isAdminMode ? 'topButton topDesktopOnly adminModeButton adminModeButtonActive' : 'topButton topDesktopOnly adminModeButton'}
+                    type="button"
+                    onClick={onToggleAdminMode}
+                >
+                    {isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                </button>
+
                 <button className="topButton topDesktopOnly" type="button" onClick={() => setBugReportOpen(true)}>
                     Сообщить об ошибке
                 </button>
@@ -374,6 +387,16 @@ export function TopBar({
                             <div className="mobileControlsRow">
                                 <button className="topButton" type="button" onClick={onToggleTheme}>
                                     {theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
+                                </button>
+                            </div>
+
+                            <div className="mobileControlsRow">
+                                <button
+                                    className={isAdminMode ? 'topButton adminModeButton adminModeButtonActive' : 'topButton adminModeButton'}
+                                    type="button"
+                                    onClick={onToggleAdminMode}
+                                >
+                                    {isAdminMode ? 'Админ: ВКЛ' : 'админ'}
                                 </button>
                             </div>
 
