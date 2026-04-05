@@ -23564,7 +23564,7 @@
     "key": "bl:524",
     "blenderID": 524,
     "roomID": 8,
-    "roomNo": "113",
+    "roomNo": "1133",
     "areClosed": false,
     "areaM2": 87.41,
     "vertexIndices": [
@@ -23603,7 +23603,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:525",

@@ -14,6 +14,23 @@ export function publicAssetUrl(path: string): string {
   return `${base}${path.replace(/^\/+/, '')}`;
 }
 
+function normalizedApiBaseUrl(): string {
+  const raw = typeof import.meta.env.VITE_API_BASE_URL === 'string'
+    ? import.meta.env.VITE_API_BASE_URL.trim()
+    : '';
+  return raw.length > 0 ? raw.replace(/\/+$/, '') : '';
+}
+
+export function plansApiUrl(path: string): string {
+  const normalizedPath = `/${path.replace(/^\/+/, '')}`;
+  const base = normalizedApiBaseUrl();
+  return base.length > 0 ? `${base}${normalizedPath}` : normalizedPath;
+}
+
+function encodePathSegment(value: string): string {
+  return encodeURIComponent(value.replace(/^\/+/, '').replace(/\/+$/, '').trim());
+}
+
 export type RoomDataManifest = {
   builds: Array<{
     id: string;
@@ -22,7 +39,7 @@ export type RoomDataManifest = {
 };
 
 export async function loadRoomDataManifest(
-  path = publicAssetUrl('room_data_manifest.json'),
+  path = plansApiUrl('/api/plans/manifest'),
 ): Promise<RoomDataManifest | null> {
   try {
     const response = await fetch(path);
@@ -50,12 +67,11 @@ export async function loadRoomDataManifest(
 }
 
 export function roomDataPaths(buildId: string, floorId: string): { jsonPath: string; csvPath: string } {
-  const prefix = `${buildId.replace(/^\/+/, '').replace(/\/+$/, '')}/${floorId
-    .replace(/^\/+/, '')
-    .replace(/\/+$/, '')}`;
+  const safeBuildId = encodePathSegment(buildId);
+  const safeFloorId = encodePathSegment(floorId);
   return {
-    jsonPath: publicAssetUrl(`${prefix}/room_data.json`),
-    csvPath: publicAssetUrl(`${prefix}/room_data.csv`),
+    jsonPath: plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/rooms`),
+    csvPath: plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/rooms.csv`),
   };
 }
 
@@ -84,10 +100,9 @@ export type RoomGraph = {
 };
 
 export function roomGraphPath(buildId: string, floorId: string): string {
-  const prefix = `${buildId.replace(/^\/+/, '').replace(/\/+$/, '')}/${floorId
-    .replace(/^\/+/, '')
-    .replace(/\/+$/, '')}`;
-  return publicAssetUrl(`${prefix}/room_graph.json`);
+  const safeBuildId = encodePathSegment(buildId);
+  const safeFloorId = encodePathSegment(floorId);
+  return plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/graph`);
 }
 
 export async function loadRoomGraphFromPublic(
