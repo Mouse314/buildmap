@@ -263,25 +263,7 @@ function App() {
         onOpenCabinet={openOfficeOnMap}
       />
 
-      {mapMode === 'routes' ? (
-        <div className="routeInfoFlanks" aria-hidden>
-          <div className="routeInfoBlock routeInfoBlockLeft">
-            <div className="routeInfoText">
-              ℹ️Выберите пункты (откуда / куда), укажите нужное помещение на карте, либо воспользуйтесь поиском сверху.
-              Указатели на лестницах говорят о том, что нужно перейти с этажа на этаж
-            </div>
-          </div>
-          <div className="routeInfoBlock routeInfoBlockRight">
-            <div className="routeInfoTitle">⚠️Внимание!</div>
-            <div className="routeInfoText">
-              Система очень пытается всё учесть, но в редких случаях маршрут может строиться сквозь закрытые двери
-              и технические помещения( Просьба обращать внимание на локальные особенности внутри зданий
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <div className="mapModeSwitchWrap">
+      <div className="mapModeDock" aria-label="Режим карты">
         <button
           type="button"
           className={mapMode === 'normal' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
@@ -296,38 +278,58 @@ function App() {
         >
           Маршруты
         </button>
-        {mapMode === 'routes' ? (
-          <div className="mapModeRouteMeta">
-            <div className="routeEndpointSwitch">
-              <button
-                type="button"
-                className={activeRouteEndpoint === 'from' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
-                onClick={onSetActiveRouteFrom}
-              >
-                Откуда
-              </button>
-              <button
-                type="button"
-                className={activeRouteEndpoint === 'to' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
-                onClick={onSetActiveRouteTo}
-              >
-                Куда
-              </button>
-              <button
-                type="button"
-                className="routeMainEntranceBtn"
-                onClick={onSetMainEntrance}
-                title="Сбросить точку старта к главному входу"
-              >
-                От главного входа
-              </button>
-            </div>
-            <div className="routeMetaLine">Откуда: {routeFrom ? routeFrom.label : 'Главный вход'}</div>
-            <div className="routeMetaLine">Куда: {routeTo ? routeTo.label : 'Выберите кабинет или воспользуйтесь поиском'}</div>
-            {routeDistanceM != null ? <div className="routeMetaDistance">Длина: {routeDistanceM.toFixed(1)} м</div> : null}
-          </div>
-        ) : null}
       </div>
+
+      {mapMode === 'routes' ? (
+        <div className="routeBottomCluster">
+          <div className="routeInfoBlock routeInfoBlockLeft" aria-hidden>
+            <div className="routeInfoText">
+              ℹ️Выберите пункты (откуда / куда), укажите нужное помещение на карте, либо воспользуйтесь поиском сверху.
+              Указатели на лестницах говорят о том, что нужно перейти с этажа на этаж
+            </div>
+          </div>
+
+          <div className="mapModeSwitchWrap">
+            <div className="mapModeRouteMeta">
+              <div className="routeEndpointSwitch">
+                <button
+                  type="button"
+                  className={activeRouteEndpoint === 'from' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
+                  onClick={onSetActiveRouteFrom}
+                >
+                  Откуда
+                </button>
+                <button
+                  type="button"
+                  className={activeRouteEndpoint === 'to' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
+                  onClick={onSetActiveRouteTo}
+                >
+                  Куда
+                </button>
+                <button
+                  type="button"
+                  className="routeMainEntranceBtn"
+                  onClick={onSetMainEntrance}
+                  title="Сбросить точку старта к главному входу"
+                >
+                  От главного входа
+                </button>
+              </div>
+              <div className="routeMetaLine">Откуда: {routeFrom ? routeFrom.label : 'Главный вход'}</div>
+              <div className="routeMetaLine">Куда: {routeTo ? routeTo.label : 'Выберите кабинет или воспользуйтесь поиском'}</div>
+              {routeDistanceM != null ? <div className="routeMetaDistance">Длина: {routeDistanceM.toFixed(1)} м</div> : null}
+            </div>
+          </div>
+
+          <div className="routeInfoBlock routeInfoBlockRight" aria-hidden>
+            <div className="routeInfoTitle">⚠️Внимание!</div>
+            <div className="routeInfoText">
+              Система очень пытается всё учесть, но в редких случаях маршрут может строиться сквозь закрытые двери
+              и технические помещения( Просьба обращать внимание на локальные особенности внутри зданий
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

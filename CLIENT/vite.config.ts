@@ -11,6 +11,10 @@ export default defineConfig({
   // Use relative base so the build works when hosted under subpaths (e.g. GitHub Pages).
   // This also keeps import.meta.env.BASE_URL usable for public asset fetching.
   base: './',
+  build: {
+    // Keep authored CSS declarations as-is to avoid dropping unprefixed backdrop-filter in production.
+    cssMinify: 'esbuild',
+  },
   server: {
     proxy: {
       '/api/plans': {

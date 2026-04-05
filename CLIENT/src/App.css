@@ -382,12 +382,29 @@
   top: 100px;
 }
 
-.mapModeSwitchWrap {
+.mapModeDock {
   position: absolute;
   z-index: 125;
-  left: 50%;
+  left: 12px;
   bottom: 14px;
-  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 20px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 10px;
+}
+
+.mapModeDock .mapModeBtn {
+  min-width: 168px;
+}
+
+.mapModeSwitchWrap {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -398,24 +415,30 @@
   -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   padding: 8px;
-  max-width: calc(100% - 20px);
+  max-width: min(92vw, 620px);
 }
 
-.routeInfoFlanks {
+.routeBottomCluster {
   position: absolute;
-  z-index: 124;
+  z-index: 125;
   left: 50%;
   bottom: 14px;
   transform: translateX(-50%);
-  width: min(98vw, 1380px);
+  width: max-content;
+  max-width: calc(100% - 22px);
   display: flex;
+  gap: 10px;
   align-items: flex-end;
-  justify-content: space-between;
   pointer-events: none;
 }
 
+.routeBottomCluster .mapModeSwitchWrap {
+  pointer-events: auto;
+}
+
 .routeInfoBlock {
-  width: clamp(260px, 24vw, 390px);
+  width: clamp(260px, 22vw, 360px);
+  height: 89px;
   border-radius: 14px;
   border: 2px solid rgba(206, 209, 255, 0.22);
   background: rgba(167, 167, 167, 0.46);
@@ -883,14 +906,32 @@
 }
 
 @media (max-width: 920px) {
-  .routeInfoFlanks {
+  .routeBottomCluster {
+    width: min(96vw, 560px);
+    justify-content: center;
+  }
+
+  .routeBottomCluster .routeInfoBlock {
     display: none;
+  }
+
+  .mapModeDock {
+    left: 8px;
+    bottom: 12px;
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  .mapModeDock .mapModeBtn {
+    min-width: 136px;
+    height: 34px;
   }
 
   .mapModeSwitchWrap {
     flex-wrap: wrap;
     justify-content: center;
-    width: min(96vw, 560px);
+    width: 100%;
+    max-width: none;
   }
 
   .mapModeRouteMeta {
@@ -1697,6 +1738,7 @@
 .appRoot[data-theme='dark'] .glassDropdownMenu,
 .appRoot[data-theme='dark'] .smartSearchPanel,
 .appRoot[data-theme='dark'] .sidePanel,
+.appRoot[data-theme='dark'] .mapModeDock,
 .appRoot[data-theme='dark'] .routeInfoBlock {
   color: #f3f4f6;
   border-color: rgba(255, 255, 255, 0.16);
