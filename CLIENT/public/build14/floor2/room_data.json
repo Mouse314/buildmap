@@ -24089,7 +24089,7 @@
     "key": "bl:645",
     "blenderID": 645,
     "roomID": 1,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 1.2,
     "vertexIndices": [
       1090,
@@ -24259,7 +24259,7 @@
     "key": "bl:650",
     "blenderID": 650,
     "roomID": 16,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 1.25,
     "vertexIndices": [
       1097,

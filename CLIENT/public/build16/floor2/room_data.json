@@ -12642,7 +12642,6 @@
     "key": "bl:333",
     "blenderID": 333,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.49,
     "vertexIndices": [
@@ -12682,7 +12681,6 @@
     "key": "bl:334",
     "blenderID": 334,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 1.82,
     "vertexIndices": [
@@ -12761,7 +12759,6 @@
     "key": "bl:336",
     "blenderID": 336,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.1,
     "vertexIndices": [
@@ -12796,7 +12793,6 @@
     "key": "bl:337",
     "blenderID": 337,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 1.12,
     "vertexIndices": [
@@ -12831,7 +12827,6 @@
     "key": "bl:338",
     "blenderID": 338,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.06,
     "vertexIndices": [
@@ -12866,7 +12861,6 @@
     "key": "bl:339",
     "blenderID": 339,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.18,
     "vertexIndices": [
@@ -12901,7 +12895,6 @@
     "key": "bl:340",
     "blenderID": 340,
     "roomID": 1,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.33,
     "vertexIndices": [
@@ -12936,7 +12929,6 @@
     "key": "bl:341",
     "blenderID": 341,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.2,
     "vertexIndices": [
@@ -13107,7 +13099,6 @@
     "key": "bl:346",
     "blenderID": 346,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 1.01,
     "vertexIndices": [
@@ -13192,7 +13183,6 @@
     "key": "bl:348",
     "blenderID": 348,
     "roomID": 3,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.1,
     "vertexIndices": [
@@ -13227,7 +13217,6 @@
     "key": "bl:349",
     "blenderID": 349,
     "roomID": 3,
-    "description": "1",
     "areClosed": false,
     "areaM2": 10.51,
     "vertexIndices": [
@@ -13277,7 +13266,6 @@
     "key": "bl:350",
     "blenderID": 350,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.04,
     "vertexIndices": [
@@ -13312,7 +13300,6 @@
     "key": "bl:351",
     "blenderID": 351,
     "roomID": 100,
-    "description": "1",
     "areClosed": false,
     "areaM2": 0.45,
     "vertexIndices": [
@@ -13347,7 +13334,6 @@
     "key": "bl:352",
     "blenderID": 352,
     "roomID": 3,
-    "description": "1",
     "areClosed": false,
     "areaM2": 6.92,
     "vertexIndices": [
@@ -13670,7 +13656,6 @@
     "key": "bl:359",
     "blenderID": 359,
     "roomID": 100,
-    "roomNo": "121",
     "areClosed": false,
     "areaM2": 0.74,
     "vertexIndices": [

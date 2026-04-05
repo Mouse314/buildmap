@@ -23564,7 +23564,7 @@
     "key": "bl:524",
     "blenderID": 524,
     "roomID": 8,
-    "roomNo": "1133",
+    "roomNo": "113",
     "areClosed": false,
     "areaM2": 87.41,
     "vertexIndices": [
@@ -23603,8 +23603,7 @@
       }
     ],
     "build": null,
-    "floor": null,
-    "category": "кабинет"
+    "floor": null
   },
   {
     "key": "bl:525",
@@ -28848,7 +28847,7 @@
     "blenderID": 639,
     "roomID": 8,
     "roomNo": "101",
-    "description": "Отдель работы со студентами",
+    "description": "Отдел работы со студентами",
     "areClosed": false,
     "areaM2": 31.35,
     "vertexIndices": [

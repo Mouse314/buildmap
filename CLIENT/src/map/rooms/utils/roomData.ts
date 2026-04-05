@@ -41,29 +41,36 @@ export type RoomDataManifest = {
 export async function loadRoomDataManifest(
   path = plansApiUrl('/api/plans/manifest'),
 ): Promise<RoomDataManifest | null> {
-  try {
-    const response = await fetch(path);
-    if (!response.ok) return null;
-    const data: unknown = await response.json();
-    if (!data || typeof data !== 'object') return null;
-    const anyData = data as Record<string, unknown>;
-    if (!Array.isArray(anyData.builds)) return null;
-    const builds: RoomDataManifest['builds'] = [];
-    for (const b of anyData.builds) {
-      if (!b || typeof b !== 'object') continue;
-      const anyB = b as Record<string, unknown>;
-      const id = typeof anyB.id === 'string' ? anyB.id : '';
-      const floorsRaw = anyB.floors;
-      const floors = Array.isArray(floorsRaw)
-        ? floorsRaw.map((f) => String(f)).filter((f) => f.length > 0)
-        : [];
-      if (id.length === 0) continue;
-      builds.push({ id, floors });
+  const fallbackPath = publicAssetUrl('room_data_manifest.json');
+  const tryPaths = path === fallbackPath ? [path] : [path, fallbackPath];
+
+  for (const tryPath of tryPaths) {
+    try {
+      const response = await fetch(tryPath);
+      if (!response.ok) continue;
+      const data: unknown = await response.json();
+      if (!data || typeof data !== 'object') continue;
+      const anyData = data as Record<string, unknown>;
+      if (!Array.isArray(anyData.builds)) continue;
+      const builds: RoomDataManifest['builds'] = [];
+      for (const b of anyData.builds) {
+        if (!b || typeof b !== 'object') continue;
+        const anyB = b as Record<string, unknown>;
+        const id = typeof anyB.id === 'string' ? anyB.id : '';
+        const floorsRaw = anyB.floors;
+        const floors = Array.isArray(floorsRaw)
+          ? floorsRaw.map((f) => String(f)).filter((f) => f.length > 0)
+          : [];
+        if (id.length === 0) continue;
+        builds.push({ id, floors });
+      }
+      return { builds };
+    } catch {
+      // Try the next path variant.
     }
-    return { builds };
-  } catch {
-    return null;
   }
+
+  return null;
 }
 
 export function roomDataPaths(buildId: string, floorId: string): { jsonPath: string; csvPath: string } {
@@ -72,6 +79,15 @@ export function roomDataPaths(buildId: string, floorId: string): { jsonPath: str
   return {
     jsonPath: plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/rooms`),
     csvPath: plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/rooms.csv`),
+  };
+}
+
+export function roomPublicDataPaths(buildId: string, floorId: string): { jsonPath: string; csvPath: string } {
+  const safeBuildId = encodePathSegment(buildId);
+  const safeFloorId = encodePathSegment(floorId);
+  return {
+    jsonPath: publicAssetUrl(`${safeBuildId}/${safeFloorId}/room_data.json`),
+    csvPath: publicAssetUrl(`${safeBuildId}/${safeFloorId}/room_data.csv`),
   };
 }
 
@@ -105,6 +121,12 @@ export function roomGraphPath(buildId: string, floorId: string): string {
   return plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/graph`);
 }
 
+export function roomPublicGraphPath(buildId: string, floorId: string): string {
+  const safeBuildId = encodePathSegment(buildId);
+  const safeFloorId = encodePathSegment(floorId);
+  return publicAssetUrl(`${safeBuildId}/${safeFloorId}/room_graph.json`);
+}
+
 export async function loadRoomGraphFromPublic(
   opts: { buildId?: string; floorId?: string; path?: string } = {},
 ): Promise<RoomGraph | null> {
@@ -116,80 +138,100 @@ export async function loadRoomGraphFromPublic(
       ? roomGraphPath(opts.buildId, opts.floorId)
       : null;
 
+  const fromBuildFloorPublic =
+    typeof opts.buildId === 'string' &&
+    opts.buildId.length > 0 &&
+    typeof opts.floorId === 'string' &&
+    opts.floorId.length > 0
+      ? roomPublicGraphPath(opts.buildId, opts.floorId)
+      : null;
+
   const graphPath = opts.path ?? fromBuildFloor ?? publicAssetUrl('room_graph.json');
+  const fallbackGraphPath = opts.path ? null : fromBuildFloorPublic ?? publicAssetUrl('room_graph.json');
 
-  try {
-    const response = await fetch(graphPath);
-    if (!response.ok) return null;
-    const raw: unknown = await response.json();
-    if (!raw || typeof raw !== 'object') return null;
+  const tryLoadGraph = async (path: string): Promise<RoomGraph | null> => {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) return null;
+      const raw: unknown = await response.json();
+      if (!raw || typeof raw !== 'object') return null;
 
-    const data = raw as Record<string, unknown>;
-    const nodesRaw = Array.isArray(data.nodes) ? data.nodes : null;
-    const edgesRaw = Array.isArray(data.edges) ? data.edges : null;
-    if (!nodesRaw || !edgesRaw) return null;
+      const data = raw as Record<string, unknown>;
+      const nodesRaw = Array.isArray(data.nodes) ? data.nodes : null;
+      const edgesRaw = Array.isArray(data.edges) ? data.edges : null;
+      if (!nodesRaw || !edgesRaw) return null;
 
-    const nodes: RoomGraphNode[] = [];
-    for (const n of nodesRaw) {
-      if (!n || typeof n !== 'object') continue;
-      const anyN = n as Record<string, unknown>;
-      const key = typeof anyN.key === 'string' ? anyN.key : '';
-      const roomIDRaw = anyN.roomID;
-      const roomID = roomIDRaw == null ? null : Number(roomIDRaw);
-      const x = Number(anyN.x);
-      const y = Number(anyN.y);
-      const roomNo = typeof anyN.roomNo === 'string' ? anyN.roomNo : null;
-      const kind = anyN.kind === 'street' ? 'street' : 'room';
-      const label = typeof anyN.label === 'string' ? anyN.label : null;
-      if (key.length === 0 || !Number.isFinite(x) || !Number.isFinite(y)) {
-        continue;
+      const nodes: RoomGraphNode[] = [];
+      for (const n of nodesRaw) {
+        if (!n || typeof n !== 'object') continue;
+        const anyN = n as Record<string, unknown>;
+        const key = typeof anyN.key === 'string' ? anyN.key : '';
+        const roomIDRaw = anyN.roomID;
+        const roomID = roomIDRaw == null ? null : Number(roomIDRaw);
+        const x = Number(anyN.x);
+        const y = Number(anyN.y);
+        const roomNo = typeof anyN.roomNo === 'string' ? anyN.roomNo : null;
+        const kind = anyN.kind === 'street' ? 'street' : 'room';
+        const label = typeof anyN.label === 'string' ? anyN.label : null;
+        if (key.length === 0 || !Number.isFinite(x) || !Number.isFinite(y)) {
+          continue;
+        }
+        if (kind === 'room' && !Number.isFinite(Number(roomID))) {
+          continue;
+        }
+        nodes.push({ key, roomID: kind === 'street' ? null : Number(roomID), roomNo, kind, label, x, y });
       }
-      if (kind === 'room' && !Number.isFinite(Number(roomID))) {
-        continue;
-      }
-      nodes.push({ key, roomID: kind === 'street' ? null : Number(roomID), roomNo, kind, label, x, y });
-    }
 
-    const edges: RoomGraphEdge[] = [];
-    for (const e of edgesRaw) {
-      if (!e || typeof e !== 'object') continue;
-      const anyE = e as Record<string, unknown>;
-      const from = typeof anyE.from === 'string' ? anyE.from : '';
-      const to = typeof anyE.to === 'string' ? anyE.to : '';
-      if (from.length === 0 || to.length === 0) continue;
-      const viaRaw = anyE.via;
-      let via: { x: number; y: number } | null | undefined = undefined;
-      if (viaRaw && typeof viaRaw === 'object') {
-        const anyVia = viaRaw as Record<string, unknown>;
-        const vx = Number(anyVia.x);
-        const vy = Number(anyVia.y);
-        if (Number.isFinite(vx) && Number.isFinite(vy)) {
-          via = { x: vx, y: vy };
+      const edges: RoomGraphEdge[] = [];
+      for (const e of edgesRaw) {
+        if (!e || typeof e !== 'object') continue;
+        const anyE = e as Record<string, unknown>;
+        const from = typeof anyE.from === 'string' ? anyE.from : '';
+        const to = typeof anyE.to === 'string' ? anyE.to : '';
+        if (from.length === 0 || to.length === 0) continue;
+        const viaRaw = anyE.via;
+        let via: { x: number; y: number } | null | undefined = undefined;
+        if (viaRaw && typeof viaRaw === 'object') {
+          const anyVia = viaRaw as Record<string, unknown>;
+          const vx = Number(anyVia.x);
+          const vy = Number(anyVia.y);
+          if (Number.isFinite(vx) && Number.isFinite(vy)) {
+            via = { x: vx, y: vy };
+          }
+        }
+        edges.push({ from, to, via });
+      }
+
+      const adjacencyRaw = data.adjacency;
+      const adjacency: Record<string, string[]> = {};
+      if (adjacencyRaw && typeof adjacencyRaw === 'object') {
+        const anyAdj = adjacencyRaw as Record<string, unknown>;
+        for (const [k, v] of Object.entries(anyAdj)) {
+          if (!Array.isArray(v)) continue;
+          adjacency[k] = v.map((x) => String(x));
         }
       }
-      edges.push({ from, to, via });
-    }
 
-    const adjacencyRaw = data.adjacency;
-    const adjacency: Record<string, string[]> = {};
-    if (adjacencyRaw && typeof adjacencyRaw === 'object') {
-      const anyAdj = adjacencyRaw as Record<string, unknown>;
-      for (const [k, v] of Object.entries(anyAdj)) {
-        if (!Array.isArray(v)) continue;
-        adjacency[k] = v.map((x) => String(x));
-      }
+      return {
+        version: Number.isFinite(Number(data.version)) ? Number(data.version) : 1,
+        generatedAt: typeof data.generatedAt === 'string' ? data.generatedAt : '',
+        nodes,
+        edges,
+        adjacency,
+      };
+    } catch {
+      return null;
     }
+  };
 
-    return {
-      version: Number.isFinite(Number(data.version)) ? Number(data.version) : 1,
-      generatedAt: typeof data.generatedAt === 'string' ? data.generatedAt : '',
-      nodes,
-      edges,
-      adjacency,
-    };
-  } catch {
-    return null;
+  const primaryGraph = await tryLoadGraph(graphPath);
+  if (primaryGraph) return primaryGraph;
+
+  if (fallbackGraphPath && fallbackGraphPath !== graphPath) {
+    return await tryLoadGraph(fallbackGraphPath);
   }
+
+  return null;
 }
 
 function parseWorldCoordsXY(value: string): Array<{ x: number; y: number }> {
@@ -434,14 +476,39 @@ export async function loadRoomsFromPublic(
       ? roomDataPaths(opts.buildId, opts.floorId)
       : null;
 
+  const fromBuildFloorPublic =
+    typeof opts.buildId === 'string' && opts.buildId.length > 0 && typeof opts.floorId === 'string' && opts.floorId.length > 0
+      ? roomPublicDataPaths(opts.buildId, opts.floorId)
+      : null;
+
   const jsonPath = opts.jsonPath ?? fromBuildFloor?.jsonPath ?? publicAssetUrl('room_data.json');
   const csvPath = opts.csvPath ?? fromBuildFloor?.csvPath ?? publicAssetUrl('room_data.csv');
+  const fallbackJsonPath = opts.jsonPath ? null : fromBuildFloorPublic?.jsonPath ?? publicAssetUrl('room_data.json');
+  const fallbackCsvPath = opts.csvPath ? null : fromBuildFloorPublic?.csvPath ?? publicAssetUrl('room_data.csv');
 
-  try {
-    return await loadRoomsFromPublicJson(jsonPath);
-  } catch {
-    return await loadRoomsFromPublicCsv(csvPath);
+  const jsonTryPaths = [jsonPath, fallbackJsonPath].filter((v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i);
+  const csvTryPaths = [csvPath, fallbackCsvPath].filter((v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i);
+
+  let lastError: unknown = null;
+
+  for (const tryPath of jsonTryPaths) {
+    try {
+      return await loadRoomsFromPublicJson(tryPath);
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  for (const tryPath of csvTryPaths) {
+    try {
+      return await loadRoomsFromPublicCsv(tryPath);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError instanceof Error) throw lastError;
+  throw new Error('Failed to load room data');
 }
 
 export function computeBounds(polygons: RoomPolygon[]): {

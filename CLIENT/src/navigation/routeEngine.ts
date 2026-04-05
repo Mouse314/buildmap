@@ -29,141 +29,148 @@ function sharedPassagePoint(roomA: Room, roomB: Room): { x: number; y: number } 
 }
 
 function simplifyPathPoints(points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> {
+  if (points.length <= 1) return points
+
+  const deduped: Array<{ x: number; y: number }> = [points[0]]
+  for (let i = 1; i < points.length; i++) {
+    const prev = deduped[deduped.length - 1]
+    const cur = points[i]
+    if (pointDistance(prev, cur) > 0.04) {
+      deduped.push(cur)
+    }
+  }
+  return deduped
+}
+
+function removeLocalBacktracking(points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> {
   if (points.length <= 2) return points
 
-  const deduped: Array<{ x: number; y: number }> = []
-  for (const p of points) {
-    const last = deduped[deduped.length - 1]
-    if (!last || pointDistance(last, p) > 0.04) deduped.push(p)
-  }
-  if (deduped.length <= 2) return deduped
+  const result: Array<{ x: number; y: number }> = [points[0]]
+  for (let i = 1; i < points.length; i++) {
+    result.push(points[i])
 
-  const result: Array<{ x: number; y: number }> = [deduped[0]]
-  for (let i = 1; i + 1 < deduped.length; i++) {
-    const prev = result[result.length - 1]
-    const cur = deduped[i]
-    const next = deduped[i + 1]
+    while (result.length >= 3) {
+      const a = result[result.length - 3]
+      const b = result[result.length - 2]
+      const c = result[result.length - 1]
 
-    const v1x = cur.x - prev.x
-    const v1y = cur.y - prev.y
-    const v2x = next.x - cur.x
-    const v2y = next.y - cur.y
-
-    const len1 = Math.hypot(v1x, v1y)
-    const len2 = Math.hypot(v2x, v2y)
-    if (len1 < 1e-6 || len2 < 1e-6) continue
-
-    const dot = (v1x * v2x + v1y * v2y) / (len1 * len2)
-    if (dot > 0.965) continue
-    result.push(cur)
-  }
-  result.push(deduped[deduped.length - 1])
-  return result
-}
-
-function pointInPolygon(point: { x: number; y: number }, polygon: Array<{ x: number; y: number }>): boolean {
-  let inside = false
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const pi = polygon[i]
-    const pj = polygon[j]
-    const intersects = ((pi.y > point.y) !== (pj.y > point.y))
-      && (point.x < ((pj.x - pi.x) * (point.y - pi.y)) / ((pj.y - pi.y) || 1e-9) + pi.x)
-    if (intersects) inside = !inside
-  }
-  return inside
-}
-
-function orientation(a: { x: number; y: number }, b: { x: number; y: number }, c: { x: number; y: number }): number {
-  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
-}
-
-function onSegment(a: { x: number; y: number }, b: { x: number; y: number }, c: { x: number; y: number }, eps = 1e-7): boolean {
-  return Math.min(a.x, b.x) - eps <= c.x
-    && c.x <= Math.max(a.x, b.x) + eps
-    && Math.min(a.y, b.y) - eps <= c.y
-    && c.y <= Math.max(a.y, b.y) + eps
-}
-
-function segmentsIntersect(
-  p1: { x: number; y: number },
-  p2: { x: number; y: number },
-  q1: { x: number; y: number },
-  q2: { x: number; y: number },
-): boolean {
-  const o1 = orientation(p1, p2, q1)
-  const o2 = orientation(p1, p2, q2)
-  const o3 = orientation(q1, q2, p1)
-  const o4 = orientation(q1, q2, p2)
-
-  if ((o1 > 0) !== (o2 > 0) && (o3 > 0) !== (o4 > 0)) return true
-
-  if (Math.abs(o1) < 1e-7 && onSegment(p1, p2, q1)) return true
-  if (Math.abs(o2) < 1e-7 && onSegment(p1, p2, q2)) return true
-  if (Math.abs(o3) < 1e-7 && onSegment(q1, q2, p1)) return true
-  if (Math.abs(o4) < 1e-7 && onSegment(q1, q2, p2)) return true
-
-  return false
-}
-
-function segmentBlockedByWalls(
-  from: { x: number; y: number },
-  to: { x: number; y: number },
-  wallPolygons: Array<Array<{ x: number; y: number }>>,
-): boolean {
-  if (pointDistance(from, to) < 1e-6) return false
-
-  const sampleCount = 6
-  for (let s = 1; s < sampleCount; s++) {
-    const t = s / sampleCount
-    const p = {
-      x: from.x + (to.x - from.x) * t,
-      y: from.y + (to.y - from.y) * t,
-    }
-    for (const wall of wallPolygons) {
-      if (pointInPolygon(p, wall)) return true
-    }
-  }
-
-  for (const wall of wallPolygons) {
-    for (let i = 0; i < wall.length; i++) {
-      const a = wall[i]
-      const b = wall[(i + 1) % wall.length]
-      if (!segmentsIntersect(from, to, a, b)) continue
-
-      const atWallVertex = pointsAlmostEqual(from, a, 1e-4)
-        || pointsAlmostEqual(from, b, 1e-4)
-        || pointsAlmostEqual(to, a, 1e-4)
-        || pointsAlmostEqual(to, b, 1e-4)
-      if (atWallVertex) continue
-      return true
-    }
-  }
-  return false
-}
-
-function straightenPathWithWalls(
-  points: Array<{ x: number; y: number }>,
-  wallPolygons: Array<Array<{ x: number; y: number }>>,
-): Array<{ x: number; y: number }> {
-  if (points.length <= 2) return points
-
-  const result: Array<{ x: number; y: number }> = []
-  let index = 0
-  result.push(points[index])
-
-  while (index < points.length - 1) {
-    let best = index + 1
-    for (let candidate = points.length - 1; candidate > index + 1; candidate--) {
-      if (!segmentBlockedByWalls(points[index], points[candidate], wallPolygons)) {
-        best = candidate
-        break
+      const ab = pointDistance(a, b)
+      const bc = pointDistance(b, c)
+      if (ab < 1e-6 || bc < 1e-6) {
+        result.splice(result.length - 2, 1)
+        continue
       }
+
+      const ac = pointDistance(a, c)
+      const v1x = b.x - a.x
+      const v1y = b.y - a.y
+      const v2x = c.x - b.x
+      const v2y = c.y - b.y
+      const dot = (v1x * v2x + v1y * v2y) / (ab * bc)
+
+      const isShortReverseSpike = dot < -0.2
+        && ac < Math.max(ab, bc) * 0.6
+        && Math.min(ab, bc) < 2.2
+
+      if (!isShortReverseSpike) break
+      result.splice(result.length - 2, 1)
     }
-    result.push(points[best])
-    index = best
   }
 
   return result
+}
+
+function segmentOverlapInfo(
+  a1: { x: number; y: number },
+  a2: { x: number; y: number },
+  b1: { x: number; y: number },
+  b2: { x: number; y: number },
+  eps = 1e-5,
+): { length: number; midpoint: { x: number; y: number } | null; direction: { x: number; y: number } | null } {
+  const ux = a2.x - a1.x
+  const uy = a2.y - a1.y
+  const vx = b2.x - b1.x
+  const vy = b2.y - b1.y
+
+  const crossUV = ux * vy - uy * vx
+  if (Math.abs(crossUV) > eps) return { length: 0, midpoint: null, direction: null }
+
+  const crossABU = (b1.x - a1.x) * uy - (b1.y - a1.y) * ux
+  if (Math.abs(crossABU) > eps) return { length: 0, midpoint: null, direction: null }
+
+  const lenSq = ux * ux + uy * uy
+  if (lenSq <= eps) return { length: 0, midpoint: null, direction: null }
+
+  const tB1 = ((b1.x - a1.x) * ux + (b1.y - a1.y) * uy) / lenSq
+  const tB2 = ((b2.x - a1.x) * ux + (b2.y - a1.y) * uy) / lenSq
+
+  const left = Math.max(0, Math.min(tB1, tB2))
+  const right = Math.min(1, Math.max(tB1, tB2))
+  const overlapT = right - left
+  if (overlapT <= 0) return { length: 0, midpoint: null, direction: null }
+
+  const tMid = left + overlapT * 0.5
+  const len = Math.sqrt(lenSq) * overlapT
+  const dirLen = Math.sqrt(lenSq)
+
+  return {
+    length: len,
+    midpoint: { x: a1.x + ux * tMid, y: a1.y + uy * tMid },
+    direction: dirLen > 1e-9 ? { x: ux / dirLen, y: uy / dirLen } : null,
+  }
+}
+
+function polygonSegments(points: Array<{ x: number; y: number }>): Array<[{ x: number; y: number }, { x: number; y: number }]> {
+  const segments: Array<[{ x: number; y: number }, { x: number; y: number }]> = []
+  if (points.length < 2) return segments
+  for (let i = 0; i < points.length; i++) {
+    segments.push([points[i], points[(i + 1) % points.length]])
+  }
+  return segments
+}
+
+function buildPerpendicularDoorApproach(
+  corridorRoom: Room,
+  room: Room,
+  corridorNode: { x: number; y: number },
+  passage: { x: number; y: number },
+): { x: number; y: number } | null {
+  const corridorSegments = polygonSegments(corridorRoom.points)
+  const roomSegments = polygonSegments(room.points)
+
+  let bestMidpoint: { x: number; y: number } | null = null
+  let bestDirection: { x: number; y: number } | null = null
+  let bestLength = 0
+
+  for (const [a1, a2] of corridorSegments) {
+    for (const [b1, b2] of roomSegments) {
+      const overlap = segmentOverlapInfo(a1, a2, b1, b2)
+      if (!overlap.midpoint || !overlap.direction) continue
+      if (overlap.length <= bestLength) continue
+      bestLength = overlap.length
+      bestMidpoint = overlap.midpoint
+      bestDirection = overlap.direction
+    }
+  }
+
+  if (!bestMidpoint || !bestDirection || bestLength < 0.05) return null
+
+  const base = passage
+  const toCorridor = { x: corridorNode.x - base.x, y: corridorNode.y - base.y }
+  const n1 = { x: -bestDirection.y, y: bestDirection.x }
+  const n2 = { x: bestDirection.y, y: -bestDirection.x }
+
+  const dot1 = toCorridor.x * n1.x + toCorridor.y * n1.y
+  const dot2 = toCorridor.x * n2.x + toCorridor.y * n2.y
+  const normal = dot1 >= dot2 ? n1 : n2
+  const corridorDepth = Math.abs(toCorridor.x * normal.x + toCorridor.y * normal.y)
+  if (corridorDepth < 0.06) return null
+
+  const offset = Math.max(0.24, Math.min(1.15, corridorDepth * 0.45))
+  return {
+    x: base.x + normal.x * offset,
+    y: base.y + normal.y * offset,
+  }
 }
 
 function distance2D(a: { x: number; y: number }, b: { x: number; y: number }): number {
@@ -199,6 +206,12 @@ function isRoomClosed(room: Room | undefined): boolean {
   return room?.areClosed === true
 }
 
+function edgePairKey(floorId: string, from: string, to: string): string {
+  return `${floorId}|${from}|${to}`
+}
+
+const CORRIDOR_ROOM_ID = 1
+
 export function computeRoute(args: {
   buildId: string
   floorsData: LoadedFloorData[]
@@ -225,14 +238,9 @@ export function computeRoute(args: {
   }
 
   const roomByFloorKey = new Map<string, Room>()
-  const wallPolygonsByFloor = new Map<string, Array<Array<{ x: number; y: number }>>>()
+  const edgeViaByFloorPair = new Map<string, { x: number; y: number } | null>()
 
   for (const floor of floors) {
-    wallPolygonsByFloor.set(
-      floor.floorId,
-      floor.rooms.filter((room) => room.roomID === 100 && room.points.length >= 3).map((room) => room.points),
-    )
-
     for (const room of floor.rooms) {
       roomByFloorKey.set(`${floor.floorId}|${room.key}`, room)
     }
@@ -260,9 +268,22 @@ export function computeRoute(args: {
       const left = nodeById.get(`${floor.floorId}|${edge.from}`)
       const right = nodeById.get(`${floor.floorId}|${edge.to}`)
       if (!left || !right) continue
-      const w = distance2D(left, right)
+
+      const via = edge.via
+        && Number.isFinite(edge.via.x)
+        && Number.isFinite(edge.via.y)
+        ? { x: edge.via.x, y: edge.via.y }
+        : null
+
+      const w = via
+        ? distance2D(left, via) + distance2D(via, right)
+        : distance2D(left, right)
+
       addDirected(`${floor.floorId}|${edge.from}`, `${floor.floorId}|${edge.to}`, w)
       addDirected(`${floor.floorId}|${edge.to}`, `${floor.floorId}|${edge.from}`, w)
+
+      edgeViaByFloorPair.set(edgePairKey(floor.floorId, edge.from, edge.to), via)
+      edgeViaByFloorPair.set(edgePairKey(floor.floorId, edge.to, edge.from), via)
     }
   }
 
@@ -466,9 +487,16 @@ export function computeRoute(args: {
     const floorPathIds = path.slice(idx, end)
     if (floorPathIds.length >= 2) {
       const points: Array<{ x: number; y: number }> = []
+      const pushPoint = (point: { x: number; y: number }) => {
+        const last = points[points.length - 1]
+        if (!last || pointDistance(last, point) > 0.035) {
+          points.push(point)
+        }
+      }
+
       const firstNode = nodeById.get(floorPathIds[0])
       const lastNode = nodeById.get(floorPathIds[floorPathIds.length - 1])
-      if (firstNode) points.push({ x: firstNode.x, y: firstNode.y })
+      if (firstNode) pushPoint({ x: firstNode.x, y: firstNode.y })
 
       for (let i = 0; i + 1 < floorPathIds.length; i++) {
         const leftId = floorPathIds[i]
@@ -477,13 +505,12 @@ export function computeRoute(args: {
         const rightNode = nodeById.get(rightId)
         if (!leftNode || !rightNode) continue
 
-        let passage: { x: number; y: number } | null = null
-        if (leftNode.kind === 'room' && rightNode.kind === 'room') {
-          const leftRoom = roomByFloorKey.get(`${floorId}|${leftNode.key}`)
-          const rightRoom = roomByFloorKey.get(`${floorId}|${rightNode.key}`)
-          if (leftRoom && rightRoom) {
-            passage = sharedPassagePoint(leftRoom, rightRoom)
-          }
+        const leftRoom = roomByFloorKey.get(`${floorId}|${leftNode.key}`)
+        const rightRoom = roomByFloorKey.get(`${floorId}|${rightNode.key}`)
+
+        let passage = edgeViaByFloorPair.get(edgePairKey(floorId, leftNode.key, rightNode.key)) ?? null
+        if (!passage && leftNode.kind === 'room' && rightNode.kind === 'room' && leftRoom && rightRoom) {
+          passage = sharedPassagePoint(leftRoom, rightRoom)
         }
 
         if (!passage) {
@@ -492,17 +519,47 @@ export function computeRoute(args: {
             y: (leftNode.y + rightNode.y) * 0.5,
           }
         }
-        points.push(passage)
+
+        const leftIsCorridor = leftRoom?.roomID === CORRIDOR_ROOM_ID
+        const rightIsCorridor = rightRoom?.roomID === CORRIDOR_ROOM_ID
+        let passagePushed = false
+
+        if (leftIsCorridor !== rightIsCorridor && leftRoom && rightRoom) {
+          const corridorRoom = leftIsCorridor ? leftRoom : rightRoom
+          const targetRoom = leftIsCorridor ? rightRoom : leftRoom
+          const corridorNode = leftIsCorridor ? leftNode : rightNode
+          const approach = buildPerpendicularDoorApproach(
+            corridorRoom,
+            targetRoom,
+            { x: corridorNode.x, y: corridorNode.y },
+            passage,
+          )
+          if (approach) {
+            if (leftIsCorridor) {
+              // corridor -> room: approach inside corridor, then doorway
+              pushPoint(approach)
+              pushPoint(passage)
+            } else {
+              // room -> corridor: doorway first, then move into corridor centerline
+              pushPoint(passage)
+              pushPoint(approach)
+            }
+            passagePushed = true
+          }
+        }
+
+        if (!passagePushed) {
+          pushPoint(passage)
+        }
       }
 
-      if (lastNode) points.push({ x: lastNode.x, y: lastNode.y })
+      if (lastNode) pushPoint({ x: lastNode.x, y: lastNode.y })
 
       const simplified = simplifyPathPoints(points)
-      const wallPolygons = wallPolygonsByFloor.get(floorId) ?? []
-      const straightened = straightenPathWithWalls(simplified, wallPolygons)
-      for (let i = 0; i + 1 < straightened.length; i++) {
-        const from = straightened[i]
-        const to = straightened[i + 1]
+      const cleaned = removeLocalBacktracking(simplified)
+      for (let i = 0; i + 1 < cleaned.length; i++) {
+        const from = cleaned[i]
+        const to = cleaned[i + 1]
         if (pointDistance(from, to) < 0.04) continue
         segments.push({ floorId, from, to })
       }
