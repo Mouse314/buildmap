@@ -10,6 +10,10 @@ type UseSmartSearchArgs = {
   isInteractiveRoom: (room: Room) => boolean;
 };
 
+function caseFold(value: string | null | undefined): string {
+  return (value ?? '').trim().toLocaleLowerCase('ru-RU');
+}
+
 export function useSmartSearch({
   manifest,
   selectedBuild,
@@ -59,13 +63,18 @@ export function useSmartSearch({
   }, [manifest, isInteractiveRoom]);
 
   return React.useMemo(() => {
-    const q = searchText.trim().toLowerCase();
+    const q = caseFold(searchText);
 
-    const allCategories = Array.from(
-      new Set(searchIndexRooms.map((r) => r.category).filter((v) => v.length > 0)),
-    ).sort((a, b) => a.localeCompare(b, 'ru'));
+    const categoriesByKey = new Map<string, string>();
+    for (const room of searchIndexRooms) {
+      const label = room.category.trim();
+      if (label.length === 0) continue;
+      const key = caseFold(label);
+      if (!categoriesByKey.has(key)) categoriesByKey.set(key, label);
+    }
 
-    const categoryMatches = q.length === 0 ? [] : allCategories.filter((c) => c.toLowerCase().includes(q));
+    const allCategories = Array.from(categoriesByKey.values()).sort((a, b) => a.localeCompare(b, 'ru'));
+    const categoryMatches = q.length === 0 ? [] : allCategories.filter((c) => caseFold(c).includes(q));
 
     if (q.length === 0) {
       return {
@@ -76,7 +85,7 @@ export function useSmartSearch({
     }
 
     const roomMatches = searchIndexRooms.filter((r) => {
-      return r.roomNo.toLowerCase().includes(q) || r.description.toLowerCase().includes(q);
+      return caseFold(r.roomNo).includes(q) || caseFold(r.description).includes(q);
     });
 
     const currentBuildMatches = roomMatches

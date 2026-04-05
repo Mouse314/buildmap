@@ -21,6 +21,23 @@ import {
 import type { HoverRoomPayload, OpenRoomPayload, RoomEditPayload } from './buildmap/types'
 import { buildGeoCalibration } from '../../navigation/geoProjection'
 
+function caseFold(value: string | null | undefined): string {
+  return (value ?? '').trim().toLocaleLowerCase('ru-RU')
+}
+
+function normalizeRoomNoToken(value: string | null | undefined): string {
+  return caseFold(value).replace(/\s+/g, '').replace(/^№/u, '')
+}
+
+function extractRoomNoFromCabinet(value: string | null | undefined): string | null {
+  const text = String(value ?? '').trim()
+  if (text.length === 0) return null
+
+  const match = text.match(/\d+\s*-\s*([0-9A-Za-zА-Яа-я]+)/u)
+  const roomNo = (match?.[1] ?? '').trim()
+  return roomNo.length > 0 ? roomNo : null
+}
+
 export function useBuildMapApp() {
   const {
     manifest,
@@ -127,18 +144,22 @@ export function useBuildMapApp() {
   }, [selectedBuild, selectedFloor])
 
   const categoryOptions = React.useMemo(() => {
-    const set = new Set<string>()
+    const byCaseFold = new Map<string, string>()
     for (const r of rooms) {
       if (!isInteractiveRoom(r)) continue
-      const v = (r.category ?? '').trim()
-      if (v.length > 0) set.add(v)
+      const label = (r.category ?? '').trim()
+      if (label.length === 0) continue
+
+      const key = caseFold(label)
+      if (!byCaseFold.has(key)) byCaseFold.set(key, label)
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b))
+    return Array.from(byCaseFold.values()).sort((a, b) => a.localeCompare(b))
   }, [rooms])
 
   const selectedCategoryColor = React.useMemo(() => {
     if (selectedCategory === '__all__') return null
-    const match = rooms.find((r) => isInteractiveRoom(r) && (r.category ?? '').trim() === selectedCategory)
+    const selectedCategoryKey = caseFold(selectedCategory)
+    const match = rooms.find((r) => isInteractiveRoom(r) && caseFold(r.category) === selectedCategoryKey)
     if (!match) return null
     return getRoomFillColor(match.roomID, match.category)
   }, [rooms, selectedCategory])
@@ -197,19 +218,20 @@ export function useBuildMapApp() {
 
   const matchedKeys = React.useMemo(() => {
     if (!isFiltering) return null
-    const q = searchText.trim().toLowerCase()
+    const q = caseFold(searchText)
+    const selectedCategoryKey = selectedCategory === '__all__' ? '' : caseFold(selectedCategory)
     const set = new Set<string>()
 
     for (const r of rooms) {
       if (!isInteractiveRoom(r)) continue
-      const category = (r.category ?? '').trim()
+      const category = caseFold(r.category)
       const roomNo = (r.roomNo ?? '').trim()
       const description = (r.description ?? '').trim()
 
-      if (selectedCategory !== '__all__' && category !== selectedCategory) continue
+      if (selectedCategoryKey.length > 0 && category !== selectedCategoryKey) continue
 
       if (q.length > 0) {
-        const ok = roomNo.toLowerCase().includes(q) || description.toLowerCase().includes(q)
+        const ok = caseFold(roomNo).includes(q) || caseFold(description).includes(q)
         if (!ok) continue
       }
 
@@ -240,12 +262,17 @@ export function useBuildMapApp() {
     if (roomsLoading) return
 
     requestAnimationFrame(() => {
-      setSelectedRoomKey(pendingSearchJump.key)
+      const pendingRoomNo = normalizeRoomNoToken(pendingSearchJump.roomNo)
+      const roomByRoomNo = pendingRoomNo.length > 0
+        ? rooms.find((room) => normalizeRoomNoToken(room.roomNo) === pendingRoomNo)
+        : null
+      const fallbackKey = pendingSearchJump.key.trim().length > 0 ? pendingSearchJump.key : null
+      setSelectedRoomKey(roomByRoomNo?.key ?? fallbackKey)
       setModalAnchor(null)
       setSearchResultJumpTrigger((v) => v + 1)
       setPendingSearchJump(null)
     })
-  }, [pendingSearchJump, roomsLoading, selectedBuild, selectedFloor])
+  }, [pendingSearchJump, rooms, roomsLoading, selectedBuild, selectedFloor])
 
   React.useEffect(() => {
     if (mapMode !== 'routes') return
@@ -280,9 +307,11 @@ export function useBuildMapApp() {
   }, [activeRouteEndpoint, applyRouteEndpoint, mapMode, setSelectedBuild, setSelectedFloor])
 
   const onPickSearchCategory = React.useCallback((category: string) => {
-    setSelectedCategory(category)
+    const targetKey = caseFold(category)
+    const canonical = categoryOptions.find((option) => caseFold(option) === targetKey) ?? category.trim()
+    setSelectedCategory(canonical.length > 0 ? canonical : category)
     setSearchText('')
-  }, [])
+  }, [categoryOptions])
 
   const onToggleTheme = React.useCallback(() => {
     setTheme((current) => (current === 'light' ? 'dark' : 'light'))
@@ -399,16 +428,19 @@ export function useBuildMapApp() {
   }, [])
 
   const openOfficeOnMap = React.useCallback((location: OfficeLocation, node: OfficeNode) => {
+    const roomNoFromCabinet = extractRoomNoFromCabinet(node.cabinet)
+    const roomNoForSearch = roomNoFromCabinet ?? location.roomNo
+
     setMapMode('normal')
     setSelectedCategory('__all__')
     setSelectedBuild(location.buildId)
     setSelectedFloor(location.floorId)
-    setSearchText(location.roomNo)
+    setSearchText(roomNoForSearch)
     setPendingSearchJump({
       key: location.roomKey,
       buildId: location.buildId,
       floorId: location.floorId,
-      roomNo: location.roomNo,
+      roomNo: roomNoForSearch,
       description: node.name,
       category: node.type,
     })

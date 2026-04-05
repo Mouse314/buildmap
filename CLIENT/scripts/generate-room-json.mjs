@@ -72,6 +72,11 @@ function digitsOnly(value) {
   return String(value ?? '').replace(/\D+/g, '');
 }
 
+function isDigitsOnlyRoomNo(value) {
+  const text = String(value ?? '').trim();
+  return text.length > 0 && /^\d+$/u.test(text);
+}
+
 function parseCabinet(value) {
   const text = String(value ?? '').trim();
   if (!text) return null;
@@ -91,6 +96,7 @@ function parseCabinet(value) {
     floorId,
     normalizedRoomNo: normalizeRoomNo(roomNo),
     roomDigits: digitsOnly(roomNo),
+    isDigitsOnlyRoomNo: isDigitsOnlyRoomNo(normalizeRoomNo(roomNo)),
   };
 }
 
@@ -138,7 +144,7 @@ function parseOfficesHierarchy(csvText) {
     exactList.push(node);
     existing.exact.set(cabinet.normalizedRoomNo, exactList);
 
-    if (cabinet.roomDigits.length > 0) {
+    if (cabinet.roomDigits.length > 0 && cabinet.isDigitsOnlyRoomNo) {
       const digitsList = existing.byDigits.get(cabinet.roomDigits) ?? [];
       digitsList.push(node);
       existing.byDigits.set(cabinet.roomDigits, digitsList);
@@ -518,7 +524,7 @@ async function main() {
 
     const makeRoomKey = ({ idx, blenderID, roomID, roomNo, vertexIndices }) => {
       if (Number.isFinite(blenderID)) return `bl:${blenderID}`;
-      const rn = String(roomNo ?? '').trim();
+      const rn = String(roomNo ?? '').trim().toLocaleLowerCase('ru-RU');
       const vi =
         Array.isArray(vertexIndices) && vertexIndices.length > 0 ? vertexIndices.join(',') : '';
       if (rn.length > 0) return vi.length > 0 ? `no:${rn}|v:${vi}` : `no:${rn}`;
@@ -600,7 +606,7 @@ async function main() {
           candidates.push(node);
         }
 
-        if (digits.length > 0) {
+        if (digits.length > 0 && isDigitsOnlyRoomNo(normalized)) {
           for (const node of buildIndex.byDigits.get(digits) ?? []) {
             if (!candidates.includes(node)) candidates.push(node);
           }
@@ -663,12 +669,33 @@ async function main() {
   const manifestPath = path.join(publicDir, 'room_data_manifest.json');
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
+  for (const node of officesTree.allNodes) {
+    if (node.location) continue;
+
+    const cabinet = node.parsedCabinet;
+    if (!cabinet || !cabinet.floorId) continue;
+
+    const floors = buildToFloors.get(cabinet.buildId);
+    if (!floors || !floors.has(cabinet.floorId)) continue;
+
+    node.location = {
+      buildId: cabinet.buildId,
+      floorId: cabinet.floorId,
+      roomKey: '',
+      roomNo: cabinet.roomNo,
+    };
+  }
+
+  const mappedRows = officesTree.allNodes.filter(
+    (node) => Boolean(node.location && String(node.location.roomKey ?? '').trim().length > 0),
+  ).length;
+
   const officesOut = {
     generatedAt: new Date().toISOString(),
     stats: {
       totalRows: officesTree.allNodes.length,
-      mappedRows: officesTree.allNodes.filter((node) => Boolean(node.location)).length,
-      unmappedRows: officesTree.allNodes.filter((node) => !node.location).length,
+      mappedRows,
+      unmappedRows: officesTree.allNodes.length - mappedRows,
     },
     institutes: officesTree.institutes,
   };

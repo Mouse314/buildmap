@@ -285,7 +285,7 @@ async function main() {
       if (typeof args.blenderID === 'number' && Number.isFinite(args.blenderID)) {
         return `bl:${args.blenderID}`;
       }
-      const rn = String(args.roomNo ?? '').trim();
+      const rn = String(args.roomNo ?? '').trim().toLocaleLowerCase('ru-RU');
       const vi =
         Array.isArray(args.vertexIndices) && args.vertexIndices.length > 0
           ? args.vertexIndices.join(',')

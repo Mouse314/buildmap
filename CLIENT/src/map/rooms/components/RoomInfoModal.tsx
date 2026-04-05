@@ -46,11 +46,15 @@ function toDraft(room: Room): RoomDraft {
   };
 }
 
+function textEqualIgnoreCase(a: string, b: string): boolean {
+  return a.trim().toLocaleLowerCase('ru-RU') === b.trim().toLocaleLowerCase('ru-RU');
+}
+
 function equalDraft(a: RoomDraft, b: RoomDraft): boolean {
   return (
-    a.roomNo === b.roomNo
-    && a.category === b.category
-    && a.description === b.description
+    textEqualIgnoreCase(a.roomNo, b.roomNo)
+    && textEqualIgnoreCase(a.category, b.category)
+    && textEqualIgnoreCase(a.description, b.description)
     && a.areClosed === b.areClosed
     && a.areaM2Text === b.areaM2Text
     && a.build === b.build

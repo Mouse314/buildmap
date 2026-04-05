@@ -98,6 +98,15 @@ function flattenRows(institutes: OfficeNode[]): OfficeTableRow[] {
   return rows;
 }
 
+function formatCabinetLabel(value: string): string {
+  const text = String(value ?? '').trim();
+  if (!text) return '';
+
+  return text.replace(/(\d+\s*-\s*\d+)([A-Za-zА-Яа-я]+)/gu, (_full, prefix: string, suffix: string) => {
+    return `${prefix}${suffix.toLocaleLowerCase('ru-RU')}`;
+  });
+}
+
 export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }: OfficesDirectoryProps) {
   const [open, setOpen] = React.useState(false);
   const rows = React.useMemo(() => flattenRows(data?.institutes ?? []), [data]);
@@ -199,6 +208,7 @@ export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }
                       const facultySpan = facultySpanByStart.get(rowIndex) ?? 0;
                       const instituteStart = instituteSpan > 0;
                       const facultyStart = facultySpan > 0 && row.facultyId.length > 0;
+                      const cabinetLabel = formatCabinetLabel(row.cabinet);
 
                       const rowClass = [
                         instituteStart ? 'officesRowInstituteStart' : '',
@@ -227,8 +237,8 @@ export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }
                             {renderLinkCell(row.department, row.departmentLink, 'Открыть сайт кафедры')}
                           </td>
 
-                          <td title={row.cabinet || 'Кабинет не указан'}>
-                            {row.location && row.cabinet.length > 0 ? (
+                          <td title={cabinetLabel || 'Кабинет не указан'}>
+                            {row.location && cabinetLabel.length > 0 ? (
                               <button
                                 type="button"
                                 className="officesCabinetLink"
@@ -236,12 +246,12 @@ export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }
                                   onOpenCabinet(row.location as OfficeLocation, row.node);
                                   setOpen(false);
                                 }}
-                                title={`Открыть ${row.cabinet} на карте: ${buildLabel(row.location.buildId)}, ${floorLabel(row.location.floorId)}`}
+                                title={`Открыть ${cabinetLabel} на карте: ${buildLabel(row.location.buildId)}, ${floorLabel(row.location.floorId)}`}
                               >
-                                {row.cabinet}
+                                {cabinetLabel}
                               </button>
                             ) : (
-                              <span className="officesMuted">{row.cabinet || '—'}</span>
+                              <span className="officesMuted">{cabinetLabel || '—'}</span>
                             )}
                           </td>
                         </tr>

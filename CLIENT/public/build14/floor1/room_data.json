@@ -22771,7 +22771,6 @@
     "blenderID": 507,
     "roomID": 8,
     "roomNo": "111а",
-    "description": "Кафедра менеджмента и маркетинга",
     "areClosed": false,
     "areaM2": 22.31,
     "vertexIndices": [
@@ -22820,8 +22819,7 @@
       }
     ],
     "build": null,
-    "floor": null,
-    "category": "преподавательская"
+    "floor": null
   },
   {
     "key": "bl:508",
@@ -24287,6 +24285,7 @@
     "blenderID": 540,
     "roomID": 8,
     "roomNo": "111в",
+    "description": "Кафедра менеджмента и маркетинга",
     "areClosed": false,
     "areaM2": 14.77,
     "vertexIndices": [
@@ -24325,7 +24324,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:541",
@@ -26133,7 +26133,6 @@
     "blenderID": 583,
     "roomID": 15,
     "roomNo": "107",
-    "description": "Кафедра государственного и муниципального управления",
     "areClosed": false,
     "areaM2": 21.09,
     "vertexIndices": [
@@ -26182,8 +26181,7 @@
       }
     ],
     "build": null,
-    "floor": null,
-    "category": "преподавательская"
+    "floor": null
   },
   {
     "key": "bl:584",

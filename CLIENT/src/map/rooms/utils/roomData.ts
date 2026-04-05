@@ -294,7 +294,7 @@ function makeRoomKey(args: {
   if (typeof args.blenderID === 'number' && Number.isFinite(args.blenderID)) {
     return `bl:${args.blenderID}`;
   }
-  const roomNo = (args.roomNo ?? '').trim();
+  const roomNo = (args.roomNo ?? '').trim().toLocaleLowerCase('ru-RU');
   const vi = args.vertexIndices && args.vertexIndices.length > 0 ? args.vertexIndices.join(',') : '';
   if (roomNo.length > 0) return vi.length > 0 ? `no:${roomNo}|v:${vi}` : `no:${roomNo}`;
   if (vi.length > 0) return `id:${args.roomID}|v:${vi}`;
