@@ -1,4 +1,5 @@
 import type { Room } from '../map/rooms/utils/Room'
+import { parseStairDirectionFlags } from '../map/rooms/utils/stairDirection'
 import type { LoadedFloorData, RouteFloorJump, RouteResult, RouteSegment, RouteTarget } from './types'
 
 function pointDistance(a: { x: number; y: number }, b: { x: number; y: number }): number {
@@ -194,14 +195,6 @@ function floorOrderValue(floorId: string): number {
   return Number.parseInt(m[1], 10)
 }
 
-function parseStairDirection(description: string | undefined): { up: boolean; down: boolean } {
-  const marker = (description ?? '').trim()
-  if (marker === '1') return { up: true, down: false }
-  if (marker === '2') return { up: false, down: true }
-  if (marker === '12') return { up: true, down: true }
-  return { up: true, down: true }
-}
-
 function isRoomClosed(room: Room | undefined): boolean {
   return room?.areClosed === true
 }
@@ -308,8 +301,8 @@ export function computeRoute(args: {
 
       const lowRoom = roomByFloorKey.get(`${lower.floorId}|${stairLow.key}`)
       const upRoom = roomByFloorKey.get(`${upper.floorId}|${nearest.key}`)
-      const lowDir = parseStairDirection(lowRoom?.description)
-      const upDir = parseStairDirection(upRoom?.description)
+      const lowDir = parseStairDirectionFlags(lowRoom?.description)
+      const upDir = parseStairDirectionFlags(upRoom?.description)
 
       const lowId = `${lower.floorId}|${stairLow.key}`
       const upId = `${upper.floorId}|${nearest.key}`

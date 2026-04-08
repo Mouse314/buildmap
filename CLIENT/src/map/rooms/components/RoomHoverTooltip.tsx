@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Room } from '../utils/Room';
+import { formatRoomDescription } from '../utils/stairDirection';
 
 function text(value: string | undefined): string {
   return (value ?? '').trim();
@@ -14,7 +15,7 @@ export function RoomHoverTooltip({
 }) {
   const category = text(room.category);
   const roomNo = text(room.roomNo);
-  const description = text(room.description);
+  const description = formatRoomDescription(room.roomID, room.description);
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = React.useState<{ left: number; top: number }>({
     left: anchor.x,

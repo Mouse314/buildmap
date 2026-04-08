@@ -3,6 +3,7 @@ import { buildRouteHints } from '../../../navigation/hints'
 import { computeRoute } from '../../../navigation/routeEngine'
 import type { LoadedFloorData, RouteEndpoint, RouteFloorJump, RouteSegment, RouteTarget } from '../../../navigation/types'
 import type { Room } from '../../../map/rooms/utils/Room'
+import { formatRoomDescription } from '../../../map/rooms/utils/stairDirection'
 import type { MapMode } from './types'
 
 export function buildRouteTargetFromRoom(room: Room, buildId: string, floorId: string): RouteTarget {
@@ -16,11 +17,12 @@ export function buildRouteTargetFromRoom(room: Room, buildId: string, floorId: s
   }
 
   const roomNo = (room.roomNo ?? '').trim()
+  const description = formatRoomDescription(room.roomID, room.description)
   return {
     buildId,
     floorId,
     roomKey: room.key,
-    label: roomNo.length > 0 ? `№ ${roomNo}` : (room.description ?? room.category ?? 'кабинет'),
+    label: roomNo.length > 0 ? `№ ${roomNo}` : (description || room.category || 'кабинет'),
   }
 }
 

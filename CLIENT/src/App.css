@@ -35,6 +35,48 @@
   --ui-menu-bg: linear-gradient(155deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08)), rgba(167, 167, 167, 0.7);
   --ui-menu-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
   --ui-menu-filter: blur(6px) saturate(118%);
+  --scrollbar-size: 10px;
+  --scrollbar-track: rgba(12, 18, 34, 0.08);
+  --scrollbar-thumb-solid: rgba(50, 84, 146, 0.5);
+  --scrollbar-thumb: rgba(50, 84, 146, 0.5);
+  --scrollbar-thumb-hover: rgba(37, 69, 126, 0.64);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-solid) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  min-height: 24px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background: var(--scrollbar-thumb);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .roomModal,
@@ -339,8 +381,8 @@
   position: absolute;
   z-index: 120;
   display: flex;
-  width: calc(100% - 100px);
-  translate: 50px 10px;
+  width: calc(100% - 30px);
+  translate: 5px 10px;
   gap: 30px;
   padding: 10px;
   align-items: center;
@@ -410,7 +452,7 @@
   gap: 8px;
   border-radius: 16px;
   border: 2px solid rgba(206, 209, 255, 0.267);
-  background: rgba(167, 167, 167, 0.72);
+  background: rgba(167, 167, 167, 0.36);
   backdrop-filter: blur(5px) saturate(115%);
   -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
@@ -477,7 +519,7 @@
 .routeHintItem {
   border-radius: 12px;
   border: 2px solid rgba(206, 209, 255, 0.267);
-  background: rgba(167, 167, 167, 0.72);
+  background: rgba(167, 167, 167, 0.36);
   backdrop-filter: blur(5px) saturate(115%);
   -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
@@ -509,7 +551,7 @@
 
 .geoAdminPanel {
   position: absolute;
-  z-index: 126;
+  z-index: 1260;
   left: 12px;
   bottom: 14px;
   width: min(96vw, 520px);
@@ -519,7 +561,7 @@
   backdrop-filter: blur(5px) saturate(115%);
   -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-  padding: 10px;
+  padding: 20px;
 }
 
 .geoAdminHeader {
@@ -529,9 +571,27 @@
   margin-bottom: 8px;
 }
 
+.geoAdminHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .geoAdminTitle {
   font-size: 0.9rem;
   font-weight: 800;
+}
+
+.geoAdminToggle {
+  height: 30px;
+  width: 30px;
+}
+
+.geoAdminBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .geoAdminMeta {
@@ -554,7 +614,7 @@
 
 .geoAdminRow {
   display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr 1.3fr;
+  grid-template-columns: 1fr 1fr max-content;
   gap: 6px;
   align-items: center;
 }
@@ -604,6 +664,9 @@
 }
 
 .geoAdminClearBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 32px;
   border-radius: 10px;
   border: 2px solid rgba(206, 209, 255, 0.32);
@@ -614,12 +677,15 @@
 }
 
 .geoAdminSaveBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 32px;
   border-radius: 10px;
   border: 2px solid rgba(134, 223, 150, 0.65);
   background: rgba(171, 244, 183, 0.45);
   color: #111;
-  font-weight: 800;
+  font-weight: 700;
   padding: 0 10px;
 }
 
@@ -651,6 +717,48 @@
 .mapModeBtnActive {
   background: rgba(255, 255, 255, 0.45);
   border-color: rgba(206, 209, 255, 0.7);
+}
+
+.gpsFab {
+  position: absolute;
+  z-index: 127;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid rgba(206, 209, 255, 0.34);
+  background: rgba(167, 167, 167, 0.66);
+  backdrop-filter: blur(6px) saturate(116%);
+  -webkit-backdrop-filter: blur(6px) saturate(116%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  color: #10243b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gpsFab:hover {
+  transition: 150ms ease-out;
+  transform: translateY(-50%) scale(1.04);
+  background: rgba(0, 126, 190, 0.8);
+}
+
+.gpsFabActive {
+  border-color: rgba(72, 188, 255, 0.75);
+  background: linear-gradient(145deg, rgba(94, 210, 255, 0.62), rgba(49, 127, 255, 0.58));
+  color: #042648;
+  box-shadow: 0 0 0 2px rgba(138, 226, 255, 0.4), 0 14px 32px rgba(29, 110, 255, 0.34);
+}
+
+.gpsFabIcon {
+  width: 31px;
+  height: 31px;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  transform: translate(-2px, 1px);
 }
 
 .mapModeRouteMeta {
@@ -732,6 +840,7 @@
   max-height: min(80vh, 760px);
   display: flex;
   flex-direction: column;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)), rgba(167, 167, 167, 0.37);
 }
 
 .officesPanelHeader {
@@ -762,7 +871,7 @@
   align-items: center;
   justify-content: center;
   width: 40px;
-  min-width: 40px;
+  /* min-width: 40px; */
   height: 40px;
   border-radius: 50%;
   border: 2px solid rgba(206, 209, 255, 0.32);
@@ -800,7 +909,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: rgba(181, 181, 181, 0.96);
+  background: rgba(181, 181, 181, 0.48);
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.2px;
@@ -808,7 +917,7 @@
 }
 
 .officesTable tr:hover td {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .officesRowInstituteStart td {
@@ -982,6 +1091,19 @@
     margin-left: 0;
   }
 
+  .gpsFab {
+    right: 10px;
+    top: auto;
+    bottom: 132px;
+    transform: none;
+    width: 50px;
+    height: 50px;
+  }
+
+  .gpsFab:hover {
+    transform: scale(1.04);
+  }
+
   .officesDirectoryFab {
     right: 10px;
     bottom: 76px;
@@ -1039,6 +1161,9 @@
 
 .sidePanelBody {
   margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items:stretch;
 }
 
 .floorButtons {
@@ -1048,6 +1173,7 @@
 }
 
 .graphicsButtons {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1072,8 +1198,22 @@
   opacity: 0.88;
 }
 
+.graphicsDivider {
+  width: 100%;
+  align-self: stretch;
+  height: 0;
+  border: 0;
+  border-top: 2px solid rgba(206, 209, 255, 0.34);
+  margin: 12px 0 2px;
+}
+
 .graphicsExtraToggles {
   margin-top: 10px;
+}
+
+.graphicsExtraToggles .graphicsButton {
+  width: 100%;
+  min-width: 0;
 }
 
 .graphicsButtonSelected {
@@ -1156,6 +1296,7 @@
 }
 
 .topSearchWrap{
+  flex: 1;
   padding: 5px;
   position: relative;
   display: flex;
@@ -1175,6 +1316,7 @@
   left: 0;
   right: 0;
   z-index: 80;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04)), rgba(167, 167, 167, 0.35);
   padding: 8px;
   max-height: 0;
   opacity: 0;
@@ -1336,7 +1478,7 @@
   align-items: center;
   justify-content: center;
   width: auto;
-  min-width: 200px;
+  min-width: 100px;
   height: 40px;
   padding: 10px;
   border-radius: 50vh;
@@ -1361,6 +1503,17 @@
   min-width: 186px;
 }
 
+.locationButtonActive {
+  border-color: rgba(18, 125, 255, 0.55);
+  background: linear-gradient(135deg, rgba(82, 195, 255, 0.5), rgba(38, 118, 252, 0.48));
+  color: #042040;
+  box-shadow: 0 0 0 1px rgba(138, 226, 255, 0.45), 0 14px 34px rgba(29, 110, 255, 0.3);
+}
+
+.locationButtonActive:hover {
+  background: linear-gradient(135deg, rgba(98, 204, 255, 0.58), rgba(54, 131, 255, 0.55));
+}
+
 .locationStatusText {
   border-radius: 11px;
   border: 2px solid rgba(206, 209, 255, 0.267);
@@ -1372,6 +1525,7 @@
 }
 
 .topThemeButton {
+  min-width: 150px;
   width: auto;
   white-space: nowrap;
 }
@@ -1728,6 +1882,10 @@
   --ui-menu-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)), rgba(18, 18, 18, 0.78);
   --ui-menu-shadow: 0 10px 42px rgba(41, 35, 78, 0.48);
   --ui-menu-filter: blur(6px) saturate(112%);
+  --scrollbar-track: rgba(243, 244, 246, 0.09);
+  --scrollbar-thumb-solid: rgba(144, 163, 201, 0.55);
+  --scrollbar-thumb: rgba(144, 163, 201, 0.55);
+  --scrollbar-thumb-hover: rgba(176, 195, 236, 0.72);
 }
 
 .appRoot[data-theme='dark'] .topSelect,
@@ -1744,6 +1902,10 @@
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(18, 18, 18, 0.72);
   box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
+}
+
+.appRoot[data-theme='dark'] .smartSearchPanel {
+  background: rgba(18, 18, 18, 0.36);
 }
 
 .appRoot[data-theme='dark'] .routeInfoBlock {
@@ -1845,7 +2007,7 @@
 .appRoot[data-theme='dark'] .officesCloseButton {
   color: #f3f4f6;
   border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(18, 18, 18, 0.8);
+  background: rgba(18, 18, 18, 0.4);
 }
 
 .appRoot[data-theme='dark'] .officesTable tr:hover td {

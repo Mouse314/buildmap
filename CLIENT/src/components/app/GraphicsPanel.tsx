@@ -60,6 +60,7 @@ export function GraphicsPanel({
             <span className="graphicsWarningMark" aria-hidden>⚠️</span>
             Возможно снижение плавности
           </div>
+          <hr className="graphicsDivider" />
           <div className="graphicsExtraToggles">
             <button
               type="button"

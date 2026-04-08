@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { RoomPolygon } from '../utils/roomData';
+import { formatRoomDescription } from '../utils/stairDirection';
 
 type RoomListEntry = {
   roomID: number;
@@ -33,7 +34,7 @@ export function RoomList({
     for (const p of polygons) {
       if (byId.has(p.roomID)) continue;
       const roomNo = normalizeText(p.roomNo);
-      const description = normalizeText(p.description);
+      const description = formatRoomDescription(p.roomID, p.description);
       byId.set(p.roomID, { roomID: p.roomID, roomNo, description });
     }
 

@@ -31,6 +31,11 @@ function encodePathSegment(value: string): string {
   return encodeURIComponent(value.replace(/^\/+/, '').replace(/\/+$/, '').trim());
 }
 
+function isServerApiPath(path: string): boolean {
+  const value = path.trim().toLowerCase();
+  return value.startsWith('/api/') || value.includes('/api/');
+}
+
 export type RoomDataManifest = {
   builds: Array<{
     id: string;
@@ -39,10 +44,12 @@ export type RoomDataManifest = {
 };
 
 export async function loadRoomDataManifest(
-  path = plansApiUrl('/api/plans/manifest'),
+  path = publicAssetUrl('room_data_manifest.json'),
 ): Promise<RoomDataManifest | null> {
   const fallbackPath = publicAssetUrl('room_data_manifest.json');
-  const tryPaths = path === fallbackPath ? [path] : [path, fallbackPath];
+  const tryPaths = [path, fallbackPath].filter(
+    (value, index, array) => !isServerApiPath(value) && array.indexOf(value) === index,
+  );
 
   for (const tryPath of tryPaths) {
     try {
@@ -77,8 +84,8 @@ export function roomDataPaths(buildId: string, floorId: string): { jsonPath: str
   const safeBuildId = encodePathSegment(buildId);
   const safeFloorId = encodePathSegment(floorId);
   return {
-    jsonPath: plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/rooms`),
-    csvPath: plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/rooms.csv`),
+    jsonPath: publicAssetUrl(`${safeBuildId}/${safeFloorId}/room_data.json`),
+    csvPath: publicAssetUrl(`${safeBuildId}/${safeFloorId}/room_data.csv`),
   };
 }
 
@@ -118,7 +125,7 @@ export type RoomGraph = {
 export function roomGraphPath(buildId: string, floorId: string): string {
   const safeBuildId = encodePathSegment(buildId);
   const safeFloorId = encodePathSegment(floorId);
-  return plansApiUrl(`/api/plans/${safeBuildId}/${safeFloorId}/graph`);
+  return publicAssetUrl(`${safeBuildId}/${safeFloorId}/room_graph.json`);
 }
 
 export function roomPublicGraphPath(buildId: string, floorId: string): string {
@@ -150,6 +157,7 @@ export async function loadRoomGraphFromPublic(
   const fallbackGraphPath = opts.path ? null : fromBuildFloorPublic ?? publicAssetUrl('room_graph.json');
 
   const tryLoadGraph = async (path: string): Promise<RoomGraph | null> => {
+    if (isServerApiPath(path)) return null;
     try {
       const response = await fetch(path);
       if (!response.ok) return null;
@@ -278,10 +286,29 @@ function splitSemicolon(line: string): string[] {
   return line.split(';').map((s) => s.trim());
 }
 
+const CATEGORY_KAFEDRA = (() => {
+  const value = (ROOM_CATEGORIES[14] ?? '').trim();
+  return value.length > 0 ? value : 'Кафедра';
+})();
+
+const CATEGORY_ADMIN = (() => {
+  const value = (ROOM_CATEGORIES[15] ?? '').trim();
+  return value.length > 0 ? value : 'Администрация';
+})();
+
+function normalizeRoomCategory(value: string | undefined): string | undefined {
+  const trimmed = (value ?? '').trim();
+  if (trimmed.length === 0) return undefined;
+
+  const folded = trimmed.toLocaleLowerCase('ru-RU');
+  if (folded.includes('преподавательск') || folded.includes('кафедр')) return CATEGORY_KAFEDRA;
+  if (folded.includes('администрац')) return CATEGORY_ADMIN;
+
+  return trimmed;
+}
+
 function getCategoryByRoomId(roomID: number): string | undefined {
-  const c = ROOM_CATEGORIES[roomID];
-  const t = (c ?? '').trim();
-  return t.length > 0 ? t : undefined;
+  return normalizeRoomCategory(ROOM_CATEGORIES[roomID]);
 }
 
 function makeRoomKey(args: {
@@ -434,8 +461,8 @@ export async function loadRoomsFromPublicJson(path = publicAssetUrl('room_data.j
     const roomNo = typeof anyItem.roomNo === 'string' ? anyItem.roomNo : undefined;
     const description = typeof anyItem.description === 'string' ? anyItem.description : undefined;
     const areClosed = parseUnknownBool(anyItem.areClosed);
-    const categoryFromJson = typeof anyItem.category === 'string' ? anyItem.category.trim() : '';
-    const category = categoryFromJson.length > 0 ? categoryFromJson : getCategoryByRoomId(roomID);
+    const categoryFromJson = typeof anyItem.category === 'string' ? anyItem.category : undefined;
+    const category = normalizeRoomCategory(categoryFromJson) ?? getCategoryByRoomId(roomID);
 
     const areaM2 = typeof anyItem.areaM2 === 'number' && Number.isFinite(anyItem.areaM2) ? anyItem.areaM2 : undefined;
     const vertexIndices = Array.isArray(anyItem.vertexIndices)
@@ -486,8 +513,12 @@ export async function loadRoomsFromPublic(
   const fallbackJsonPath = opts.jsonPath ? null : fromBuildFloorPublic?.jsonPath ?? publicAssetUrl('room_data.json');
   const fallbackCsvPath = opts.csvPath ? null : fromBuildFloorPublic?.csvPath ?? publicAssetUrl('room_data.csv');
 
-  const jsonTryPaths = [jsonPath, fallbackJsonPath].filter((v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i);
-  const csvTryPaths = [csvPath, fallbackCsvPath].filter((v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i);
+  const jsonTryPaths = [jsonPath, fallbackJsonPath].filter(
+    (v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i && !isServerApiPath(v),
+  );
+  const csvTryPaths = [csvPath, fallbackCsvPath].filter(
+    (v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i && !isServerApiPath(v),
+  );
 
   let lastError: unknown = null;
 

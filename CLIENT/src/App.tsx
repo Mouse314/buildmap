@@ -8,6 +8,7 @@ import { GraphicsPanel } from './components/app/GraphicsPanel'
 import { OfficesDirectory } from './components/app/OfficesDirectory'
 import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
+import gpsButtonIcon from '../assets/icon/free-icon-gps-navigation-4398552.png'
 
 function App() {
   const {
@@ -39,6 +40,7 @@ function App() {
     officesHierarchy,
     isAdminMode,
     geoFileStatusText,
+    isLocationTracking,
     isLocating,
     locationStatusText,
     modalAnchor,
@@ -128,7 +130,7 @@ function App() {
         onToggleTheme={onToggleTheme}
         isAdminMode={isAdminMode}
         onToggleAdminMode={toggleAdminMode}
-        isLocating={isLocating}
+        isLocationTracking={isLocationTracking}
         onLocateUser={locateUserOnMap}
         locationStatusText={locationStatusText}
       />
@@ -243,10 +245,10 @@ function App() {
 
           <div className="geoAdminActions">
             <button type="button" className="geoAdminClearBtn" onClick={clearSelectedBuildGeoInputs}>
-              Очистить координаты
+              Очистить 
             </button>
             <button type="button" className="geoAdminSaveBtn" onClick={saveSelectedBuildGeoToFile}>
-              Сохранить в файл корпуса
+              Сохранить
             </button>
             <div className="geoAdminHint">
               Для позиционирования заполните минимум 3 угла, рекомендуется все 4.
@@ -279,6 +281,18 @@ function App() {
           Маршруты
         </button>
       </div>
+
+      <button
+        type="button"
+        className={isLocationTracking ? 'gpsFab gpsFabActive' : 'gpsFab'}
+        onClick={locateUserOnMap}
+        aria-label={isLocationTracking ? 'Выключить позиционирование' : 'Включить позиционирование'}
+        title={isLocationTracking
+          ? (isLocating ? 'GPS: идёт уточнение местоположения' : 'Выключить GPS')
+          : 'Включить GPS'}
+      >
+        <img className="gpsFabIcon" src={gpsButtonIcon} alt="" aria-hidden="true" />
+      </button>
 
       {mapMode === 'routes' ? (
         <div className="routeBottomCluster">

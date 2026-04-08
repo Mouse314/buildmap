@@ -777,7 +777,13 @@ export function FloorPlanCanvas({
         {geoAnchorMarkers && geoAnchorMarkers.length > 0 ? (
           <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.7, 0]}>
             {geoAnchorMarkers.map((marker) => (
-              <Html key={`geo-anchor-${marker.id}`} position={[marker.x, marker.y, 0]} sprite center>
+              <Html
+                key={`geo-anchor-${marker.id}`}
+                position={[marker.x, marker.y, 0]}
+                sprite
+                center
+                zIndexRange={[40, 32]}
+              >
                 <div className={marker.isFilled ? 'geoAnchorMapMarker geoAnchorMapMarkerReady' : 'geoAnchorMapMarker'}>
                   <span className="geoAnchorMapDot" aria-hidden />
                   <span className="geoAnchorMapLabel">{marker.label}</span>

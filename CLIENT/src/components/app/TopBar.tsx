@@ -47,7 +47,7 @@ type TopBarProps = {
     isAdminMode: boolean;
     onToggleAdminMode: () => void;
 
-    isLocating: boolean;
+    isLocationTracking: boolean;
     onLocateUser: () => void;
     locationStatusText: string | null;
 };
@@ -77,7 +77,7 @@ export function TopBar({
     onToggleTheme,
     isAdminMode,
     onToggleAdminMode,
-    isLocating,
+    isLocationTracking,
     onLocateUser,
     locationStatusText,
 }: TopBarProps) {
@@ -293,16 +293,6 @@ export function TopBar({
             </button>
 
                 <button
-                    className="topButton topDesktopOnly locationButton"
-                    type="button"
-                    onClick={onLocateUser}
-                    title={locationStatusText ?? 'Показать текущее местоположение на плане'}
-                    disabled={isLocating}
-                >
-                    {isLocating ? 'Определяем…' : 'Моё местоположение'}
-                </button>
-
-                <button
                     className={isAdminMode ? 'topButton topDesktopOnly adminModeButton adminModeButtonActive' : 'topButton topDesktopOnly adminModeButton'}
                     type="button"
                     onClick={onToggleAdminMode}
@@ -409,12 +399,14 @@ export function TopBar({
 
                             <div className="mobileControlsRow">
                                 <button
-                                    className="topButton locationButton"
+                                    className={isLocationTracking
+                                        ? 'topButton locationButton locationButtonActive'
+                                        : 'topButton locationButton'}
                                     type="button"
                                     onClick={onLocateUser}
-                                    disabled={isLocating}
+                                    aria-pressed={isLocationTracking}
                                 >
-                                    {isLocating ? 'Определяем…' : 'Моё местоположение'}
+                                    {isLocationTracking ? 'GPS: ВКЛ' : 'Моё местоположение'}
                                 </button>
                             </div>
 

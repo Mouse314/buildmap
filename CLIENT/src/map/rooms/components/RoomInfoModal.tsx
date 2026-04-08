@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Room } from '../utils/Room';
+import { formatRoomDescription } from '../utils/stairDirection';
 
 function text(value: string | undefined): string {
   return (value ?? '').trim();
@@ -86,7 +87,7 @@ export function RoomInfoModal({
 }) {
   const roomNo = text(room.roomNo);
   const category = text(room.category);
-  const description = text(room.description);
+  const description = formatRoomDescription(room.roomID, room.description);
   const areaText = React.useMemo(() => formatAreaM2(room.areaM2), [room.areaM2]);
 
   const modalRef = React.useRef<HTMLDivElement | null>(null);

@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { getRoomFillColor } from '../../map/rooms/utils/roomPalette'
+import { formatRoomDescription } from '../../map/rooms/utils/stairDirection'
 import { type GraphicsPresetId } from '../../map/graphicsPresets'
 import { buildLabel, floorLabel, isInteractiveRoom } from '../utils/roomLabels'
 import { useSmartSearch } from '../search/useSmartSearch'
@@ -97,6 +98,7 @@ export function useBuildMapApp() {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
   const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('min')
   const [graphicsOpen, setGraphicsOpen] = React.useState(true)
+  const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
   const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
 
   const [selectedCategory, setSelectedCategory] = React.useState<string>('__all__')
@@ -105,8 +107,12 @@ export function useBuildMapApp() {
   const [pendingSearchJump, setPendingSearchJump] = React.useState<SearchIndexedRoom | null>(null)
 
   const [geoFileStatusText, setGeoFileStatusText] = React.useState<string | null>(null)
+  const [isLocationTracking, setIsLocationTracking] = React.useState(false)
   const [isLocating, setIsLocating] = React.useState(false)
   const [locationStatusText, setLocationStatusText] = React.useState<string | null>(null)
+  const locationTrackingRef = React.useRef(false)
+  const locationPollTimerRef = React.useRef<number | null>(null)
+  const locationRequestInFlightRef = React.useRef(false)
 
   const [userLocationOverlay, setUserLocationOverlay] = React.useState<{
     buildId: string
@@ -226,7 +232,7 @@ export function useBuildMapApp() {
       if (!isInteractiveRoom(r)) continue
       const category = caseFold(r.category)
       const roomNo = (r.roomNo ?? '').trim()
-      const description = (r.description ?? '').trim()
+      const description = formatRoomDescription(r.roomID, r.description)
 
       if (selectedCategoryKey.length > 0 && category !== selectedCategoryKey) continue
 
@@ -317,8 +323,19 @@ export function useBuildMapApp() {
     setTheme((current) => (current === 'light' ? 'dark' : 'light'))
   }, [])
 
-  const locateUserOnMap = React.useCallback(() => {
+  const clearLocationPollingTimer = React.useCallback(() => {
+    if (locationPollTimerRef.current != null) {
+      window.clearInterval(locationPollTimerRef.current)
+      locationPollTimerRef.current = null
+    }
+  }, [])
+
+  const requestUserLocation = React.useCallback(() => {
+    if (!locationTrackingRef.current) return
+
     if (!selectedGeoCalibration) {
+      setUserLocationOverlay(null)
+      setIsLocating(false)
       setLocationStatusText('Заполните координаты 4 углов для этого корпуса в админ-режиме')
       return
     }
@@ -327,19 +344,29 @@ export function useBuildMapApp() {
       const mapped = mapGeoPointToOverlay(selectedGeoCalibration, LOCATION_SPOOF, selectedBuild)
       setUserLocationOverlay(mapped.overlay)
       setLocationStatusText(`Тестовые координаты: ${mapped.statusText}`)
+      setIsLocating(false)
       return
     }
 
     if (!navigator.geolocation) {
+      setUserLocationOverlay(null)
+      setIsLocating(false)
       setLocationStatusText('Геолокация не поддерживается в этом браузере')
       return
     }
 
+    if (locationRequestInFlightRef.current) return
+
+    locationRequestInFlightRef.current = true
+
     setIsLocating(true)
-    setLocationStatusText('Запрашиваем доступ к геопозиции…')
+    setLocationStatusText('Уточняем текущее местоположение…')
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        locationRequestInFlightRef.current = false
+        if (!locationTrackingRef.current) return
+
         const mapped = mapGeoPointToOverlay(
           selectedGeoCalibration,
           { lat: position.coords.latitude, lon: position.coords.longitude },
@@ -351,6 +378,10 @@ export function useBuildMapApp() {
         setIsLocating(false)
       },
       (geoError) => {
+        locationRequestInFlightRef.current = false
+        if (!locationTrackingRef.current) return
+
+        setUserLocationOverlay(null)
         if (geoError.code === geoError.PERMISSION_DENIED) {
           setLocationStatusText('Доступ к геолокации запрещён пользователем')
         } else if (geoError.code === geoError.TIMEOUT) {
@@ -368,8 +399,46 @@ export function useBuildMapApp() {
     )
   }, [selectedBuild, selectedGeoCalibration])
 
+  React.useEffect(() => {
+    if (!isLocationTracking) {
+      clearLocationPollingTimer()
+      locationRequestInFlightRef.current = false
+      setIsLocating(false)
+      return
+    }
+
+    requestUserLocation()
+    locationPollTimerRef.current = window.setInterval(() => {
+      requestUserLocation()
+    }, 2500)
+
+    return () => {
+      clearLocationPollingTimer()
+    }
+  }, [clearLocationPollingTimer, isLocationTracking, requestUserLocation])
+
+  const locateUserOnMap = React.useCallback(() => {
+    if (isLocationTracking) {
+      locationTrackingRef.current = false
+      setIsLocationTracking(false)
+      locationRequestInFlightRef.current = false
+      setIsLocating(false)
+      setUserLocationOverlay(null)
+      setLocationStatusText(null)
+      return
+    }
+
+    locationTrackingRef.current = true
+    setIsLocationTracking(true)
+    setLocationStatusText('Определяем текущее местоположение…')
+  }, [isLocationTracking])
+
   const onToggleGraphicsPanel = React.useCallback(() => {
     setGraphicsOpen((current) => !current)
+  }, [])
+
+  const onToggleGeoAdminPanel = React.useCallback(() => {
+    setGeoAdminOpen((current) => !current)
   }, [])
 
   const onToggleGraphOverlay = React.useCallback(() => {
@@ -536,6 +605,7 @@ export function useBuildMapApp() {
     theme,
     graphicsPreset,
     graphicsOpen,
+    geoAdminOpen,
     selectedBuild,
     selectedFloor,
     titleAnchor,
@@ -555,6 +625,7 @@ export function useBuildMapApp() {
     officesHierarchy,
     isAdminMode,
     geoFileStatusText,
+    isLocationTracking,
     isLocating,
     locationStatusText,
     modalAnchor,
@@ -592,6 +663,7 @@ export function useBuildMapApp() {
     toggleAdminMode,
     locateUserOnMap,
     onToggleGraphicsPanel,
+    onToggleGeoAdminPanel,
     onToggleGraphOverlay,
     onRouteFloorJump,
     onSelectRoomKey,

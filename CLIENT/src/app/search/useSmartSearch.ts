@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { loadRoomsFromPublic, type RoomDataManifest } from '../../map/rooms/utils/roomData';
 import type { Room } from '../../map/rooms/utils/Room';
+import { formatRoomDescription } from '../../map/rooms/utils/stairDirection';
 import type { SearchIndexedRoom, SmartSearchData } from './types';
 
 type UseSmartSearchArgs = {
@@ -44,7 +45,7 @@ export function useSmartSearch({
                 buildId: build.id,
                 floorId,
                 roomNo: (room.roomNo ?? '').trim(),
-                description: (room.description ?? '').trim(),
+                description: formatRoomDescription(room.roomID, room.description),
                 category: (room.category ?? '').trim(),
               });
             }
