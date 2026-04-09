@@ -4,6 +4,7 @@ import {
   publicAssetUrl,
   roomsToPolygons,
 } from '../../../map/rooms/utils/roomData'
+import { getCategoryByRoomId } from '../../../map/rooms/utils/roomCategories'
 import {
   buildGeoCalibration,
   formatDistanceHuman,
@@ -37,10 +38,16 @@ function normalizeText(value: string | undefined): string | undefined {
 }
 
 export function applyRoomChangesLocal(room: Room, changes: RoomEditPayload): Room {
+  const nextRoomId = typeof changes.roomID === 'number' && Number.isFinite(changes.roomID)
+    ? Math.trunc(changes.roomID)
+    : room.roomID
+  const nextCategory = normalizeText(changes.category) ?? getCategoryByRoomId(nextRoomId) ?? room.category
+
   return {
     ...room,
+    roomID: nextRoomId,
     roomNo: normalizeText(changes.roomNo),
-    category: normalizeText(changes.category),
+    category: nextCategory,
     description: normalizeText(changes.description),
     areClosed: changes.areClosed,
     areaM2: typeof changes.areaM2 === 'number' && Number.isFinite(changes.areaM2) ? changes.areaM2 : undefined,

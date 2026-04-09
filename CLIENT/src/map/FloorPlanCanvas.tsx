@@ -1,5 +1,5 @@
 ﻿import { Canvas, useFrame } from '@react-three/fiber';
-import { Html, Line, OrbitControls, PerformanceMonitor, PerspectiveCamera, Stats } from '@react-three/drei';
+import { Html, Line, OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
 import * as React from 'react';
 import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -13,7 +13,7 @@ import { FitView } from './canvas/FitView';
 import { SmoothWheelZoom } from './canvas/SmoothWheelZoom';
 import { AutoFitToPolygons } from './canvas/AutoFitToPolygons';
 import { PanBounds, type PanBoundsRect } from './canvas/PanBounds';
-import { getGraphicsPreset, type GraphicsPresetId } from './graphicsPresets';
+import { getGraphicsPreset, type GraphicsPresetConfig, type GraphicsPresetId } from './graphicsPresets';
 import { ShadowConfigurator } from './floorplan/components/ShadowConfigurator';
 import { SceneEffects } from './floorplan/components/SceneEffects';
 import { SceneLights } from './floorplan/components/SceneLights';
@@ -59,7 +59,10 @@ export function FloorPlanCanvas({
   titleText,
   titleAnchor = null,
   theme = 'light',
+  isAdminMode = false,
   graphicsPreset = 'medium',
+  graphicsPresetConfig = null,
+  graphicsPresetRefreshToken = 0,
   searchText = '',
   searchResultJumpTrigger = 0,
   matchedKeys = null,
@@ -79,7 +82,10 @@ export function FloorPlanCanvas({
   titleText?: string;
   titleAnchor?: TitleAnchor | null;
   theme?: 'light' | 'dark';
+  isAdminMode?: boolean;
   graphicsPreset?: GraphicsPresetId;
+  graphicsPresetConfig?: GraphicsPresetConfig | null;
+  graphicsPresetRefreshToken?: number;
   searchText?: string;
   searchResultJumpTrigger?: number;
   matchedKeys?: Set<string> | null;
@@ -107,7 +113,7 @@ export function FloorPlanCanvas({
   const [hoveredPolyKey, setHoveredPolyKey] = React.useState<string | null>(null);
   const controlsRef = React.useRef<OrbitControlsImpl | null>(null);
 
-  const preset = React.useMemo(() => getGraphicsPreset(graphicsPreset), [graphicsPreset]);
+  const preset = graphicsPresetConfig ?? getGraphicsPreset(graphicsPreset);
 
   const searchToken = React.useMemo(() => {
     return (searchText ?? '').trim();
@@ -183,34 +189,14 @@ export function FloorPlanCanvas({
     return window.matchMedia?.('(pointer: coarse)').matches ?? false;
   }, []);
 
-  const initialDpr = React.useMemo(() => {
+  const dpr = React.useMemo(() => {
     if (preset.dpr.mode === 'fixed') return Math.min(deviceDpr, preset.dpr.value);
     return Math.min(deviceDpr, preset.dpr.baseMax);
   }, [deviceDpr, preset.dpr]);
 
-  const [dpr, setDpr] = React.useState<number>(initialDpr);
-  const [effectsEnabled, setEffectsEnabled] = React.useState<boolean>(preset.postFx.enabled);
-  const dprRef = React.useRef<number>(initialDpr);
-  const effectsEnabledRef = React.useRef<boolean>(preset.postFx.enabled);
-  const dragQualitySnapshotRef = React.useRef<{ dpr: number; effects: boolean } | null>(null);
-  const dragQualityRestoreTimeoutRef = React.useRef<number | null>(null);
+  const effectsEnabled = preset.postFx.enabled;
 
   const enableNightLampShadows = preset.shadowsEnabled && theme === 'dark' && graphicsPreset === 'max';
-  const allowAdaptiveQuality = preset.dpr.mode === 'adaptive';
-  const dragBoostOnMinPreset = graphicsPreset === 'min';
-
-  React.useEffect(() => {
-    setDpr(initialDpr);
-    setEffectsEnabled(preset.postFx.enabled);
-  }, [initialDpr, preset.postFx.enabled]);
-
-  React.useEffect(() => {
-    dprRef.current = dpr;
-  }, [dpr]);
-
-  React.useEffect(() => {
-    effectsEnabledRef.current = effectsEnabled;
-  }, [effectsEnabled]);
 
   const colors = React.useMemo(() => getSceneColors(theme, graphicsPreset), [graphicsPreset, theme]);
 
@@ -228,51 +214,6 @@ export function FloorPlanCanvas({
     onHoverRoom?.(null);
   }, [isDragging, onHoverRoom]);
 
-  React.useEffect(() => {
-    if (!dragBoostOnMinPreset) {
-      if (dragQualityRestoreTimeoutRef.current != null) {
-        window.clearTimeout(dragQualityRestoreTimeoutRef.current);
-        dragQualityRestoreTimeoutRef.current = null;
-      }
-      dragQualitySnapshotRef.current = null;
-      return;
-    }
-
-    if (isDragging) {
-      if (dragQualityRestoreTimeoutRef.current != null) {
-        window.clearTimeout(dragQualityRestoreTimeoutRef.current);
-        dragQualityRestoreTimeoutRef.current = null;
-      }
-
-      dragQualitySnapshotRef.current = {
-        dpr: dprRef.current,
-        effects: effectsEnabledRef.current,
-      };
-
-      setEffectsEnabled(false);
-      setDpr((prev) => Math.min(prev, 0.85));
-      return;
-    }
-
-    if (!dragQualitySnapshotRef.current) return;
-    dragQualityRestoreTimeoutRef.current = window.setTimeout(() => {
-      const snapshot = dragQualitySnapshotRef.current;
-      if (!snapshot) return;
-      setDpr(snapshot.dpr);
-      setEffectsEnabled(snapshot.effects);
-      dragQualitySnapshotRef.current = null;
-      dragQualityRestoreTimeoutRef.current = null;
-    }, 140);
-  }, [dragBoostOnMinPreset, isDragging]);
-
-  React.useEffect(() => {
-    return () => {
-      if (dragQualityRestoreTimeoutRef.current != null) {
-        window.clearTimeout(dragQualityRestoreTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const hoveredPolyKeyRef = React.useRef<string | null>(null);
   React.useEffect(() => {
     hoveredPolyKeyRef.current = hoveredPolyKey;
@@ -280,8 +221,12 @@ export function FloorPlanCanvas({
 
   const wallExtrudeEnabled = graphicsPreset === 'medium' || graphicsPreset === 'max';
   const renderItems = React.useMemo(
-    () => buildRenderItems(polygons, rooms, { wallExtrudeEnabled }),
-    [polygons, rooms, wallExtrudeEnabled],
+    () => buildRenderItems(polygons, rooms, {
+      wallExtrudeEnabled,
+      allowSmallInteractive: isAdminMode,
+      allowAllInteractive: isAdminMode,
+    }),
+    [isAdminMode, polygons, rooms, wallExtrudeEnabled],
   );
 
   const roomKeysSet = React.useMemo(() => {
@@ -464,21 +409,6 @@ export function FloorPlanCanvas({
       <ShadowConfigurator enabled={enableNightLampShadows} />
       <RouteShaderTicker material={routeShaderMaterial} />
 
-      {allowAdaptiveQuality && (
-        <PerformanceMonitor
-          onDecline={() => {
-            if (preset.dpr.mode !== 'adaptive') return;
-            setDpr(Math.min(deviceDpr, preset.dpr.declineTo));
-            setEffectsEnabled(false);
-          }}
-          onIncline={() => {
-            if (preset.dpr.mode !== 'adaptive') return;
-            setDpr(Math.min(deviceDpr, preset.dpr.baseMax));
-            setEffectsEnabled(preset.postFx.enabled);
-          }}
-        />
-      )}
-
       <color attach="background" args={[colors.background]} />
       <CursorManager hovered={Boolean(hoveredItem)} dragging={isDragging} />
       <DragDetector dragRef={dragRef} setIsDragging={setIsDragging} />
@@ -491,7 +421,12 @@ export function FloorPlanCanvas({
         dirIntensity={colors.dirIntensity}
       />
 
-      <SceneEffects enabled={effectsEnabled} preset={preset} graphicsPreset={graphicsPreset} />
+      <SceneEffects
+        key={`scene-effects-${graphicsPreset}-${graphicsPresetRefreshToken}`}
+        enabled={effectsEnabled}
+        preset={preset}
+        graphicsPreset={graphicsPreset}
+      />
 
       <FitView polygons={polygons} controlsRef={controlsRef} />
 
@@ -549,7 +484,6 @@ export function FloorPlanCanvas({
             : null
         }
         glowOpacity={0.38}
-        outlineOpacity={0.7}
         glowBoost={9.0}
         renderOrder={7}
       />
@@ -565,7 +499,6 @@ export function FloorPlanCanvas({
             : null
         }
         glowOpacity={0.32}
-        outlineOpacity={0.65}
         glowBoost={8.0}
         renderOrder={9}
       />

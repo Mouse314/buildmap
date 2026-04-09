@@ -98,6 +98,29 @@ export function roomPublicDataPaths(buildId: string, floorId: string): { jsonPat
   };
 }
 
+export type RoomOverridePatch = {
+  roomID?: number | null;
+  roomNo?: string | null;
+  category?: string | null;
+  description?: string | null;
+  areClosed?: boolean | null;
+  areaM2?: number | null;
+  build?: string | null;
+  floor?: string | null;
+};
+
+type RoomOverridesByFloor = Record<string, Record<string, RoomOverridePatch>>;
+
+export function roomOverridesPath(buildId: string): string {
+  const safeBuildId = encodePathSegment(buildId);
+  return publicAssetUrl(`${safeBuildId}/room_overrides.json`);
+}
+
+export function roomPublicOverridesPath(buildId: string): string {
+  const safeBuildId = encodePathSegment(buildId);
+  return publicAssetUrl(`${safeBuildId}/room_overrides.json`);
+}
+
 export type RoomGraphNode = {
   key: string;
   roomID: number | null;
@@ -280,6 +303,167 @@ function parseUnknownBool(value: unknown): boolean | undefined {
   if (typeof value === 'string') return parseBoolLoose(value);
   if (typeof value === 'number' && Number.isFinite(value)) return value !== 0;
   return undefined;
+}
+
+function normalizeOptionalText(value: string | null | undefined): string | undefined {
+  if (value == null) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function parseRoomOverridePatch(raw: unknown): RoomOverridePatch {
+  if (!raw || typeof raw !== 'object') return {};
+  const anyRaw = raw as Record<string, unknown>;
+  const patch: RoomOverridePatch = {};
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'roomID')) {
+    const value = anyRaw.roomID;
+    if (value === null || (typeof value === 'number' && Number.isFinite(value))) patch.roomID = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'roomNo')) {
+    const value = anyRaw.roomNo;
+    if (value === null || typeof value === 'string') patch.roomNo = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'category')) {
+    const value = anyRaw.category;
+    if (value === null || typeof value === 'string') patch.category = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'description')) {
+    const value = anyRaw.description;
+    if (value === null || typeof value === 'string') patch.description = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'areClosed')) {
+    const value = anyRaw.areClosed;
+    if (value === null || typeof value === 'boolean') patch.areClosed = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'areaM2')) {
+    const value = anyRaw.areaM2;
+    if (value === null || (typeof value === 'number' && Number.isFinite(value))) patch.areaM2 = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'build')) {
+    const value = anyRaw.build;
+    if (value === null || typeof value === 'string') patch.build = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(anyRaw, 'floor')) {
+    const value = anyRaw.floor;
+    if (value === null || typeof value === 'string') patch.floor = value;
+  }
+
+  return patch;
+}
+
+function parseRoomOverridesByFloor(raw: unknown): RoomOverridesByFloor {
+  if (!raw || typeof raw !== 'object') return {};
+  const anyRaw = raw as Record<string, unknown>;
+  const floorsRaw = anyRaw.floors;
+  if (!floorsRaw || typeof floorsRaw !== 'object') return {};
+
+  const result: RoomOverridesByFloor = {};
+  const anyFloors = floorsRaw as Record<string, unknown>;
+
+  for (const [floorId, roomMapRaw] of Object.entries(anyFloors)) {
+    if (!roomMapRaw || typeof roomMapRaw !== 'object') continue;
+
+    const roomMap = roomMapRaw as Record<string, unknown>;
+    const parsedRoomMap: Record<string, RoomOverridePatch> = {};
+
+    for (const [roomKey, patchRaw] of Object.entries(roomMap)) {
+      const normalizedRoomKey = roomKey.trim();
+      if (normalizedRoomKey.length === 0) continue;
+      parsedRoomMap[normalizedRoomKey] = parseRoomOverridePatch(patchRaw);
+    }
+
+    if (Object.keys(parsedRoomMap).length > 0) {
+      result[floorId] = parsedRoomMap;
+    }
+  }
+
+  return result;
+}
+
+async function loadRoomOverridesFromPublic(buildId: string): Promise<RoomOverridesByFloor> {
+  const primaryPath = roomOverridesPath(buildId);
+  const fallbackPath = roomPublicOverridesPath(buildId);
+  const tryPaths = [primaryPath, fallbackPath].filter(
+    (v, i, arr): v is string => typeof v === 'string' && arr.indexOf(v) === i && !isServerApiPath(v),
+  );
+
+  for (const tryPath of tryPaths) {
+    try {
+      const response = await fetch(tryPath);
+      if (!response.ok) continue;
+      const data: unknown = await response.json();
+      return parseRoomOverridesByFloor(data);
+    } catch {
+      // Try the next path variant.
+    }
+  }
+
+  return {};
+}
+
+function applyRoomOverridePatch(room: Room, patch: RoomOverridePatch): Room {
+  const next: Room = { ...room };
+  const hasRoomIdOverride = Object.prototype.hasOwnProperty.call(patch, 'roomID');
+  const hasCategoryOverride = Object.prototype.hasOwnProperty.call(patch, 'category');
+
+  if (hasRoomIdOverride) {
+    if (typeof patch.roomID === 'number' && Number.isFinite(patch.roomID)) {
+      next.roomID = Math.trunc(patch.roomID);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'roomNo')) {
+    next.roomNo = normalizeOptionalText(patch.roomNo);
+  }
+
+  if (hasCategoryOverride) {
+    const category = normalizeOptionalText(patch.category);
+    next.category = normalizeRoomCategory(category) ?? category;
+  } else if (hasRoomIdOverride) {
+    next.category = getCategoryByRoomId(next.roomID);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'description')) {
+    next.description = normalizeOptionalText(patch.description);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'areClosed')) {
+    next.areClosed = typeof patch.areClosed === 'boolean' ? patch.areClosed : undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'areaM2')) {
+    next.areaM2 =
+      typeof patch.areaM2 === 'number' && Number.isFinite(patch.areaM2) ? patch.areaM2 : undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'build')) {
+    const build = normalizeOptionalText(patch.build);
+    next.build = build ?? null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'floor')) {
+    const floor = normalizeOptionalText(patch.floor);
+    next.floor = floor ?? null;
+  }
+
+  return next;
+}
+
+function applyRoomOverrides(rooms: Room[], roomOverrides: Record<string, RoomOverridePatch>): Room[] {
+  if (Object.keys(roomOverrides).length === 0) return rooms;
+  return rooms.map((room) => {
+    const patch = roomOverrides[room.key];
+    if (!patch) return room;
+    return applyRoomOverridePatch(room, patch);
+  });
 }
 
 function splitSemicolon(line: string): string[] {
@@ -521,25 +705,44 @@ export async function loadRoomsFromPublic(
   );
 
   let lastError: unknown = null;
+  let baseRooms: Room[] | null = null;
 
   for (const tryPath of jsonTryPaths) {
     try {
-      return await loadRoomsFromPublicJson(tryPath);
+      baseRooms = await loadRoomsFromPublicJson(tryPath);
+      break;
     } catch (error) {
       lastError = error;
     }
   }
 
-  for (const tryPath of csvTryPaths) {
-    try {
-      return await loadRoomsFromPublicCsv(tryPath);
-    } catch (error) {
-      lastError = error;
+  if (!baseRooms) {
+    for (const tryPath of csvTryPaths) {
+      try {
+        baseRooms = await loadRoomsFromPublicCsv(tryPath);
+        break;
+      } catch (error) {
+        lastError = error;
+      }
     }
   }
 
-  if (lastError instanceof Error) throw lastError;
-  throw new Error('Failed to load room data');
+  if (!baseRooms) {
+    if (lastError instanceof Error) throw lastError;
+    throw new Error('Failed to load room data');
+  }
+
+  const hasBuildFloor =
+    typeof opts.buildId === 'string' &&
+    opts.buildId.length > 0 &&
+    typeof opts.floorId === 'string' &&
+    opts.floorId.length > 0;
+
+  if (!hasBuildFloor) return baseRooms;
+
+  const allOverrides = await loadRoomOverridesFromPublic(opts.buildId as string);
+  const floorOverrides = allOverrides[opts.floorId as string] ?? {};
+  return applyRoomOverrides(baseRooms, floorOverrides);
 }
 
 export function computeBounds(polygons: RoomPolygon[]): {

@@ -5,6 +5,7 @@ import { RoomHoverTooltip } from './map/rooms/components/RoomHoverTooltip'
 import { TopBar } from './components/app/TopBar'
 import { FloorsPanel } from './components/app/FloorsPanel'
 import { GraphicsPanel } from './components/app/GraphicsPanel'
+import { GraphicsPresetAdminModal } from './components/app/GraphicsPresetAdminModal'
 import { OfficesDirectory } from './components/app/OfficesDirectory'
 import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
@@ -20,7 +21,12 @@ function App() {
     searchInputRef,
     theme,
     graphicsPreset,
+    graphicsPresetRefreshToken,
     graphicsOpen,
+    isGraphicsPresetsModalOpen,
+    graphicsPresetsById,
+    isSavingGraphicsPresets,
+    graphicsPresetsStatusText,
     selectedBuild,
     selectedFloor,
     titleAnchor,
@@ -75,6 +81,10 @@ function App() {
     toggleAdminMode,
     locateUserOnMap,
     onToggleGraphicsPanel,
+    onGraphicsPresetsEditorActivePresetChange,
+    previewGraphicsPresetsDraft,
+    openGraphicsPresetsModal,
+    closeGraphicsPresetsModal,
     onToggleGraphOverlay,
     onRouteFloorJump,
     onSelectRoomKey,
@@ -149,6 +159,19 @@ function App() {
         onSelectPreset={setGraphicsPreset}
         showGraphOverlay={showGraphOverlay}
         onToggleGraphOverlay={onToggleGraphOverlay}
+        isAdminMode={isAdminMode}
+        onOpenPresetSettings={openGraphicsPresetsModal}
+      />
+
+      <GraphicsPresetAdminModal
+        isOpen={isGraphicsPresetsModalOpen}
+        presetsById={graphicsPresetsById}
+        activeGraphicsPreset={graphicsPreset}
+        isSaving={isSavingGraphicsPresets}
+        statusText={graphicsPresetsStatusText}
+        onClose={closeGraphicsPresetsModal}
+        onActivePresetChange={onGraphicsPresetsEditorActivePresetChange}
+        onDraftChange={previewGraphicsPresetsDraft}
       />
 
       <div className="appMain">
@@ -156,7 +179,10 @@ function App() {
           rooms={rooms}
           roomGraph={roomGraph}
           theme={theme}
+          isAdminMode={isAdminMode}
           graphicsPreset={graphicsPreset}
+          graphicsPresetConfig={graphicsPresetsById[graphicsPreset]}
+          graphicsPresetRefreshToken={graphicsPresetRefreshToken}
           searchText={searchText}
           matchedKeys={matchedKeys}
           searchResultJumpTrigger={searchResultJumpTrigger}
@@ -279,6 +305,12 @@ function App() {
           onClick={onSetRouteModeRoutes}
         >
           Маршруты
+        </button>
+        <button
+          type="button"
+          className={'mapModeBtn'}
+        >
+          Расписание
         </button>
       </div>
 

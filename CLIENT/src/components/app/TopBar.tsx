@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { GlassDropdown } from '../GlassDropdown';
-import { GRAPHICS_PRESETS, type GraphicsPresetId } from '../../map/graphicsPresets';
+import { listGraphicsPresets, type GraphicsPresetId } from '../../map/graphicsPresets';
 
 type SearchIndexedRoom = {
     key: string;
@@ -85,6 +85,7 @@ export function TopBar({
     const [mobileControlsOpen, setMobileControlsOpen] = React.useState(false);
     const [bugReportOpen, setBugReportOpen] = React.useState(false);
     const [bugReportText, setBugReportText] = React.useState('');
+    const graphicsPresets = listGraphicsPresets();
     const searchWrapRef = React.useRef<HTMLDivElement | null>(null);
     function formatSearchPrimary(item: SearchIndexedRoom): string {
         const roomPart = item.roomNo.length > 0 ? `№ ${item.roomNo}` : 'Без номера';
@@ -363,7 +364,7 @@ export function TopBar({
                             <div className="mobileControlsRow">
                                 <div className="mobileControlsSectionTitle">Настройки графики</div>
                                 <div className="graphicsButtons mobileGraphicsButtons">
-                                    {GRAPHICS_PRESETS.map((p) => {
+                                    {graphicsPresets.map((p) => {
                                         const selected = graphicsPreset === p.id;
                                         const needsWarning = p.id === 'medium' || p.id === 'max';
                                         return (

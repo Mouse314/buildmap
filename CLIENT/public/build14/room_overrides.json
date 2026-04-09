@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "buildId": "build14",
+  "updatedAt": "2026-04-09T12:30:36.090Z",
+  "floors": {
+    "floor1": {
+      "bl:524": {
+        "roomNo": "113",
+        "category": "кабинет",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 87.41,
+        "build": null,
+        "floor": null
+      },
+      "bl:90": {
+        "roomID": 13,
+        "roomNo": null,
+        "category": "гардероб",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 35.7,
+        "build": null,
+        "floor": null
+      },
+      "bl:538": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.2,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-04-09T12:30:36.090Z"
+      }
+    },
+    "floor3": {
+      "bl:652": {
+        "roomNo": null,
+        "category": "актовый зал",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 3.69,
+        "build": null,
+        "floor": null
+      },
+      "bl:651": {
+        "roomNo": null,
+        "category": "актовый зал",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 7.14,
+        "build": null,
+        "floor": null
+      }
+    }
+  }
+}

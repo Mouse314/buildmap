@@ -25,4 +25,11 @@ const ROOM_CATEGORIES: Partial<Record<number, string>> = {
   301: 'ниже',
 };
 
+export function getCategoryByRoomId(roomID: number): string | undefined {
+  const value = ROOM_CATEGORIES[roomID];
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export default ROOM_CATEGORIES;

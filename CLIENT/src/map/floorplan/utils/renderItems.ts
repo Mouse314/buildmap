@@ -18,10 +18,12 @@ export type RenderItem = {
 export function buildRenderItems(
   polygons: RoomPolygon[],
   rooms: Room[],
-  opts: { wallExtrudeEnabled?: boolean } = {},
+  opts: { wallExtrudeEnabled?: boolean; allowSmallInteractive?: boolean; allowAllInteractive?: boolean } = {},
 ): RenderItem[] {
   const items: RenderItem[] = [];
   const wallExtrudeEnabled = opts.wallExtrudeEnabled ?? true;
+  const allowSmallInteractive = opts.allowSmallInteractive ?? false;
+  const allowAllInteractive = opts.allowAllInteractive ?? false;
 
   for (let idx = 0; idx < polygons.length; idx++) {
     const poly = polygons[idx];
@@ -36,7 +38,8 @@ export function buildRenderItems(
 
     const room = rooms[idx];
     const key = room?.key ?? `${poly.roomID}-${idx}`;
-    const interactive = !NON_HOVERABLE_ROOM_IDS.has(poly.roomID) && isInteractiveRoomArea(room?.areaM2);
+    const areaInteractive = allowSmallInteractive || isInteractiveRoomArea(room?.areaM2);
+    const interactive = allowAllInteractive || (!NON_HOVERABLE_ROOM_IDS.has(poly.roomID) && areaInteractive);
 
     items.push({
       key,

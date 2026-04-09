@@ -202,6 +202,129 @@ const LABEL_ROOM_ID = 200;
 const HIDDEN_ROOM_IDS = new Set([300, 301]);
 const CORRIDOR_ROOM_ID = 1;
 
+function normalizeOptionalText(value) {
+  if (value == null) return undefined;
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function parseRoomOverridePatch(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const patch = {};
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'roomID')) {
+    const value = raw.roomID;
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      patch.roomID = Math.trunc(value);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'roomNo')) {
+    const value = raw.roomNo;
+    patch.roomNo = value == null ? undefined : normalizeOptionalText(value);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'category')) {
+    const value = raw.category;
+    patch.category = value == null ? undefined : normalizeOptionalText(value);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'description')) {
+    const value = raw.description;
+    patch.description = value == null ? undefined : normalizeOptionalText(value);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'areClosed')) {
+    const value = raw.areClosed;
+    if (typeof value === 'boolean') patch.areClosed = value;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'areaM2')) {
+    const value = raw.areaM2;
+    patch.areaM2 = typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'build')) {
+    const value = raw.build;
+    patch.build = value == null ? null : normalizeOptionalText(value) ?? null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(raw, 'floor')) {
+    const value = raw.floor;
+    patch.floor = value == null ? null : normalizeOptionalText(value) ?? null;
+  }
+
+  return patch;
+}
+
+function parseOverridesByFloor(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const floorsRaw = raw.floors;
+  if (!floorsRaw || typeof floorsRaw !== 'object') return {};
+
+  const result = {};
+  for (const [floorId, floorValue] of Object.entries(floorsRaw)) {
+    if (!floorValue || typeof floorValue !== 'object') continue;
+    const roomMap = {};
+    for (const [roomKey, patchRaw] of Object.entries(floorValue)) {
+      const normalizedRoomKey = String(roomKey ?? '').trim();
+      if (!normalizedRoomKey) continue;
+      roomMap[normalizedRoomKey] = parseRoomOverridePatch(patchRaw);
+    }
+    result[floorId] = roomMap;
+  }
+
+  return result;
+}
+
+function applyRoomOverridePatch(room, patch) {
+  const next = { ...room };
+
+  if (typeof patch.roomID === 'number' && Number.isFinite(patch.roomID)) {
+    next.roomID = Math.trunc(patch.roomID);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'roomNo')) {
+    next.roomNo = patch.roomNo;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'category')) {
+    next.category = patch.category;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'description')) {
+    next.description = patch.description;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'areClosed')) {
+    next.areClosed = patch.areClosed;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'areaM2')) {
+    next.areaM2 = patch.areaM2;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'build')) {
+    next.build = patch.build;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'floor')) {
+    next.floor = patch.floor;
+  }
+
+  return next;
+}
+
+function applyOverridesToRooms(rooms, floorOverrides) {
+  if (!floorOverrides || typeof floorOverrides !== 'object') return rooms;
+  return rooms.map((room) => {
+    const patch = floorOverrides[room.key];
+    if (!patch) return room;
+    return applyRoomOverridePatch(room, patch);
+  });
+}
+
 function round3(value) {
   return Number(value.toFixed(3));
 }
@@ -573,6 +696,7 @@ async function main() {
 
   const manifest = { builds: [] };
   const buildToFloors = new Map();
+  const overridesByBuild = new Map();
   let totalRooms = 0;
   let fileCount = 0;
   let annotatedRooms = 0;
@@ -646,13 +770,29 @@ async function main() {
       }
     }
 
+    let buildOverrides = overridesByBuild.get(buildId);
+    if (!buildOverrides) {
+      const overridesPath = path.join(publicDir, buildId, 'room_overrides.json');
+      try {
+        const rawOverridesText = await fs.readFile(overridesPath, 'utf8');
+        const parsedOverrides = JSON.parse(rawOverridesText);
+        buildOverrides = parseOverridesByFloor(parsedOverrides);
+      } catch {
+        buildOverrides = {};
+      }
+      overridesByBuild.set(buildId, buildOverrides);
+    }
+
+    const floorOverrides = buildOverrides[floorId] ?? {};
+    const mergedRooms = applyOverridesToRooms(rooms, floorOverrides);
+
     const jsonPath = path.join(path.dirname(file), 'room_data.json');
-    await fs.writeFile(jsonPath, JSON.stringify(rooms, null, 2) + '\n', 'utf8');
-    const graph = buildRoomGraph(rooms);
+    await fs.writeFile(jsonPath, JSON.stringify(mergedRooms, null, 2) + '\n', 'utf8');
+    const graph = buildRoomGraph(mergedRooms);
     const graphPath = path.join(path.dirname(file), 'room_graph.json');
     await fs.writeFile(graphPath, JSON.stringify(graph, null, 2) + '\n', 'utf8');
 
-    totalRooms += rooms.length;
+    totalRooms += mergedRooms.length;
     fileCount += 1;
 
     const existing = buildToFloors.get(buildId) ?? new Set();

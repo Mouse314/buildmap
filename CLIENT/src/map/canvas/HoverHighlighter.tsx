@@ -5,21 +5,16 @@ import * as THREE from 'three';
 export function HoverHighlighter({
   active,
   glowOpacity = 0.22,
-  outlineOpacity = 0.55,
   glowBoost = 1.2,
   renderOrder = 9,
 }: {
   active: { key: string; geometry: THREE.BufferGeometry; color: string } | null;
   glowOpacity?: number;
-  outlineOpacity?: number;
   glowBoost?: number;
   renderOrder?: number;
 }) {
-  const edgesCache = React.useRef(new Map<string, THREE.EdgesGeometry>());
   const glowMeshRef = React.useRef<THREE.Mesh | null>(null);
-  const outlineRef = React.useRef<THREE.LineSegments | null>(null);
   const glowMatRef = React.useRef<THREE.MeshBasicMaterial | null>(null);
-  const lineMatRef = React.useRef<THREE.LineBasicMaterial | null>(null);
 
   const displayedRef = React.useRef<{
     key: string;
@@ -37,16 +32,6 @@ export function HoverHighlighter({
     if (glowMeshRef.current) {
       glowMeshRef.current.geometry = active.geometry;
     }
-
-    let edges = edgesCache.current.get(active.key);
-    if (!edges) {
-      edges = new THREE.EdgesGeometry(active.geometry);
-      edgesCache.current.set(active.key, edges);
-    }
-
-    if (outlineRef.current) {
-      outlineRef.current.geometry = edges;
-    }
   }, [active]);
 
   useFrame((_, delta) => {
@@ -55,18 +40,12 @@ export function HoverHighlighter({
 
     const isVisible = alphaRef.current > 0.002 && Boolean(displayedRef.current);
     if (glowMeshRef.current) glowMeshRef.current.visible = isVisible;
-    if (outlineRef.current) outlineRef.current.visible = isVisible;
 
     const displayed = displayedRef.current;
     if (displayed && glowMatRef.current) {
       const glowColor = new THREE.Color(displayed.color).multiplyScalar(glowBoost);
       glowMatRef.current.color.copy(glowColor);
       glowMatRef.current.opacity = glowOpacity * alphaRef.current;
-    }
-
-    if (displayed && lineMatRef.current) {
-      lineMatRef.current.color.set(displayed.color);
-      lineMatRef.current.opacity = outlineOpacity * alphaRef.current;
     }
 
     if (!active && alphaRef.current < 0.002) {
@@ -97,26 +76,6 @@ export function HoverHighlighter({
           side={THREE.DoubleSide}
         />
       </mesh>
-
-      <lineSegments
-        ref={outlineRef}
-        geometry={undefined}
-        rotation={[-Math.PI / 2, 0, 0]}
-        raycast={() => null}
-        renderOrder={renderOrder + 1}
-        visible={false}
-        scale={1.0}
-      >
-        <lineBasicMaterial
-          ref={lineMatRef}
-          color={'#000000'}
-          transparent
-          opacity={0}
-          depthWrite={false}
-          depthTest={true}
-          toneMapped={false}
-        />
-      </lineSegments>
     </group>
   );
 }

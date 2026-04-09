@@ -3514,7 +3514,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "гардероб"
   },
   {
     "key": "bl:91",
@@ -23601,7 +23602,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:525",
@@ -24195,7 +24197,7 @@
   {
     "key": "bl:538",
     "blenderID": 538,
-    "roomID": 100,
+    "roomID": 1,
     "areClosed": false,
     "areaM2": 0.2,
     "vertexIndices": [
@@ -24224,7 +24226,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:539",

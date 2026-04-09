@@ -43,6 +43,7 @@ export type SavedGeoAnchorsFile = {
 }
 
 export type RoomEditPayload = {
+  roomID?: number
   roomNo?: string
   category?: string
   description?: string

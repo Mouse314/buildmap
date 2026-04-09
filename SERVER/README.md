@@ -31,7 +31,9 @@ By default, server starts on `http://localhost:3001` and serves files from `../C
 - `GET /api/plans/:buildId/:floorId/rooms`
 - `GET /api/plans/:buildId/:floorId/rooms.csv`
 - `GET /api/plans/:buildId/:floorId/graph`
+- `GET /api/admin/health`
 - `POST /api/admin/rooms/update`
+- `POST /api/admin/graphics/presets`
 
 `buildId` and `floorId` are sanitized server-side to avoid path traversal.
 
@@ -40,3 +42,45 @@ By default, server starts on `http://localhost:3001` and serves files from `../C
 - IDs are taken from `CLIENT/public/room_data_manifest.json`.
 - They must match folder names in `CLIENT/public/<buildId>/<floorId>/`.
 - Example IDs from current dataset: `build14`, `build16`, `floor1`, `floor2`, ...
+
+### Persistent room edits
+
+`POST /api/admin/rooms/update` no longer mutates `room_data.json`.
+
+Instead, it saves admin edits into build-level file:
+
+- `CLIENT/public/<buildId>/room_overrides.json`
+
+Missing `room_overrides.json` files are auto-created on server startup for discovered builds.
+
+Graphic presets are stored in:
+
+- `CLIENT/public/graphics_presets.json`
+
+`graphics_presets.json` is also auto-created on server startup if it does not exist.
+
+This allows re-generating `room_data.json` from CSV without losing manual admin corrections.
+
+Current `room_overrides.json` format:
+
+```json
+{
+	"version": 1,
+	"buildId": "build14",
+	"updatedAt": "2026-04-09T10:20:30.000Z",
+	"floors": {
+		"floor1": {
+			"room-key": {
+				"roomNo": "101",
+				"category": "Кафедра",
+				"description": "Текст",
+				"areClosed": false,
+				"areaM2": 23.4,
+				"build": null,
+				"floor": null,
+				"updatedAt": "2026-04-09T10:20:30.000Z"
+			}
+		}
+	}
+}
+```

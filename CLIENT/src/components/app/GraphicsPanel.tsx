@@ -1,4 +1,4 @@
-import { GRAPHICS_PRESETS, type GraphicsPresetId } from '../../map/graphicsPresets';
+import { listGraphicsPresets, type GraphicsPresetId } from '../../map/graphicsPresets';
 
 type GraphicsPanelProps = {
   graphicsOpen: boolean;
@@ -7,6 +7,8 @@ type GraphicsPanelProps = {
   onSelectPreset: (preset: GraphicsPresetId) => void;
   showGraphOverlay: boolean;
   onToggleGraphOverlay: () => void;
+  isAdminMode: boolean;
+  onOpenPresetSettings: () => void;
 };
 
 export function GraphicsPanel({
@@ -16,7 +18,11 @@ export function GraphicsPanel({
   onSelectPreset,
   showGraphOverlay,
   onToggleGraphOverlay,
+  isAdminMode,
+  onOpenPresetSettings,
 }: GraphicsPanelProps) {
+  const graphicsPresets = listGraphicsPresets();
+
   return (
     <div className="sidePanel sidePanelRight" aria-label="Настройки графики">
       <div className="sidePanelHeader">
@@ -36,7 +42,7 @@ export function GraphicsPanel({
       {graphicsOpen ? (
         <div className="sidePanelBody" id="graphics-panel-body">
           <div className="graphicsButtons">
-            {GRAPHICS_PRESETS.map((p) => {
+            {graphicsPresets.map((p) => {
               const selected = graphicsPreset === p.id;
               const needsWarning = p.id === 'medium' || p.id === 'max';
               return (
@@ -71,6 +77,17 @@ export function GraphicsPanel({
             >
               Сетка графа
             </button>
+
+            {isAdminMode ? (
+              <button
+                type="button"
+                className="topButton graphicsButton graphicsPresetSettingsButton"
+                onClick={onOpenPresetSettings}
+                title="Открыть детальную настройку графических пресетов"
+              >
+                Тонкая настройка пресетов
+              </button>
+            ) : null}
           </div>
         </div>
       ) : null}

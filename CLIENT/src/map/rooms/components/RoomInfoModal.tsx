@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Room } from '../utils/Room';
+import { getCategoryByRoomId } from '../utils/roomCategories';
 import { formatRoomDescription } from '../utils/stairDirection';
 
 function text(value: string | undefined): string {
@@ -16,6 +17,7 @@ function formatAreaM2(areaM2: number | undefined): string {
 }
 
 type RoomEditPayload = {
+  roomID?: number;
   roomNo?: string;
   category?: string;
   description?: string;
@@ -26,6 +28,7 @@ type RoomEditPayload = {
 };
 
 type RoomDraft = {
+  roomIDText: string;
   roomNo: string;
   category: string;
   description: string;
@@ -37,6 +40,7 @@ type RoomDraft = {
 
 function toDraft(room: Room): RoomDraft {
   return {
+    roomIDText: String(room.roomID),
     roomNo: room.roomNo ?? '',
     category: room.category ?? '',
     description: room.description ?? '',
@@ -53,6 +57,8 @@ function textEqualIgnoreCase(a: string, b: string): boolean {
 
 function equalDraft(a: RoomDraft, b: RoomDraft): boolean {
   return (
+    a.roomIDText === b.roomIDText
+    &&
     textEqualIgnoreCase(a.roomNo, b.roomNo)
     && textEqualIgnoreCase(a.category, b.category)
     && textEqualIgnoreCase(a.description, b.description)
@@ -68,6 +74,15 @@ function parseArea(value: string): number | undefined {
   if (cleaned.length === 0) return undefined;
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : undefined;
+}
+
+function parseRoomId(value: string): number | undefined {
+  const cleaned = value.trim();
+  if (cleaned.length === 0) return undefined;
+  if (!/^-?\d+$/.test(cleaned)) return undefined;
+  const n = Number.parseInt(cleaned, 10);
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return n;
 }
 
 export function RoomInfoModal({
@@ -113,6 +128,10 @@ export function RoomInfoModal({
     const padding = 12;
     const gap = 12;
 
+    const topBarEl = document.querySelector<HTMLElement>('.topBar');
+    const topBarBottom = topBarEl ? topBarEl.getBoundingClientRect().bottom : 0;
+    const safeTop = Math.max(padding, Math.ceil(topBarBottom) + 8);
+
     const r = el.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -121,14 +140,29 @@ export function RoomInfoModal({
 
     const left = clamp(anchor.x, padding + r.width / 2, vw - padding - r.width / 2);
 
-    const canPlaceAbove = anchor.y - r.height - gap >= padding;
-    const nextPlacement: 'above' | 'below' = canPlaceAbove ? 'above' : 'below';
+    const canPlaceAbove = anchor.y - gap - r.height >= safeTop;
+    const canPlaceBelow = anchor.y + gap + r.height <= vh - padding;
 
-    const top = clamp(anchor.y, padding, vh - padding);
+    let nextPlacement: 'above' | 'below' = placement;
+
+    if (nextPlacement === 'above' && !canPlaceAbove && canPlaceBelow) {
+      nextPlacement = 'below';
+    } else if (nextPlacement === 'below' && !canPlaceBelow && canPlaceAbove) {
+      nextPlacement = 'above';
+    } else if (!canPlaceAbove && canPlaceBelow) {
+      nextPlacement = 'below';
+    } else if (canPlaceAbove) {
+      nextPlacement = 'above';
+    }
+
+    const topMin = nextPlacement === 'above' ? safeTop + r.height + gap : safeTop - gap;
+    const topMaxRaw = nextPlacement === 'above' ? vh - padding : vh - padding - r.height - gap;
+    const topMax = Math.max(topMin, topMaxRaw);
+    const top = clamp(anchor.y, topMin, topMax);
 
     setPlacement(nextPlacement);
     setPos({ left, top });
-  }, [anchor.x, anchor.y, room.roomID]);
+  }, [anchor.x, anchor.y, isAdminMode, placement, room.roomID, saveError, saveStatus]);
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -144,6 +178,15 @@ export function RoomInfoModal({
 
   const onSaveClick = async () => {
     if (!onSaveRoom) return;
+    const roomID = parseRoomId(draft.roomIDText);
+    if (typeof roomID !== 'number') {
+      setSaveStatus('error');
+      setSaveError('Некорректное значение ID');
+      return;
+    }
+
+    const categoryByRoomId = getCategoryByRoomId(roomID);
+
     const areaM2 = parseArea(draft.areaM2Text);
     if (draft.areaM2Text.trim().length > 0 && typeof areaM2 !== 'number') {
       setSaveStatus('error');
@@ -155,8 +198,9 @@ export function RoomInfoModal({
       setSaveStatus('saving');
       setSaveError('');
       await onSaveRoom({
+        roomID,
         roomNo: draft.roomNo.trim(),
-        category: draft.category.trim(),
+        category: (categoryByRoomId ?? draft.category).trim(),
         description: draft.description.trim(),
         areClosed: draft.areClosed,
         areaM2,
@@ -201,7 +245,26 @@ export function RoomInfoModal({
             <>
               <div className="roomModalRow">
                 <div className="roomModalLabel">ID</div>
-                <div className="roomModalValue">{room.roomID}</div>
+                <input
+                  className="roomModalInput"
+                  value={draft.roomIDText}
+                  onChange={(e) => {
+                    const nextValue = e.target.value;
+                    setDraft((prev) => {
+                      const nextRoomId = parseRoomId(nextValue);
+                      if (typeof nextRoomId !== 'number') {
+                        return { ...prev, roomIDText: nextValue };
+                      }
+
+                      const categoryByRoomId = getCategoryByRoomId(nextRoomId);
+                      return {
+                        ...prev,
+                        roomIDText: nextValue,
+                        category: categoryByRoomId ?? prev.category,
+                      };
+                    });
+                  }}
+                />
               </div>
 
               <div className="roomModalRow">

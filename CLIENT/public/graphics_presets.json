@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-09T11:45:20.965Z",
+  "presets": {
+    "min": {
+      "id": "min",
+      "label": "Сбалансированные",
+      "title": "Максимальная производительность",
+      "dpr": {
+        "mode": "fixed",
+        "value": 1
+      },
+      "shadowsEnabled": false,
+      "mouseLampEnabled": false,
+      "postFx": {
+        "enabled": false,
+        "multisampling": 0,
+        "n8ao": null,
+        "bloom": null,
+        "vignette": {
+          "offset": 0.37,
+          "darkness": 0.62
+        }
+      }
+    },
+    "medium": {
+      "id": "medium",
+      "label": "Выше среднего",
+      "title": "Улучшенное качество",
+      "dpr": {
+        "mode": "adaptive",
+        "baseMax": 1.5,
+        "declineTo": 1
+      },
+      "shadowsEnabled": false,
+      "mouseLampEnabled": true,
+      "postFx": {
+        "enabled": true,
+        "multisampling": 0,
+        "n8ao": null,
+        "bloom": {
+          "intensity": 0.06,
+          "luminanceThreshold": 0.55,
+          "luminanceSmoothing": 0.75,
+          "radius": 0.2,
+          "mipmapBlur": true
+        },
+        "vignette": {
+          "offset": 0.38,
+          "darkness": 0.52
+        }
+      }
+    },
+    "max": {
+      "id": "max",
+      "label": "Максимальные",
+      "title": "Максимальное качество (рекомендуется только для мощных устройств)",
+      "dpr": {
+        "mode": "adaptive",
+        "baseMax": 1.5,
+        "declineTo": 1
+      },
+      "shadowsEnabled": true,
+      "mouseLampEnabled": true,
+      "postFx": {
+        "enabled": true,
+        "multisampling": 4,
+        "n8ao": {
+          "aoRadius": 3,
+          "distanceFalloff": 0.5,
+          "intensity": 5,
+          "screenSpaceRadius": false
+        },
+        "bloom": {
+          "intensity": 0.16,
+          "luminanceThreshold": 0.48,
+          "luminanceSmoothing": 0.72,
+          "radius": 0.28,
+          "mipmapBlur": true
+        },
+        "vignette": {
+          "offset": 0.32,
+          "darkness": 0.62
+        }
+      }
+    }
+  }
+}

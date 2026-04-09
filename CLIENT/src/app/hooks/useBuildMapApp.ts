@@ -1,7 +1,16 @@
 ﻿import * as React from 'react'
 import { getRoomFillColor } from '../../map/rooms/utils/roomPalette'
 import { formatRoomDescription } from '../../map/rooms/utils/stairDirection'
-import { type GraphicsPresetId } from '../../map/graphicsPresets'
+import {
+  applyGraphicsPresetsById,
+  applyGraphicsPresetsFromUnknown,
+  buildGraphicsPresetsFilePayload,
+  cloneGraphicsPresetsById,
+  getGraphicsPresetsById,
+  type GraphicsPresetId,
+  type GraphicsPresetsById,
+} from '../../map/graphicsPresets'
+import { plansApiUrl, publicAssetUrl } from '../../map/rooms/utils/roomData'
 import { buildLabel, floorLabel, isInteractiveRoom } from '../utils/roomLabels'
 import { useSmartSearch } from '../search/useSmartSearch'
 import type { SearchIndexedRoom } from '../search/types'
@@ -98,6 +107,15 @@ export function useBuildMapApp() {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
   const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('min')
   const [graphicsOpen, setGraphicsOpen] = React.useState(true)
+  const [isGraphicsPresetsModalOpen, setIsGraphicsPresetsModalOpen] = React.useState(false)
+  const [graphicsPresetsById, setGraphicsPresetsById] = React.useState<GraphicsPresetsById>(() => getGraphicsPresetsById())
+  const [isSavingGraphicsPresets, setIsSavingGraphicsPresets] = React.useState(false)
+  const [graphicsPresetsStatusText, setGraphicsPresetsStatusText] = React.useState<string | null>(null)
+  const [graphicsPresetRefreshToken, setGraphicsPresetRefreshToken] = React.useState(0)
+  const graphicsPresetsAutosaveTimerRef = React.useRef<number | null>(null)
+  const graphicsPresetsAutosaveDraftRef = React.useRef<GraphicsPresetsById | null>(null)
+  const graphicsPresetsSaveRequestSeqRef = React.useRef(0)
+  const graphicsPresetsLastPreviewSignatureRef = React.useRef('')
   const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
   const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
 
@@ -252,14 +270,113 @@ export function useBuildMapApp() {
   const totalRooms = React.useMemo(() => rooms.filter(isInteractiveRoom).length, [rooms])
   const matchedRooms = matchedKeys ? matchedKeys.size : totalRooms
 
+  const bumpGraphicsPresetRefreshToken = React.useCallback(() => {
+    setGraphicsPresetRefreshToken((value) => (value + 1) % 1000000000)
+  }, [])
+
+  const clearGraphicsPresetsAutosaveTimer = React.useCallback(() => {
+    if (graphicsPresetsAutosaveTimerRef.current == null) return
+    window.clearTimeout(graphicsPresetsAutosaveTimerRef.current)
+    graphicsPresetsAutosaveTimerRef.current = null
+  }, [])
+
+  React.useEffect(() => {
+    return () => {
+      clearGraphicsPresetsAutosaveTimer()
+    }
+  }, [clearGraphicsPresetsAutosaveTimer])
+
+  const persistGraphicsPresetsById = React.useCallback(async (nextPresetsById: GraphicsPresetsById) => {
+    if (!isAdminMode) return
+
+    const requestSeq = graphicsPresetsSaveRequestSeqRef.current + 1
+    graphicsPresetsSaveRequestSeqRef.current = requestSeq
+    setIsSavingGraphicsPresets(true)
+
+    const payload = buildGraphicsPresetsFilePayload(nextPresetsById)
+    let response: Response
+
+    try {
+      response = await fetch(plansApiUrl('/api/admin/graphics/presets'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+    } catch {
+      if (graphicsPresetsSaveRequestSeqRef.current !== requestSeq) return
+      setIsSavingGraphicsPresets(false)
+      setGraphicsPresetsStatusText('Ошибка автосохранения: сервер недоступен')
+      return
+    }
+
+    if (!response.ok) {
+      if (graphicsPresetsSaveRequestSeqRef.current !== requestSeq) return
+      setIsSavingGraphicsPresets(false)
+      const details = (await response.text()).trim()
+      setGraphicsPresetsStatusText(
+        details.length > 0 ? `Ошибка автосохранения: ${details}` : `Ошибка автосохранения (${response.status})`,
+      )
+      return
+    }
+
+    if (graphicsPresetsSaveRequestSeqRef.current !== requestSeq) return
+
+    const appliedPresets = cloneGraphicsPresetsById(nextPresetsById)
+    applyGraphicsPresetsById(appliedPresets)
+    setGraphicsPresetsById(getGraphicsPresetsById())
+    bumpGraphicsPresetRefreshToken()
+    setGraphicsPresetsStatusText('Автосохранено в public/graphics_presets.json')
+    setIsSavingGraphicsPresets(false)
+  }, [bumpGraphicsPresetRefreshToken, isAdminMode])
+
+  const scheduleGraphicsPresetsAutosave = React.useCallback((nextPresetsById: GraphicsPresetsById) => {
+    graphicsPresetsAutosaveDraftRef.current = cloneGraphicsPresetsById(nextPresetsById)
+    setGraphicsPresetsStatusText('Автосохранение...')
+    clearGraphicsPresetsAutosaveTimer()
+
+    graphicsPresetsAutosaveTimerRef.current = window.setTimeout(() => {
+      const draft = graphicsPresetsAutosaveDraftRef.current
+      graphicsPresetsAutosaveTimerRef.current = null
+      if (!draft) return
+      void persistGraphicsPresetsById(draft)
+    }, 320)
+  }, [clearGraphicsPresetsAutosaveTimer, persistGraphicsPresetsById])
+
+  React.useEffect(() => {
+    let cancelled = false
+
+    fetch(publicAssetUrl('graphics_presets.json'))
+      .then(async (response) => {
+        if (!response.ok) return null
+        const data: unknown = await response.json()
+        return data
+      })
+      .then((data) => {
+        if (cancelled || !data) return
+        const applied = applyGraphicsPresetsFromUnknown(data)
+        if (!applied) return
+        setGraphicsPresetsById(getGraphicsPresetsById())
+        bumpGraphicsPresetRefreshToken()
+      })
+      .catch(() => {
+        if (cancelled) return
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   React.useEffect(() => {
     if (selectedRoomKey == null) return
     const room = rooms.find((x) => x.key === selectedRoomKey)
-    if (room && !isInteractiveRoom(room)) {
+    if (!isAdminMode && room && !isInteractiveRoom(room)) {
       setSelectedRoomKey(null)
       setModalAnchor(null)
     }
-  }, [rooms, selectedRoomKey])
+  }, [isAdminMode, rooms, selectedRoomKey])
 
   React.useEffect(() => {
     if (!pendingSearchJump) return
@@ -437,6 +554,44 @@ export function useBuildMapApp() {
     setGraphicsOpen((current) => !current)
   }, [])
 
+  const openGraphicsPresetsModal = React.useCallback(() => {
+    if (!isAdminMode) {
+      window.alert('Подробная настройка пресетов доступна только в админ-режиме')
+      return
+    }
+
+    const currentPresets = getGraphicsPresetsById()
+    setGraphicsPresetsById(currentPresets)
+    graphicsPresetsLastPreviewSignatureRef.current = JSON.stringify(currentPresets)
+    setGraphicsPresetsStatusText(null)
+    setIsGraphicsPresetsModalOpen(true)
+  }, [isAdminMode])
+
+  const onGraphicsPresetsEditorActivePresetChange = React.useCallback((presetId: GraphicsPresetId) => {
+    setGraphicsPreset((current) => (current === presetId ? current : presetId))
+  }, [])
+
+  const previewGraphicsPresetsDraft = React.useCallback((nextPresetsById: GraphicsPresetsById) => {
+    const appliedPresets = cloneGraphicsPresetsById(nextPresetsById)
+    const signature = JSON.stringify(appliedPresets)
+    if (signature === graphicsPresetsLastPreviewSignatureRef.current) return
+    graphicsPresetsLastPreviewSignatureRef.current = signature
+
+    applyGraphicsPresetsById(appliedPresets)
+    setGraphicsPresetsById(appliedPresets)
+    bumpGraphicsPresetRefreshToken()
+    scheduleGraphicsPresetsAutosave(appliedPresets)
+  }, [bumpGraphicsPresetRefreshToken, scheduleGraphicsPresetsAutosave])
+
+  const closeGraphicsPresetsModal = React.useCallback(() => {
+    const pendingDraft = graphicsPresetsAutosaveDraftRef.current
+    if (pendingDraft) {
+      clearGraphicsPresetsAutosaveTimer()
+      void persistGraphicsPresetsById(pendingDraft)
+    }
+    setIsGraphicsPresetsModalOpen(false)
+  }, [clearGraphicsPresetsAutosaveTimer, persistGraphicsPresetsById])
+
   const onToggleGeoAdminPanel = React.useCallback(() => {
     setGeoAdminOpen((current) => !current)
   }, [])
@@ -604,7 +759,12 @@ export function useBuildMapApp() {
     searchInputRef,
     theme,
     graphicsPreset,
+    graphicsPresetRefreshToken,
     graphicsOpen,
+    isGraphicsPresetsModalOpen,
+    graphicsPresetsById,
+    isSavingGraphicsPresets,
+    graphicsPresetsStatusText,
     geoAdminOpen,
     selectedBuild,
     selectedFloor,
@@ -663,6 +823,10 @@ export function useBuildMapApp() {
     toggleAdminMode,
     locateUserOnMap,
     onToggleGraphicsPanel,
+    onGraphicsPresetsEditorActivePresetChange,
+    previewGraphicsPresetsDraft,
+    openGraphicsPresetsModal,
+    closeGraphicsPresetsModal,
     onToggleGeoAdminPanel,
     onToggleGraphOverlay,
     onRouteFloorJump,

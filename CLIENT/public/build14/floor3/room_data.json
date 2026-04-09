@@ -25416,7 +25416,6 @@
     "key": "bl:651",
     "blenderID": 651,
     "roomID": 7,
-    "description": "Сцена",
     "areClosed": false,
     "areaM2": 7.14,
     "vertexIndices": [
@@ -25470,13 +25469,13 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "актовый зал"
   },
   {
     "key": "bl:652",
     "blenderID": 652,
     "roomID": 7,
-    "description": "Сцена",
     "areClosed": false,
     "areaM2": 3.69,
     "vertexIndices": [
@@ -25530,6 +25529,7 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "актовый зал"
   }
 ]
