@@ -15,7 +15,10 @@ except ModuleNotFoundError as exc:
     print("  .\\run_parser.ps1")
     sys.exit(1)
 
-ROOM_RE = re.compile(r'\b(\d{1,2}\s*-\s*\d{3})_?\b')
+DASH_CHARS = r'\-‐‑‒–—−'
+ROOM_RE = re.compile(
+    rf'(?<!\d)(\d{{1,2}}\s*[{DASH_CHARS}]\s*\d{{3}}(?:\s*[а-яёa-z])?(?:\s*/\s*\d{{1,3}})?)_?'
+)
 TEACHER_RE = re.compile(r'([А-ЯЁA-Z][а-яёa-z]+(?:-[А-ЯЁA-Z][а-яёa-z]+)?\s+[А-ЯЁA-Z]\.\s*[А-ЯЁA-Z]\.)')
 SUBGROUP_RE = re.compile(r'(\d{2}\s*подгруппа)', re.IGNORECASE)
 GROUP_CODE_RE = re.compile(r'\b[А-Яа-яЁёA-Za-z]{1,8}[БбBb6]?-?\d{4}-\d{2}-\d{2}\b')
@@ -157,7 +160,10 @@ def normalize_interval(text):
 
 def normalize_room_value(raw_room):
     text = str(raw_room or "").strip().replace("_", "")
+    text = re.sub(rf'[{DASH_CHARS}]', '-', text)
     text = re.sub(r'\s*-\s*', '-', text)
+    text = re.sub(r'\s*/\s*', '/', text)
+    text = re.sub(r'\s+', '', text)
     return text
 
 
@@ -556,6 +562,54 @@ def get_first_schedule_date_label(df):
     first_date = parsed_dates.min()
     return first_date.strftime("%d.%m.%y")
 
+
+def analyze_schedule_anomalies(df):
+    total_rows = len(df)
+    if total_rows == 0:
+        return {
+            "total_rows": 0,
+            "anomalous_rows": 0,
+            "reason_counts": {},
+        }
+
+    idx = df.index
+
+    date_series = pd.to_datetime(df.get("Дата", pd.Series(index=idx, dtype="object")), format="%d.%m.%y", errors="coerce")
+    time_series = df.get("Время", pd.Series(index=idx, dtype="object")).fillna("").astype(str).str.strip()
+    day_series = df.get("День недели", pd.Series(index=idx, dtype="object")).fillna("").astype(str).str.strip().str.lower()
+    room_series = df.get("Кабинет", pd.Series(index=idx, dtype="object")).fillna("").astype(str).str.strip()
+    teacher_series = df.get("Преподаватель", pd.Series(index=idx, dtype="object")).fillna("").astype(str).str.strip()
+    discipline_series = df.get("Дисциплина", pd.Series(index=idx, dtype="object")).fillna("").astype(str).str.strip()
+
+    normalized_room_series = room_series.apply(normalize_room_value)
+    room_is_valid = normalized_room_series.apply(
+        lambda value: bool(re.fullmatch(r'\d{1,2}-\d{3}(?:[а-яёa-z])?(?:/\d{1,3})?', value, flags=re.IGNORECASE))
+    )
+
+    reason_masks = {
+        "пустая или некорректная дата": date_series.isna(),
+        "пустое или некорректное время": ~time_series.str.fullmatch(r'\d{2}:\d{2}-\d{2}:\d{2}'),
+        "пустой или некорректный день недели": ~day_series.isin(DAYS),
+        "пустой или некорректный кабинет": room_series.eq("") | room_series.str.lower().eq("не указан") | ~room_is_valid,
+        "не указан преподаватель": teacher_series.eq("") | teacher_series.str.lower().eq("не указан"),
+        "пустая дисциплина": discipline_series.eq("") | discipline_series.str.lower().eq("не указано"),
+    }
+
+    anomaly_mask = pd.Series(False, index=idx)
+    reason_counts = {}
+    for reason, mask in reason_masks.items():
+        mask = mask.fillna(True)
+        anomaly_mask = anomaly_mask | mask
+        count = int(mask.sum())
+        if count > 0:
+            reason_counts[reason] = count
+
+    return {
+        "total_rows": total_rows,
+        "anomalous_rows": int(anomaly_mask.sum()),
+        "reason_counts": reason_counts,
+    }
+
 # Использование скрипта:
 if __name__ == "__main__":
     script_dir = Path(__file__).resolve().parent
@@ -565,6 +619,7 @@ if __name__ == "__main__":
         print("Файлы PDF не найдены. Положите расписание в папку schedule рядом со скриптом.")
     else:
         exported_files = []
+        anomaly_reports = []
         output_root = script_dir / "parsed_schedule"
 
         for pdf_path in schedule_files:
@@ -590,7 +645,29 @@ if __name__ == "__main__":
             rel_saved = saved_per_file_csv.relative_to(script_dir)
             print(f"Сохранён файл: {rel_saved} ({len(schedule_df)} строк)")
 
+            anomaly_info = analyze_schedule_anomalies(schedule_df)
+            anomaly_reports.append({
+                "group_name": group_name,
+                "csv_path": rel_saved,
+                "total_rows": anomaly_info["total_rows"],
+                "anomalous_rows": anomaly_info["anomalous_rows"],
+                "reason_counts": anomaly_info["reason_counts"],
+            })
+
         if not exported_files:
             print("Не удалось получить данные из найденных PDF-файлов.")
         else:
             print(f"\nЭкспорт завершён: {len(exported_files)} файл(ов) в папке {output_root.relative_to(script_dir)}")
+            print("\nАнализ аномальных строк по результирующим CSV:")
+            for report in anomaly_reports:
+                print(
+                    f"- {report['group_name']}: {report['anomalous_rows']} из {report['total_rows']} аномальных строк"
+                    f" ({report['csv_path']})"
+                )
+                if report["reason_counts"]:
+                    reasons_line = "; ".join(
+                        f"{reason}: {count}" for reason, count in report["reason_counts"].items()
+                    )
+                    print(f"  Причины: {reasons_line}")
+                else:
+                    print("  Причины: не обнаружены")

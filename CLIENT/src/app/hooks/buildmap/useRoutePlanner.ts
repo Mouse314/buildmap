@@ -6,6 +6,22 @@ import type { Room } from '../../../map/rooms/utils/Room'
 import { formatRoomDescription } from '../../../map/rooms/utils/stairDirection'
 import type { MapMode } from './types'
 
+function roomCenter(room: Room): { x: number; y: number } {
+  if (room.points.length === 0) return { x: 0, y: 0 }
+
+  let sx = 0
+  let sy = 0
+  for (const point of room.points) {
+    sx += point.x
+    sy += point.y
+  }
+
+  return {
+    x: sx / room.points.length,
+    y: sy / room.points.length,
+  }
+}
+
 export function buildRouteTargetFromRoom(room: Room, buildId: string, floorId: string): RouteTarget {
   if (room.roomID === 9) {
     return {
@@ -42,7 +58,23 @@ export function useRoutePlanner({
   const [routeDistanceM, setRouteDistanceM] = React.useState<number | null>(null)
   const [routeSegments, setRouteSegments] = React.useState<RouteSegment[]>([])
   const [routeFloorJumps, setRouteFloorJumps] = React.useState<RouteFloorJump[]>([])
+  const [routeResult, setRouteResult] = React.useState<{ segments: RouteSegment[]; floorJumps: RouteFloorJump[] } | null>(null)
   const [routeHints, setRouteHints] = React.useState<string[]>([])
+  const [routeAllFloors, setRouteAllFloors] = React.useState<string[]>([])
+  const [routeTargetPoint, setRouteTargetPoint] = React.useState<{ floorId: string; x: number; y: number } | null>(null)
+
+  const clearRouteMemory = React.useCallback(() => {
+    setRouteFrom(null)
+    setRouteTo(null)
+    setActiveRouteEndpoint('to')
+    setRouteDistanceM(null)
+    setRouteSegments([])
+    setRouteFloorJumps([])
+    setRouteResult(null)
+    setRouteHints([])
+    setRouteAllFloors([])
+    setRouteTargetPoint(null)
+  }, [])
 
   const applyRouteEndpoint = React.useCallback((endpoint: RouteEndpoint, target: RouteTarget) => {
     if (endpoint === 'from') {
@@ -58,33 +90,41 @@ export function useRoutePlanner({
 
   React.useEffect(() => {
     if (mapMode !== 'routes') {
-      setRouteSegments([])
-      setRouteFloorJumps([])
+      setRouteResult(null)
       setRouteHints([])
       setRouteDistanceM(null)
+      setRouteAllFloors([])
+      setRouteTargetPoint(null)
       return
     }
     if (!routeTo) {
-      setRouteSegments([])
-      setRouteFloorJumps([])
+      setRouteResult(null)
       setRouteHints([])
       setRouteDistanceM(null)
+      setRouteAllFloors([])
+      setRouteTargetPoint(null)
       return
     }
     if (routeTo.buildId !== selectedBuild) {
-      setRouteSegments([])
-      setRouteFloorJumps([])
+      setRouteResult(null)
       setRouteHints([])
       setRouteDistanceM(null)
+      setRouteAllFloors([])
+      setRouteTargetPoint(null)
       return
     }
     if (routeFrom && routeFrom.buildId !== selectedBuild) {
-      setRouteSegments([])
-      setRouteFloorJumps([])
+      setRouteResult(null)
       setRouteHints([])
       setRouteDistanceM(null)
+      setRouteAllFloors([])
+      setRouteTargetPoint(null)
       return
     }
+
+    const targetFloorData = buildFloorData.find((f) => f.floorId === routeTo.floorId)
+    const targetRoom = targetFloorData?.rooms.find((room) => room.key === routeTo.roomKey)
+    setRouteTargetPoint(targetRoom ? { floorId: routeTo.floorId, ...roomCenter(targetRoom) } : null)
 
     const result = computeRoute({
       buildId: selectedBuild,
@@ -94,23 +134,45 @@ export function useRoutePlanner({
     })
 
     if (!result) {
-      setRouteSegments([])
-      setRouteFloorJumps([])
+      setRouteResult(null)
       setRouteHints(['Маршрут не найден'])
       setRouteDistanceM(null)
+      setRouteAllFloors([])
       return
     }
 
+    const floorsSet = new Set<string>()
+    for (const segment of result.segments) floorsSet.add(segment.floorId)
+    for (const jump of result.floorJumps) {
+      floorsSet.add(jump.floorId)
+      floorsSet.add(jump.targetFloorId)
+    }
+    if (floorsSet.size === 0) floorsSet.add(routeTo.floorId)
+    setRouteAllFloors(Array.from(floorsSet))
+
+    setRouteResult({
+      segments: result.segments,
+      floorJumps: result.floorJumps,
+    })
     setRouteDistanceM(result.distance)
-    setRouteSegments(result.segments.filter((s) => s.floorId === selectedFloor))
-    setRouteFloorJumps(result.floorJumps.filter((j) => j.floorId === selectedFloor))
     setRouteHints(buildRouteHints({
       routeFrom,
       routeTo,
       buildFloorData,
       routeDistanceM: result.distance,
     }))
-  }, [buildFloorData, mapMode, routeFrom, routeTo, selectedBuild, selectedFloor])
+  }, [buildFloorData, mapMode, routeFrom, routeTo, selectedBuild])
+
+  React.useEffect(() => {
+    if (!routeResult) {
+      setRouteSegments([])
+      setRouteFloorJumps([])
+      return
+    }
+
+    setRouteSegments(routeResult.segments.filter((s) => s.floorId === selectedFloor))
+    setRouteFloorJumps(routeResult.floorJumps.filter((j) => j.floorId === selectedFloor))
+  }, [routeResult, selectedFloor])
 
   return {
     mapMode,
@@ -121,10 +183,14 @@ export function useRoutePlanner({
     routeSegments,
     routeFloorJumps,
     routeHints,
+    routeAllFloors,
+    routeTargetPoint,
 
     setMapMode,
     setRouteFrom,
+    setRouteTo,
     setActiveRouteEndpoint,
     applyRouteEndpoint,
+    clearRouteMemory,
   }
 }

@@ -68,7 +68,9 @@ export function FloorPlanCanvas({
   matchedKeys = null,
   routeSegments = [],
   routeFloorJumps = [],
+  routeEndpointGeoControl = null,
   onRouteFloorJump,
+  onRouteEndpointGeoAction,
   showGraphOverlay = false,
   userLocationOverlay = null,
   geoAnchorMarkers = null,
@@ -91,7 +93,16 @@ export function FloorPlanCanvas({
   matchedKeys?: Set<string> | null;
   routeSegments?: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }>;
   routeFloorJumps?: Array<{ x: number; y: number; targetFloorId: string; direction: 'up' | 'down' }>;
+  routeEndpointGeoControl?: {
+    x: number;
+    y: number;
+    mode: 'jump-floor' | 'cancel';
+    icon: string;
+    text: string;
+    targetFloorId: string | null;
+  } | null;
   onRouteFloorJump?: (targetFloorId: string) => void;
+  onRouteEndpointGeoAction?: (mode: 'jump-floor' | 'cancel', targetFloorId: string | null) => void;
   showGraphOverlay?: boolean;
   userLocationOverlay?: {
     mode: 'inside' | 'outside';
@@ -206,6 +217,12 @@ export function FloorPlanCanvas({
     { down: false, startX: 0, startY: 0, moved: false },
   );
   const [isDragging, setIsDragging] = React.useState(false);
+
+  const suppressMapTapFromOverlay = React.useCallback(() => {
+    // Prevent DOM overlays from triggering accidental room pick beneath.
+    clickCandidateRef.current = null;
+    suppressMouseTapUntilRef.current = performance.now() + 420;
+  }, []);
 
   React.useEffect(() => {
     if (!isDragging) return;
@@ -659,15 +676,24 @@ export function FloorPlanCanvas({
         {routeJumpGroups.length > 0 ? (
           <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.56, 0]}>
             {routeJumpGroups.map((group) => (
-              <Html key={group.key} position={[group.x, group.y, 0]} sprite center>
+              <Html key={group.key} position={[group.x, group.y, 0]} sprite center zIndexRange={[90, 10]}>
                 <div className="routeStairJumpGroup">
                   {group.buttons.map((jump) => (
                     <button
                       key={jump.key}
                       type="button"
                       className="routeStairJumpBtn"
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        suppressMapTapFromOverlay();
+                      }}
+                      onPointerUp={(e) => {
+                        e.stopPropagation();
+                        suppressMapTapFromOverlay();
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        suppressMapTapFromOverlay();
                         onRouteFloorJump?.(jump.targetFloorId);
                       }}
                       title={jump.title}
@@ -680,6 +706,37 @@ export function FloorPlanCanvas({
                 </div>
               </Html>
             ))}
+          </group>
+        ) : null}
+
+        {routeEndpointGeoControl ? (
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.58, 0]}>
+            <Html position={[routeEndpointGeoControl.x, routeEndpointGeoControl.y, 0]} sprite center zIndexRange={[90, 10]}>
+              <div className="routeEndGeoGroup">
+                <button
+                  type="button"
+                  className="routeEndGeoBtn"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    suppressMapTapFromOverlay();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    suppressMapTapFromOverlay();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    suppressMapTapFromOverlay();
+                    onRouteEndpointGeoAction?.(routeEndpointGeoControl.mode, routeEndpointGeoControl.targetFloorId);
+                  }}
+                  title={routeEndpointGeoControl.text}
+                  aria-label={routeEndpointGeoControl.text}
+                >
+                  <span className="routeEndGeoEmoji" aria-hidden>{routeEndpointGeoControl.icon}</span>
+                  <span className="routeEndGeoText">{routeEndpointGeoControl.text}</span>
+                </button>
+              </div>
+            </Html>
           </group>
         ) : null}
 

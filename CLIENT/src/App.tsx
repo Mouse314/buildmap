@@ -42,6 +42,7 @@ function App() {
     routeSegments,
     routeFloorJumps,
     routeHints,
+    routeEndpointGeoControl,
     showGraphOverlay,
     officesHierarchy,
     isAdminMode,
@@ -87,6 +88,7 @@ function App() {
     closeGraphicsPresetsModal,
     onToggleGraphOverlay,
     onRouteFloorJump,
+    onRouteEndpointGeoAction,
     onSelectRoomKey,
     onOpenRoom,
     onHoverRoom,
@@ -189,6 +191,8 @@ function App() {
           routeSegments={routeSegments}
           routeFloorJumps={routeFloorJumps}
           onRouteFloorJump={onRouteFloorJump}
+          routeEndpointGeoControl={routeEndpointGeoControl}
+          onRouteEndpointGeoAction={onRouteEndpointGeoAction}
           showGraphOverlay={showGraphOverlay}
           userLocationOverlay={activeUserLocationOverlay}
           geoAnchorMarkers={selectedGeoMarkers}

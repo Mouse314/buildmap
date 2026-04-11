@@ -48,6 +48,29 @@ function extractRoomNoFromCabinet(value: string | null | undefined): string | nu
   return roomNo.length > 0 ? roomNo : null
 }
 
+function floorOrderValue(floorId: string): number {
+  const match = floorId.match(/floor\s*(\d+)/i)
+  if (!match) return Number.NaN
+  return Number.parseInt(match[1], 10)
+}
+
+function floorCenter(rooms: Room[]): { x: number; y: number } {
+  let sx = 0
+  let sy = 0
+  let count = 0
+
+  for (const room of rooms) {
+    for (const point of room.points) {
+      sx += point.x
+      sy += point.y
+      count += 1
+    }
+  }
+
+  if (count === 0) return { x: 0, y: 0 }
+  return { x: sx / count, y: sy / count }
+}
+
 export function useBuildMapApp() {
   const {
     manifest,
@@ -77,10 +100,13 @@ export function useBuildMapApp() {
     routeSegments,
     routeFloorJumps,
     routeHints,
+    routeAllFloors,
+    routeTargetPoint,
     setMapMode,
     setRouteFrom,
     setActiveRouteEndpoint,
     applyRouteEndpoint,
+    clearRouteMemory,
   } = useRoutePlanner({
     buildFloorData,
     selectedBuild,
@@ -239,6 +265,47 @@ export function useBuildMapApp() {
       accuracyText: userLocationOverlay.accuracyText,
     }
   }, [selectedBuild, userLocationOverlay])
+
+  const routeEndpointGeoControl = React.useMemo(() => {
+    if (mapMode !== 'routes') return null
+    if (!routeTo) return null
+
+    const targetPoint = routeTargetPoint && routeTargetPoint.floorId === selectedFloor
+      ? routeTargetPoint
+      : null
+    const fallbackPoint = floorCenter(rooms)
+    const x = targetPoint?.x ?? fallbackPoint.x
+    const y = targetPoint?.y ?? fallbackPoint.y
+
+    if (routeTo.floorId === selectedFloor && targetPoint) {
+      return {
+        x,
+        y,
+        mode: 'cancel' as const,
+        icon: '✖',
+        text: 'Финиш',
+        targetFloorId: null,
+      }
+    }
+
+    if (routeAllFloors.length === 1 && routeAllFloors[0] === routeTo.floorId) {
+      const currentOrder = floorOrderValue(selectedFloor)
+      const targetOrder = floorOrderValue(routeTo.floorId)
+      if (Number.isFinite(currentOrder) && Number.isFinite(targetOrder) && currentOrder !== targetOrder) {
+        const isUp = targetOrder > currentOrder
+        return {
+          x,
+          y,
+          mode: 'jump-floor' as const,
+          icon: isUp ? '⬆️' : '⬇️',
+          text: isUp ? 'Маршрут выше' : 'Маршрут ниже',
+          targetFloorId: routeTo.floorId,
+        }
+      }
+    }
+
+    return null
+  }, [mapMode, rooms, routeAllFloors, routeTargetPoint, routeTo, selectedFloor])
 
   const matchedKeys = React.useMemo(() => {
     if (!isFiltering) return null
@@ -750,6 +817,20 @@ export function useBuildMapApp() {
     setRouteFrom(null)
   }, [setRouteFrom])
 
+  const onRouteEndpointGeoAction = React.useCallback((mode: 'jump-floor' | 'cancel', targetFloorId: string | null) => {
+    if (mode === 'jump-floor' && targetFloorId) {
+      setSelectedFloor(targetFloorId)
+      return
+    }
+
+    if (mode === 'cancel') {
+      clearRouteMemory()
+      setMapMode('normal')
+      setSelectedRoomKey(null)
+      setModalAnchor(null)
+    }
+  }, [clearRouteMemory, setMapMode, setSelectedFloor])
+
   return {
     error,
     rooms,
@@ -801,6 +882,7 @@ export function useBuildMapApp() {
     selectedGeoRealCardinalLabels,
     selectedGeoMarkers,
     activeUserLocationOverlay,
+    routeEndpointGeoControl,
     matchedKeys,
     smartSearchData,
     totalRooms,
@@ -846,5 +928,6 @@ export function useBuildMapApp() {
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
+    onRouteEndpointGeoAction,
   }
 }

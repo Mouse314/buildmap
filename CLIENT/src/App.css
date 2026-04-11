@@ -974,8 +974,8 @@
   gap: 8px;
   padding: 5px;
   border-radius: 16px;
-  border: 2px solid rgba(206, 209, 255, 0.34);
-  background: rgba(167, 167, 167, 0.45);
+  border: 2px solid rgba(206, 209, 255, 0.26);
+  background: rgba(167, 167, 167, 0.32);
   backdrop-filter: blur(4px) saturate(112%);
   -webkit-backdrop-filter: blur(4px) saturate(112%);
 }
@@ -984,8 +984,8 @@
   min-width: 88px;
   height: 42px;
   border-radius: 14px;
-  border: 2px solid rgba(206, 209, 255, 0.72);
-  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(206, 209, 255, 0.5);
+  background: rgba(255, 255, 255, 0.68);
   color: #111;
   font-weight: 800;
   display: flex;
@@ -994,13 +994,13 @@
   gap: 6px;
   padding: 0 10px;
   text-align: center;
-  box-shadow: 0 9px 20px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
 }
 
 .routeStairJumpBtn:hover {
   transition: 150ms ease-out;
   transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .routeStairJumpEmoji {
@@ -1010,6 +1010,52 @@
 
 .routeStairJumpText {
   font-size: 0.72rem;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.routeEndGeoGroup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 16px;
+  border: 2px solid rgba(206, 209, 255, 0.26);
+  background: rgba(167, 167, 167, 0.32);
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
+}
+
+.routeEndGeoBtn {
+  min-width: 124px;
+  height: 42px;
+  border-radius: 14px;
+  border: 2px solid rgba(206, 209, 255, 0.5);
+  background: rgba(255, 255, 255, 0.72);
+  color: #111;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
+}
+
+.routeEndGeoBtn:hover {
+  transition: 150ms ease-out;
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.routeEndGeoEmoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.routeEndGeoText {
+  font-size: 0.74rem;
   line-height: 1.05;
   white-space: nowrap;
 }
