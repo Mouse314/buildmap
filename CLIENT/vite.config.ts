@@ -25,6 +25,10 @@ export default defineConfig({
         target: plansApiProxyTarget,
         changeOrigin: true,
       },
+      '/api/schedule': {
+        target: plansApiProxyTarget,
+        changeOrigin: true,
+      },
     },
   },
   plugins: [

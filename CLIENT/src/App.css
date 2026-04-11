@@ -1060,6 +1060,487 @@
   white-space: nowrap;
 }
 
+.scheduleBottomCluster {
+  position: absolute;
+  z-index: 125;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.schedulePeriodDock {
+  min-height: 42px;
+  border-radius: 14px;
+  border: 2px solid rgba(206, 209, 255, 0.3);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  max-width: min(78vw, 780px);
+}
+
+.schedulePeriodSwitch {
+  display: inline-flex;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.schedulePeriodBtn {
+  min-width: 84px;
+  height: 30px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.32);
+  color: #111;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.schedulePeriodBtnActive {
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.schedulePackageSelectWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.schedulePackageSelectWrap select {
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.68);
+  color: #111;
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+.schedulePeriodMeta {
+  font-size: 0.74rem;
+  font-weight: 700;
+  opacity: 0.86;
+  white-space: nowrap;
+}
+
+.scheduleOpenBtn {
+  height: 42px;
+  min-width: 220px;
+  border-radius: 14px;
+  border: 2px solid rgba(206, 209, 255, 0.3);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  color: #111;
+  font-weight: 800;
+  padding: 0 16px;
+}
+
+.scheduleOpenBtn:hover {
+  transition: 140ms ease-out;
+  transform: translateY(-1px);
+  background: rgba(167, 167, 167, 0.84);
+}
+
+.scheduleRoomOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 940;
+  padding: 0;
+  background: transparent;
+}
+
+.scheduleRoomModal {
+  position: fixed;
+  width: clamp(320px, 56vw, 920px);
+  max-width: calc(100vw - 24px);
+  max-height: min(70vh, 680px);
+  border-radius: 16px;
+  border: 2px solid rgba(206, 209, 255, 0.3);
+  background: rgba(167, 167, 167, 0.8);
+  backdrop-filter: blur(7px) saturate(118%);
+  -webkit-backdrop-filter: blur(7px) saturate(118%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scheduleRoomModalAnchor {
+  color: #111;
+}
+
+.scheduleRoomModalAbove {
+  transform: translate(-50%, calc(-100% - 12px));
+  animation: scheduleRoomModalAboveIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.scheduleRoomModalBelow {
+  transform: translate(-50%, 12px);
+  animation: scheduleRoomModalBelowIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes scheduleRoomModalAboveIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 12px));
+  }
+}
+
+@keyframes scheduleRoomModalBelowIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 12px);
+  }
+}
+
+.scheduleRoomHeader {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.scheduleRoomTitle {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.scheduleRoomMeta {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  opacity: 0.84;
+  font-weight: 700;
+}
+
+.scheduleRoomClose {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.4);
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #111;
+}
+
+.scheduleRoomBody {
+  min-height: 0;
+  overflow: auto;
+}
+
+.scheduleRoomEmpty {
+  padding: 14px;
+  font-weight: 700;
+  opacity: 0.82;
+}
+
+.scheduleRoomTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.scheduleRoomTable th,
+.scheduleRoomTable td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 8px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.scheduleRoomTable thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.76);
+  z-index: 1;
+}
+
+.scheduleOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 980;
+  background: rgba(11, 15, 25, 0.26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scheduleModal {
+  width: min(1280px, calc(100% - 30px));
+  max-height: min(88vh, 920px);
+  border-radius: var(--ui-window-radius);
+  border: var(--ui-window-border);
+  background: var(--ui-window-bg);
+  backdrop-filter: var(--ui-window-filter);
+  -webkit-backdrop-filter: var(--ui-window-filter);
+  box-shadow: var(--ui-window-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scheduleModalHeader {
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  flex-shrink: 0;
+}
+
+.scheduleModalTitle {
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.scheduleModalMeta {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0.82;
+}
+
+.scheduleCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(206, 209, 255, 0.32);
+  background: rgba(255, 255, 255, 0.26);
+  color: #111;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.scheduleControlsGrid {
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 8px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+}
+
+.scheduleField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scheduleFieldWide {
+  grid-column: span 2;
+}
+
+.scheduleFieldLabel {
+  font-size: 0.74rem;
+  font-weight: 800;
+  opacity: 0.86;
+}
+
+.scheduleSelect,
+.scheduleInput {
+  height: 34px;
+  border-radius: 10px;
+  border: 2px solid rgba(206, 209, 255, 0.3);
+  background: rgba(255, 255, 255, 0.36);
+  padding: 0 10px;
+  color: #111;
+  font-size: 0.84rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.scheduleError,
+.scheduleLoading,
+.scheduleTableMeta {
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.scheduleError {
+  color: #8f1e1e;
+}
+
+.scheduleStatsGrid {
+  padding: 6px 10px 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.scheduleStatsBlock {
+  border-radius: 12px;
+  border: 2px solid rgba(206, 209, 255, 0.26);
+  background: rgba(255, 255, 255, 0.24);
+  padding: 8px;
+}
+
+.scheduleStatsTitle {
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.scheduleStatsItems {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scheduleStatsItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.scheduleStatsLabel {
+  font-size: 0.76rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.scheduleStatsCount {
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.scheduleStatsEmpty {
+  font-size: 0.74rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.scheduleTableWrap {
+  padding: 0 10px 12px;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.scheduleTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.scheduleTable th,
+.scheduleTable td {
+  text-align: left;
+  padding: 7px 9px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+  font-size: 0.82rem;
+  vertical-align: top;
+}
+
+.scheduleTable th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(181, 181, 181, 0.48);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  font-weight: 800;
+}
+
+.scheduleTable thead tr:nth-child(2) th {
+  top: 30px;
+  z-index: 3;
+  background: rgba(181, 181, 181, 0.58);
+}
+
+.scheduleColumnFilter {
+  width: 100%;
+  height: 30px;
+  border-radius: 8px;
+  border: 2px solid rgba(206, 209, 255, 0.3);
+  background: rgba(255, 255, 255, 0.42);
+  padding: 0 8px;
+  color: #111;
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
+}
+
+@media (max-width: 1080px) {
+  .scheduleControlsGrid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+
+  .scheduleFieldWide {
+    grid-column: span 2;
+  }
+
+  .scheduleStatsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .scheduleModal {
+    width: calc(100% - 14px);
+    max-height: calc(100vh - 14px);
+  }
+
+  .scheduleControlsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .scheduleFieldWide {
+    grid-column: span 1;
+  }
+
+  .scheduleTable th,
+  .scheduleTable td {
+    font-size: 0.76rem;
+    padding: 6px 8px;
+  }
+
+  .scheduleRoomModal {
+    width: min(92vw, 680px);
+    max-height: min(78vh, 760px);
+  }
+
+  .scheduleRoomTable th,
+  .scheduleRoomTable td {
+    font-size: 0.74rem;
+    padding: 6px 7px;
+  }
+}
+
 @media (max-width: 920px) {
   .routeBottomCluster {
     width: min(96vw, 560px);
@@ -1168,6 +1649,34 @@
   .officesTable td {
     padding: 7px 8px;
     font-size: 0.8rem;
+  }
+
+  .scheduleBottomCluster {
+    left: 50%;
+    right: auto;
+    bottom: 10px;
+    flex-direction: column;
+    align-items: center;
+    transform: translateX(-50%);
+    width: calc(100% - 16px);
+    max-width: 560px;
+  }
+
+  .schedulePeriodDock {
+    max-width: none;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .schedulePeriodMeta {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .scheduleOpenBtn {
+    width: 100%;
+    min-width: 0;
   }
 }
 

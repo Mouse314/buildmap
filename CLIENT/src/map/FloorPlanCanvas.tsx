@@ -68,6 +68,9 @@ export function FloorPlanCanvas({
   matchedKeys = null,
   routeSegments = [],
   routeFloorJumps = [],
+  scheduleHeatEnabled = false,
+  scheduleHeatByRoomKey = null,
+  scheduleHeatMax = 0,
   routeEndpointGeoControl = null,
   onRouteFloorJump,
   onRouteEndpointGeoAction,
@@ -93,6 +96,9 @@ export function FloorPlanCanvas({
   matchedKeys?: Set<string> | null;
   routeSegments?: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }>;
   routeFloorJumps?: Array<{ x: number; y: number; targetFloorId: string; direction: 'up' | 'down' }>;
+  scheduleHeatEnabled?: boolean;
+  scheduleHeatByRoomKey?: Record<string, number> | null;
+  scheduleHeatMax?: number;
   routeEndpointGeoControl?: {
     x: number;
     y: number;
@@ -531,12 +537,26 @@ export function FloorPlanCanvas({
           const isLabel = item.polygon.roomID === 200;
 
           const shouldDim = matchedKeys != null && !isMatched && !isSelected && !isHovered && !isWall && !isLabel;
-          const fillColor = isWall && theme === 'dark'
-            ? '#212630'
-            : shouldDim
-              ? colors.dimFill
-              : item.color;
-          const fillOpacity = shouldDim ? 0.6 : 1.0;
+          const heatCount = scheduleHeatByRoomKey?.[item.key] ?? 0;
+          const heatMaxSafe = Math.max(1, scheduleHeatMax);
+          const fillColor = (() => {
+            if (scheduleHeatEnabled && !isWall && !isLabel) {
+              const cool = new THREE.Color('#eef1f6');
+              if (heatCount <= 0) return cool.getStyle();
+              const hot = new THREE.Color('#cf2d2d');
+              const t = Math.min(1, heatCount / heatMaxSafe);
+              const eased = 0.18 + (0.82 * Math.sqrt(t));
+              return cool.lerp(hot, eased).getStyle();
+            }
+
+            if (isWall && theme === 'dark') return '#212630';
+            if (shouldDim) return colors.dimFill;
+            return item.color;
+          })();
+
+          const fillOpacity = scheduleHeatEnabled && !isWall && !isLabel
+            ? 0.96
+            : (shouldDim ? 0.6 : 1.0);
 
           return (
             <React.Fragment key={item.key}>

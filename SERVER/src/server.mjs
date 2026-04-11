@@ -11,6 +11,11 @@ const publicRoot = process.env.PLANS_PUBLIC_DIR
   ? path.resolve(process.cwd(), process.env.PLANS_PUBLIC_DIR)
   : defaultPublicRoot;
 
+const defaultScheduleRoot = path.resolve(__dirname, '../schedule_parser/parsed_schedule');
+const scheduleRoot = process.env.SCHEDULE_PARSED_DIR
+  ? path.resolve(process.cwd(), process.env.SCHEDULE_PARSED_DIR)
+  : defaultScheduleRoot;
+
 const host = process.env.HOST && process.env.HOST.trim().length > 0 ? process.env.HOST.trim() : '0.0.0.0';
 const portRaw = process.env.PORT ?? '3001';
 const port = Number.parseInt(portRaw, 10);
@@ -255,6 +260,88 @@ function safeSegment(raw) {
   const value = decoded.trim();
   if (!/^[a-zA-Z0-9_-]+$/.test(value)) return null;
   return value;
+}
+
+function safeScheduleDate(raw) {
+  if (typeof raw !== 'string') return null;
+  const value = raw.trim();
+  return /^\d{2}\.\d{2}\.\d{2}$/.test(value) ? value : null;
+}
+
+function safeScheduleFileName(raw) {
+  if (typeof raw !== 'string') return null;
+  const value = raw.trim();
+  if (value.length === 0) return null;
+  if (value.includes('/') || value.includes('\\') || value.includes('\0')) return null;
+  if (path.basename(value) !== value) return null;
+  if (!/\.csv$/i.test(value)) return null;
+  return value;
+}
+
+function parseScheduleDateToEpoch(value) {
+  const m = value.match(/^(\d{2})\.(\d{2})\.(\d{2})$/);
+  if (!m) return Number.NEGATIVE_INFINITY;
+  const day = Number.parseInt(m[1], 10);
+  const month = Number.parseInt(m[2], 10);
+  const year = 2000 + Number.parseInt(m[3], 10);
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) return Number.NEGATIVE_INFINITY;
+  const d = new Date(Date.UTC(year, month - 1, day));
+  if (Number.isNaN(d.getTime())) return Number.NEGATIVE_INFINITY;
+  return d.getTime();
+}
+
+async function readScheduleManifest() {
+  let entries;
+  try {
+    entries = await fs.readdir(scheduleRoot, { withFileTypes: true });
+  } catch {
+    return { dates: [] };
+  }
+
+  const dateDirs = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => safeScheduleDate(name) != null)
+    .sort((a, b) => parseScheduleDateToEpoch(b) - parseScheduleDateToEpoch(a));
+
+  const dates = [];
+
+  for (const dateDir of dateDirs) {
+    const folderPath = path.join(scheduleRoot, dateDir);
+    let files;
+    try {
+      files = await fs.readdir(folderPath, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    const csvFiles = [];
+    for (const file of files) {
+      if (!file.isFile()) continue;
+      if (!/\.csv$/i.test(file.name)) continue;
+      const filePath = path.join(folderPath, file.name);
+      try {
+        const stats = await fs.stat(filePath);
+        csvFiles.push({
+          name: file.name,
+          size: stats.size,
+          modifiedAt: stats.mtime.toISOString(),
+        });
+      } catch {
+        // ignore broken file entries
+      }
+    }
+
+    csvFiles.sort((a, b) => a.name.localeCompare(b.name, 'ru-RU'));
+    if (csvFiles.length > 0) {
+      dates.push({
+        date: dateDir,
+        files: csvFiles,
+      });
+    }
+  }
+
+  return { dates };
 }
 
 function normalizeNullableTextField(value) {
@@ -648,6 +735,32 @@ async function handleGetRequest(req, res) {
     return;
   }
 
+  if (pathname === '/api/schedule/manifest') {
+    const manifest = await readScheduleManifest();
+    sendJson(res, 200, manifest);
+    return;
+  }
+
+  if (pathname === '/api/schedule/file') {
+    const date = safeScheduleDate(url.searchParams.get('date'));
+    const name = safeScheduleFileName(url.searchParams.get('name'));
+
+    if (!date || !name) {
+      sendJson(res, 400, { error: 'Invalid schedule date or file name' });
+      return;
+    }
+
+    const filePath = path.join(scheduleRoot, date, name);
+    const normalized = path.normalize(filePath);
+    if (!normalized.startsWith(path.normalize(scheduleRoot + path.sep))) {
+      sendJson(res, 400, { error: 'Invalid schedule path' });
+      return;
+    }
+
+    await sendFile(res, normalized, 'text/csv; charset=utf-8');
+    return;
+  }
+
   const parts = pathname.split('/').filter((x) => x.length > 0);
   if (parts.length === 5 && parts[0] === 'api' && parts[1] === 'plans') {
     const buildId = safeSegment(parts[2]);
@@ -748,6 +861,8 @@ async function bootstrap() {
     console.log(`Plans API server is running on http://${host}:${port}`);
     // eslint-disable-next-line no-console
     console.log(`Serving data from ${publicRoot}`);
+    // eslint-disable-next-line no-console
+    console.log(`Serving schedule data from ${scheduleRoot}`);
   });
 }
 

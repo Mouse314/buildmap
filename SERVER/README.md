@@ -23,6 +23,7 @@ By default, server starts on `http://localhost:3001` and serves files from `../C
 - `PORT` - server port (default: `3001`)
 - `HOST` - bind host (default: `0.0.0.0`)
 - `PLANS_PUBLIC_DIR` - optional custom path to public plans directory
+- `SCHEDULE_PARSED_DIR` - optional path to parsed schedule folder (default: `SERVER/schedule_parser/parsed_schedule`)
 
 ### Endpoints
 
@@ -31,6 +32,8 @@ By default, server starts on `http://localhost:3001` and serves files from `../C
 - `GET /api/plans/:buildId/:floorId/rooms`
 - `GET /api/plans/:buildId/:floorId/rooms.csv`
 - `GET /api/plans/:buildId/:floorId/graph`
+- `GET /api/schedule/manifest`
+- `GET /api/schedule/file?date=DD.MM.YY&name=<group.csv>`
 - `GET /api/admin/health`
 - `POST /api/admin/rooms/update`
 - `POST /api/admin/graphics/presets`

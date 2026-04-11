@@ -30,6 +30,8 @@ import {
 } from './buildmap/geoUtils'
 import type { HoverRoomPayload, OpenRoomPayload, RoomEditPayload } from './buildmap/types'
 import { buildGeoCalibration } from '../../navigation/geoProjection'
+import { fetchScheduleBatchDataset, fetchScheduleManifest, type ScheduleManifest } from '../../schedule/api'
+import { ScheduleDataset, type SchedulePeriodMode } from '../../schedule/domain'
 
 function caseFold(value: string | null | undefined): string {
   return (value ?? '').trim().toLocaleLowerCase('ru-RU')
@@ -69,6 +71,53 @@ function floorCenter(rooms: Room[]): { x: number; y: number } {
 
   if (count === 0) return { x: 0, y: 0 }
   return { x: sx / count, y: sy / count }
+}
+
+function buildNumberFromBuildId(buildId: string): string | null {
+  const m = buildId.match(/(\d+)/)
+  return m ? m[1] : null
+}
+
+function normalizeScheduleRoomToken(value: string | null | undefined): string {
+  return caseFold(value).replace(/\s+/g, '')
+}
+
+function parseCabinetTarget(value: string | null | undefined): { building: string; roomToken: string } | null {
+  const text = String(value ?? '').trim()
+  if (text.length === 0) return null
+
+  const m = text.match(/^(\d+)\s*[-–—]\s*([0-9A-Za-zА-Яа-я]+(?:\s*\/\s*[0-9A-Za-zА-Яа-я]+)?)/u)
+  if (!m) return null
+
+  const building = m[1]
+  const roomToken = normalizeScheduleRoomToken(m[2])
+  if (roomToken.length === 0) return null
+
+  return { building, roomToken }
+}
+
+function parseScheduleBatchDateToIso(value: string): string {
+  const m = value.match(/^(\d{2})\.(\d{2})\.(\d{2})$/)
+  if (!m) return ''
+
+  const day = Number.parseInt(m[1], 10)
+  const month = Number.parseInt(m[2], 10)
+  const year = 2000 + Number.parseInt(m[3], 10)
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) return ''
+  if (day < 1 || day > 31 || month < 1 || month > 12) return ''
+
+  const dd = String(day).padStart(2, '0')
+  const mm = String(month).padStart(2, '0')
+  return `${year}-${mm}-${dd}`
+}
+
+function scheduleGroupLabelFromSourceFile(sourceFile: string): string {
+  const value = sourceFile.trim()
+  if (value.length === 0) return ''
+
+  const noExt = value.replace(/\.csv$/i, '')
+  // Parser fallback names can include technical suffixes like _20260411_193135.
+  return noExt.replace(/_\d{8}_\d{6}$/u, '')
 }
 
 export function useBuildMapApp() {
@@ -149,6 +198,13 @@ export function useBuildMapApp() {
   const [searchText, setSearchText] = React.useState<string>('')
   const [searchResultJumpTrigger, setSearchResultJumpTrigger] = React.useState(0)
   const [pendingSearchJump, setPendingSearchJump] = React.useState<SearchIndexedRoom | null>(null)
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = React.useState(false)
+  const [schedulePeriodMode, setSchedulePeriodMode] = React.useState<SchedulePeriodMode>('week')
+  const [scheduleManifest, setScheduleManifest] = React.useState<ScheduleManifest | null>(null)
+  const [scheduleDataset, setScheduleDataset] = React.useState<ScheduleDataset | null>(null)
+  const [scheduleBatchDate, setScheduleBatchDate] = React.useState('')
+  const [isScheduleLoading, setIsScheduleLoading] = React.useState(false)
+  const [scheduleLoadError, setScheduleLoadError] = React.useState<string | null>(null)
 
   const [geoFileStatusText, setGeoFileStatusText] = React.useState<string | null>(null)
   const [isLocationTracking, setIsLocationTracking] = React.useState(false)
@@ -178,6 +234,10 @@ export function useBuildMapApp() {
     return rooms.find((r) => r.key === selectedRoomKey) ?? null
   }, [rooms, selectedRoomKey])
 
+  const selectedRoomScheduleLabel = React.useMemo(() => {
+    return selectedRoom?.roomNo || ''
+  }, [selectedRoom])
+
   const buildOptions = React.useMemo(() => {
     const builds = manifest?.builds ?? []
     return builds.map((b) => b.id)
@@ -192,6 +252,209 @@ export function useBuildMapApp() {
   const titleText = React.useMemo(() => {
     return `${buildLabel(selectedBuild)}\n${floorLabel(selectedFloor)}`
   }, [selectedBuild, selectedFloor])
+
+  React.useEffect(() => {
+    let cancelled = false
+    setScheduleLoadError(null)
+
+    fetchScheduleManifest()
+      .then((manifest) => {
+        if (cancelled) return
+        setScheduleManifest(manifest)
+
+        const firstDate = manifest.dates[0]
+        if (!firstDate || firstDate.files.length === 0) {
+          setScheduleBatchDate('')
+          setScheduleDataset(new ScheduleDataset([]))
+          return
+        }
+
+        setScheduleBatchDate((current) => {
+          if (current.length > 0 && manifest.dates.some((item) => item.date === current)) return current
+          return firstDate.date
+        })
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        setScheduleDataset(new ScheduleDataset([]))
+        setScheduleBatchDate('')
+        setScheduleManifest({ dates: [] })
+        setScheduleLoadError(error instanceof Error ? error.message : 'Не удалось загрузить расписание')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  React.useEffect(() => {
+    let cancelled = false
+
+    const dateEntry = scheduleManifest?.dates.find((item) => item.date === scheduleBatchDate)
+    if (!dateEntry || dateEntry.files.length === 0) {
+      setScheduleDataset(new ScheduleDataset([]))
+      setIsScheduleLoading(false)
+      return
+    }
+
+    setIsScheduleLoading(true)
+    setScheduleLoadError(null)
+
+    fetchScheduleBatchDataset(dateEntry.date, dateEntry.files.map((file) => file.name))
+      .then((dataset) => {
+        if (cancelled) return
+        setScheduleDataset(dataset)
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        setScheduleDataset(new ScheduleDataset([]))
+        setScheduleLoadError(error instanceof Error ? error.message : 'Не удалось загрузить расписание')
+      })
+      .finally(() => {
+        if (cancelled) return
+        setIsScheduleLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [scheduleManifest, scheduleBatchDate])
+
+  const scheduleFocusDateIso = React.useMemo(() => {
+    return parseScheduleBatchDateToIso(scheduleBatchDate)
+  }, [scheduleBatchDate])
+
+  const schedulePackageDates = React.useMemo(() => {
+    return scheduleManifest?.dates.map((item) => item.date) ?? []
+  }, [scheduleManifest])
+
+  const selectedBuildNumber = React.useMemo(() => buildNumberFromBuildId(selectedBuild), [selectedBuild])
+
+  const knownScheduleBuildNumbers = React.useMemo(() => {
+    const set = new Set<string>()
+    for (const buildId of buildOptions) {
+      const num = buildNumberFromBuildId(buildId)
+      if (num) set.add(num)
+    }
+    return set
+  }, [buildOptions])
+
+  const roomTokenToKey = React.useMemo(() => {
+    const map = new Map<string, string>()
+    for (const room of rooms) {
+      if (!isInteractiveRoom(room)) continue
+      const token = normalizeScheduleRoomToken(room.roomNo)
+      if (token.length === 0) continue
+      map.set(token, room.key)
+    }
+    return map
+  }, [rooms])
+
+  const scheduleRowsByPeriod = React.useMemo(() => {
+    if (!scheduleDataset) return []
+    return ScheduleDataset.rowsByPeriod(scheduleDataset.rows, schedulePeriodMode, scheduleFocusDateIso)
+  }, [scheduleDataset, schedulePeriodMode, scheduleFocusDateIso])
+
+  const scheduleRowsForSelectedBuild = React.useMemo(() => {
+    if (!selectedBuildNumber) return [] as Array<{ roomToken: string; row: (typeof scheduleRowsByPeriod)[number] }>
+
+    const filtered: Array<{ roomToken: string; row: (typeof scheduleRowsByPeriod)[number] }> = []
+    const seen = new Set<string>()
+    for (const row of scheduleRowsByPeriod) {
+      const target = parseCabinetTarget(row.cabinet)
+      if (!target) continue
+      if (!knownScheduleBuildNumbers.has(target.building)) continue
+      if (target.building !== selectedBuildNumber) continue
+
+      const dedupKey = [
+        scheduleGroupLabelFromSourceFile(row.sourceFile),
+        row.date,
+        row.weekday,
+        row.time,
+        row.subgroup,
+        row.discipline,
+        row.lessonType,
+        row.teacher,
+        row.cabinet,
+      ].join('\u0001')
+      if (seen.has(dedupKey)) continue
+      seen.add(dedupKey)
+
+      filtered.push({ roomToken: target.roomToken, row })
+    }
+    return filtered
+  }, [knownScheduleBuildNumbers, scheduleRowsByPeriod, selectedBuildNumber])
+
+  const scheduleHeatByRoomKey = React.useMemo(() => {
+    const counts: Record<string, number> = {}
+
+    for (const item of scheduleRowsForSelectedBuild) {
+      const key = roomTokenToKey.get(item.roomToken)
+      if (!key) continue
+      counts[key] = (counts[key] ?? 0) + 1
+    }
+
+    return counts
+  }, [roomTokenToKey, scheduleRowsForSelectedBuild])
+
+  const scheduleHeatMax = React.useMemo(() => {
+    let max = 0
+    for (const value of Object.values(scheduleHeatByRoomKey)) {
+      if (value > max) max = value
+    }
+    return max
+  }, [scheduleHeatByRoomKey])
+
+  const scheduleRoomLessonsByKey = React.useMemo(() => {
+    const map = new Map<string, Array<{
+      group: string
+      date: string
+      weekday: string
+      time: string
+      subgroup: string
+      discipline: string
+      lessonType: string
+      teacher: string
+      cabinet: string
+      dateIso: string
+    }>>()
+
+    for (const item of scheduleRowsForSelectedBuild) {
+      const roomKey = roomTokenToKey.get(item.roomToken)
+      if (!roomKey) continue
+
+      const list = map.get(roomKey) ?? []
+      list.push({
+        group: scheduleGroupLabelFromSourceFile(item.row.sourceFile),
+        date: item.row.date,
+        weekday: item.row.weekday,
+        time: item.row.time,
+        subgroup: item.row.subgroup,
+        discipline: item.row.discipline,
+        lessonType: item.row.lessonType,
+        teacher: item.row.teacher,
+        cabinet: item.row.cabinet,
+        dateIso: item.row.dateIso ?? '',
+      })
+      map.set(roomKey, list)
+    }
+
+    for (const lessons of map.values()) {
+      lessons.sort((a, b) => {
+        const byDate = a.dateIso.localeCompare(b.dateIso)
+        if (byDate !== 0) return byDate
+        return a.time.localeCompare(b.time)
+      })
+    }
+
+    return map
+  }, [roomTokenToKey, scheduleRowsForSelectedBuild])
+
+  const selectedRoomScheduleLessons = React.useMemo(() => {
+    if (!selectedRoomKey) return []
+    const rows = scheduleRoomLessonsByKey.get(selectedRoomKey) ?? []
+    return rows.map(({ dateIso: _dateIso, ...rest }) => rest)
+  }, [scheduleRoomLessonsByKey, selectedRoomKey])
 
   const categoryOptions = React.useMemo(() => {
     const byCaseFold = new Map<string, string>()
@@ -797,13 +1060,37 @@ export function useBuildMapApp() {
 
   const onSetRouteModeNormal = React.useCallback(() => {
     setMapMode('normal')
+    setIsScheduleModalOpen(false)
   }, [setMapMode])
 
   const onSetRouteModeRoutes = React.useCallback(() => {
     setMapMode('routes')
+    setIsScheduleModalOpen(false)
     setSelectedRoomKey(null)
     setModalAnchor(null)
   }, [setMapMode])
+
+  const onSetRouteModeSchedule = React.useCallback(() => {
+    setMapMode('schedule')
+    setSelectedRoomKey(null)
+    setModalAnchor(null)
+  }, [setMapMode])
+
+  const onOpenScheduleModal = React.useCallback(() => {
+    setIsScheduleModalOpen(true)
+  }, [])
+
+  const onCloseScheduleModal = React.useCallback(() => {
+    setIsScheduleModalOpen(false)
+  }, [])
+
+  const onSetSchedulePeriodMode = React.useCallback((mode: SchedulePeriodMode) => {
+    setSchedulePeriodMode(mode)
+  }, [])
+
+  const onSetScheduleBatchDate = React.useCallback((date: string) => {
+    setScheduleBatchDate(date)
+  }, [])
 
   const onSetActiveRouteFrom = React.useCallback(() => {
     setActiveRouteEndpoint('from')
@@ -853,6 +1140,13 @@ export function useBuildMapApp() {
     selectedCategory,
     searchText,
     searchResultJumpTrigger,
+    isScheduleModalOpen,
+    schedulePeriodMode,
+    scheduleFocusDateIso,
+    schedulePackageDates,
+    scheduleBatchDate,
+    isScheduleLoading,
+    scheduleLoadError,
     roomGraph,
     mapMode,
     routeFrom,
@@ -883,6 +1177,8 @@ export function useBuildMapApp() {
     selectedGeoMarkers,
     activeUserLocationOverlay,
     routeEndpointGeoControl,
+    scheduleHeatByRoomKey,
+    scheduleHeatMax,
     matchedKeys,
     smartSearchData,
     totalRooms,
@@ -925,9 +1221,16 @@ export function useBuildMapApp() {
     openOfficeOnMap,
     onSetRouteModeNormal,
     onSetRouteModeRoutes,
+    onSetRouteModeSchedule,
+    onOpenScheduleModal,
+    onCloseScheduleModal,
+    onSetSchedulePeriodMode,
+    onSetScheduleBatchDate,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
     onRouteEndpointGeoAction,
+    selectedRoomScheduleLabel,
+    selectedRoomScheduleLessons,
   }
 }

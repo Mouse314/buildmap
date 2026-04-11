@@ -7,6 +7,8 @@ import { FloorsPanel } from './components/app/FloorsPanel'
 import { GraphicsPanel } from './components/app/GraphicsPanel'
 import { GraphicsPresetAdminModal } from './components/app/GraphicsPresetAdminModal'
 import { OfficesDirectory } from './components/app/OfficesDirectory'
+import { ScheduleModal } from './components/app/ScheduleModal'
+import { ScheduleRoomModal } from './components/app/ScheduleRoomModal'
 import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
 import gpsButtonIcon from '../assets/icon/free-icon-gps-navigation-4398552.png'
@@ -33,6 +35,12 @@ function App() {
     selectedCategory,
     searchText,
     searchResultJumpTrigger,
+    isScheduleModalOpen,
+    schedulePeriodMode,
+    schedulePackageDates,
+    scheduleBatchDate,
+    isScheduleLoading,
+    scheduleLoadError,
     roomGraph,
     mapMode,
     routeFrom,
@@ -43,6 +51,8 @@ function App() {
     routeFloorJumps,
     routeHints,
     routeEndpointGeoControl,
+    scheduleHeatByRoomKey,
+    scheduleHeatMax,
     showGraphOverlay,
     officesHierarchy,
     isAdminMode,
@@ -53,6 +63,8 @@ function App() {
     modalAnchor,
     isTouchDevice,
     selectedRoom,
+    selectedRoomScheduleLabel,
+    selectedRoomScheduleLessons,
     buildOptions,
     floorOptions,
     titleText,
@@ -101,6 +113,11 @@ function App() {
     openOfficeOnMap,
     onSetRouteModeNormal,
     onSetRouteModeRoutes,
+    onSetRouteModeSchedule,
+    onOpenScheduleModal,
+    onCloseScheduleModal,
+    onSetSchedulePeriodMode,
+    onSetScheduleBatchDate,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
@@ -190,6 +207,9 @@ function App() {
           searchResultJumpTrigger={searchResultJumpTrigger}
           routeSegments={routeSegments}
           routeFloorJumps={routeFloorJumps}
+          scheduleHeatEnabled={mapMode === 'schedule'}
+          scheduleHeatByRoomKey={scheduleHeatByRoomKey}
+          scheduleHeatMax={scheduleHeatMax}
           onRouteFloorJump={onRouteFloorJump}
           routeEndpointGeoControl={routeEndpointGeoControl}
           onRouteEndpointGeoAction={onRouteEndpointGeoAction}
@@ -209,13 +229,23 @@ function App() {
         <RoomHoverTooltip room={hoveredRoom} anchor={hoverAnchor} />
       ) : null}
 
-      {mapMode !== 'routes' && selectedRoom && modalAnchor ? (
+      {mapMode === 'normal' && selectedRoom && modalAnchor ? (
         <RoomInfoModal
           room={selectedRoom}
           anchor={modalAnchor}
           isAdminMode={isAdminMode}
           onSaveRoom={onSaveSelectedRoomChanges}
           onBuildRoute={onBuildRouteFromRoom}
+          onClose={onCloseRoomModal}
+        />
+      ) : null}
+
+      {mapMode === 'schedule' && selectedRoom && modalAnchor ? (
+        <ScheduleRoomModal
+          roomLabel={selectedRoomScheduleLabel}
+          periodMode={schedulePeriodMode}
+          lessons={selectedRoomScheduleLessons}
+          anchor={modalAnchor}
           onClose={onCloseRoomModal}
         />
       ) : null}
@@ -312,7 +342,8 @@ function App() {
         </button>
         <button
           type="button"
-          className={'mapModeBtn'}
+          className={mapMode === 'schedule' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
+          onClick={onSetRouteModeSchedule}
         >
           Расписание
         </button>
@@ -380,6 +411,59 @@ function App() {
           </div>
         </div>
       ) : null}
+
+      {mapMode === 'schedule' ? (
+        <div className="scheduleBottomCluster">
+          <div className="schedulePeriodDock">
+            <div className="schedulePeriodSwitch" role="group" aria-label="Период отображения">
+              <button
+                type="button"
+                className={schedulePeriodMode === 'week' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
+                onClick={() => onSetSchedulePeriodMode('week')}
+              >
+                Неделя
+              </button>
+              <button
+                type="button"
+                className={schedulePeriodMode === 'day' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
+                onClick={() => onSetSchedulePeriodMode('day')}
+              >
+                День
+              </button>
+            </div>
+
+            <label className="schedulePackageSelectWrap">
+              <span>Пакет</span>
+              <select
+                value={scheduleBatchDate}
+                onChange={(e) => onSetScheduleBatchDate(e.target.value)}
+                disabled={isScheduleLoading || schedulePackageDates.length === 0}
+              >
+                {schedulePackageDates.map((date) => (
+                  <option key={`schedule-package-${date}`} value={date}>{date}</option>
+                ))}
+              </select>
+            </label>
+
+            <div className="schedulePeriodMeta" aria-live="polite">
+              {isScheduleLoading
+                ? 'Загружаем расписание...'
+                : (scheduleLoadError
+                    ? `Ошибка: ${scheduleLoadError}`
+                    : (scheduleBatchDate ? `Пакет: ${scheduleBatchDate}` : 'Пакет не найден'))}
+            </div>
+          </div>
+
+          <button type="button" className="scheduleOpenBtn" onClick={onOpenScheduleModal}>
+            Показать расписание
+          </button>
+        </div>
+      ) : null}
+
+      <ScheduleModal
+        isOpen={isScheduleModalOpen}
+        onClose={onCloseScheduleModal}
+      />
     </div>
   )
 }

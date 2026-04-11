@@ -1,6 +1,6 @@
 import type { Room } from '../../../map/rooms/utils/Room'
 
-export type MapMode = 'normal' | 'routes'
+export type MapMode = 'normal' | 'routes' | 'schedule'
 
 export type GeoCornerKey = 'nw' | 'ne' | 'se' | 'sw'
 
