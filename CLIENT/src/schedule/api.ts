@@ -1,5 +1,10 @@
-import { plansApiUrl, publicAssetUrl } from '../map/rooms/utils/roomData'
+import { publicAssetUrl } from '../map/rooms/utils/roomData'
 import { ScheduleDataset, ScheduleLesson } from './domain'
+
+const RETRYABLE_CSV_STATUS_CODES = new Set([429, 502, 503, 504])
+const CSV_FETCH_RETRY_COUNT = 3
+const CSV_FETCH_RETRY_BASE_DELAY_MS = 250
+const CSV_FETCH_CONCURRENCY = 6
 
 export type ScheduleManifest = {
   dates: Array<{
@@ -26,18 +31,65 @@ function scheduleStaticCsvUrl(date: string, name: string): string {
   return publicAssetUrl(`schedule/${safeDate}/${safeName}`)
 }
 
-async function fetchScheduleManifestFromApi(): Promise<ScheduleManifest> {
-  const response = await fetch(plansApiUrl('/api/schedule/manifest'))
-  if (!response.ok) {
-    throw new Error(`Ошибка загрузки манифеста расписания (${response.status})`)
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
+}
+
+function retryDelayMs(attempt: number): number {
+  const jitter = Math.floor(Math.random() * 120)
+  return CSV_FETCH_RETRY_BASE_DELAY_MS * 2 ** attempt + jitter
+}
+
+async function fetchTextWithRetry(url: string, errorPrefix: string): Promise<string> {
+  for (let attempt = 0; attempt < CSV_FETCH_RETRY_COUNT; attempt += 1) {
+    try {
+      const response = await fetch(url)
+      if (response.ok) {
+        return response.text()
+      }
+
+      const shouldRetry = RETRYABLE_CSV_STATUS_CODES.has(response.status) && attempt < CSV_FETCH_RETRY_COUNT - 1
+      if (shouldRetry) {
+        await delay(retryDelayMs(attempt))
+        continue
+      }
+
+      throw new Error(`${errorPrefix} (${response.status})`)
+    } catch (error) {
+      const canRetry = attempt < CSV_FETCH_RETRY_COUNT - 1
+      if (!canRetry) {
+        throw error
+      }
+
+      await delay(retryDelayMs(attempt))
+    }
   }
 
-  const data: unknown = await response.json()
-  if (!isScheduleManifest(data)) {
-    throw new Error('Неверный формат манифеста расписания')
-  }
+  throw new Error(`${errorPrefix} (unknown)`)
+}
 
-  return data
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) return []
+
+  const results = new Array<R>(items.length)
+  let nextIndex = 0
+
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex
+      nextIndex += 1
+      results[index] = await mapper(items[index], index)
+    }
+  })
+
+  await Promise.all(workers)
+  return results
 }
 
 async function fetchScheduleManifestFromStatic(): Promise<ScheduleManifest> {
@@ -54,48 +106,22 @@ async function fetchScheduleManifestFromStatic(): Promise<ScheduleManifest> {
   return data
 }
 
-async function fetchScheduleCsvFromApi(date: string, name: string): Promise<string> {
-  const url = new URL(plansApiUrl('/api/schedule/file'), window.location.origin)
-  url.searchParams.set('date', date)
-  url.searchParams.set('name', name)
-
-  const response = await fetch(url.toString())
-  if (!response.ok) {
-    throw new Error(`Ошибка загрузки CSV (${response.status})`)
-  }
-
-  return response.text()
-}
-
 async function fetchScheduleCsvFromStatic(date: string, name: string): Promise<string> {
-  const response = await fetch(scheduleStaticCsvUrl(date, name))
-  if (!response.ok) {
-    throw new Error(`Ошибка загрузки локального CSV (${response.status})`)
-  }
-
-  return response.text()
+  return fetchTextWithRetry(scheduleStaticCsvUrl(date, name), 'Ошибка загрузки локального CSV')
 }
 
 export async function fetchScheduleManifest(): Promise<ScheduleManifest> {
-  try {
-    return await fetchScheduleManifestFromApi()
-  } catch {
-    return fetchScheduleManifestFromStatic()
-  }
+  return fetchScheduleManifestFromStatic()
 }
 
 export async function fetchScheduleCsv(date: string, name: string): Promise<string> {
-  try {
-    return await fetchScheduleCsvFromApi(date, name)
-  } catch {
-    return fetchScheduleCsvFromStatic(date, name)
-  }
+  return fetchScheduleCsvFromStatic(date, name)
 }
 
 export async function fetchScheduleBatchDataset(date: string, fileNames: string[]): Promise<ScheduleDataset> {
   if (fileNames.length === 0) return new ScheduleDataset([])
 
-  const csvTexts = await Promise.all(fileNames.map((name) => fetchScheduleCsv(date, name)))
+  const csvTexts = await mapWithConcurrency(fileNames, CSV_FETCH_CONCURRENCY, (name) => fetchScheduleCsv(date, name))
   const datasets = csvTexts.map((text, idx) => {
     const csvName = fileNames[idx] ?? ''
     const dataset = ScheduleDataset.fromCsv(text)
