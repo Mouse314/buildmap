@@ -13,6 +13,12 @@ import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
 import gpsButtonIcon from '../assets/icon/free-icon-gps-navigation-4398552.png'
 
+function formatIsoDateForUi(value: string): string {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) return value
+  return `${match[3]}.${match[2]}.${match[1]}`
+}
+
 function App() {
   const {
     error,
@@ -37,8 +43,7 @@ function App() {
     searchResultJumpTrigger,
     isScheduleModalOpen,
     schedulePeriodMode,
-    schedulePackageDates,
-    scheduleBatchDate,
+    scheduleFocusDateIso,
     isScheduleLoading,
     scheduleLoadError,
     roomGraph,
@@ -117,7 +122,7 @@ function App() {
     onOpenScheduleModal,
     onCloseScheduleModal,
     onSetSchedulePeriodMode,
-    onSetScheduleBatchDate,
+    onSetScheduleFocusDate,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
@@ -432,17 +437,13 @@ function App() {
               </button>
             </div>
 
-            <label className="schedulePackageSelectWrap">
-              <span>Пакет</span>
-              <select
-                value={scheduleBatchDate}
-                onChange={(e) => onSetScheduleBatchDate(e.target.value)}
-                disabled={isScheduleLoading || schedulePackageDates.length === 0}
-              >
-                {schedulePackageDates.map((date) => (
-                  <option key={`schedule-package-${date}`} value={date}>{date}</option>
-                ))}
-              </select>
+            <label className="scheduleCalendarField">
+              <span>Календарь</span>
+              <input
+                type="date"
+                value={scheduleFocusDateIso}
+                onChange={(e) => onSetScheduleFocusDate(e.target.value)}
+              />
             </label>
 
             <div className="schedulePeriodMeta" aria-live="polite">
@@ -450,7 +451,9 @@ function App() {
                 ? 'Загружаем расписание...'
                 : (scheduleLoadError
                     ? `Ошибка: ${scheduleLoadError}`
-                    : (scheduleBatchDate ? `Пакет: ${scheduleBatchDate}` : 'Пакет не найден'))}
+                    : (schedulePeriodMode === 'week'
+                        ? `Неделя с ${formatIsoDateForUi(scheduleFocusDateIso)}`
+                        : `День: ${formatIsoDateForUi(scheduleFocusDateIso)}`))}
             </div>
           </div>
 

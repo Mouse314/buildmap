@@ -1110,7 +1110,7 @@
   background: rgba(255, 255, 255, 0.74);
 }
 
-.schedulePackageSelectWrap {
+.scheduleCalendarField {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1118,7 +1118,7 @@
   font-weight: 700;
 }
 
-.schedulePackageSelectWrap select {
+.scheduleCalendarField input {
   height: 30px;
   border-radius: 9px;
   border: 1px solid rgba(0, 0, 0, 0.18);

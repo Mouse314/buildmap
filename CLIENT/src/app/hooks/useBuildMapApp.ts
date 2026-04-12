@@ -111,6 +111,53 @@ function parseScheduleBatchDateToIso(value: string): string {
   return `${year}-${mm}-${dd}`
 }
 
+function toIsoDateLocal(value: Date): string {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function parseIsoDateOnly(value: string): Date | null {
+  const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!m) return null
+
+  const year = Number.parseInt(m[1], 10)
+  const month = Number.parseInt(m[2], 10)
+  const day = Number.parseInt(m[3], 10)
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null
+
+  const date = new Date(year, month - 1, day)
+  if (Number.isNaN(date.getTime())) return null
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null
+  return date
+}
+
+function getTodayIso(): string {
+  return toIsoDateLocal(new Date())
+}
+
+function toWeekStartMondayIso(value: string): string {
+  const parsed = parseIsoDateOnly(value)
+  if (!parsed) return value
+
+  const day = parsed.getDay()
+  const mondayOffset = day === 0 ? -6 : 1 - day
+  parsed.setDate(parsed.getDate() + mondayOffset)
+  return toIsoDateLocal(parsed)
+}
+
+function dayDistanceFromIso(firstIso: string, secondIso: string): number | null {
+  const first = parseIsoDateOnly(firstIso)
+  const second = parseIsoDateOnly(secondIso)
+  if (!first || !second) return null
+
+  const firstUtc = Date.UTC(first.getFullYear(), first.getMonth(), first.getDate())
+  const secondUtc = Date.UTC(second.getFullYear(), second.getMonth(), second.getDate())
+  return Math.round((firstUtc - secondUtc) / 86400000)
+}
+
 function scheduleGroupLabelFromSourceFile(sourceFile: string): string {
   const value = sourceFile.trim()
   if (value.length === 0) return ''
@@ -200,11 +247,12 @@ export function useBuildMapApp() {
   const [pendingSearchJump, setPendingSearchJump] = React.useState<SearchIndexedRoom | null>(null)
   const [isScheduleModalOpen, setIsScheduleModalOpen] = React.useState(false)
   const [schedulePeriodMode, setSchedulePeriodMode] = React.useState<SchedulePeriodMode>('week')
+  const [scheduleFocusDateIso, setScheduleFocusDateIso] = React.useState<string>(() => toWeekStartMondayIso(getTodayIso()))
   const [scheduleManifest, setScheduleManifest] = React.useState<ScheduleManifest | null>(null)
   const [scheduleDataset, setScheduleDataset] = React.useState<ScheduleDataset | null>(null)
-  const [scheduleBatchDate, setScheduleBatchDate] = React.useState('')
   const [isScheduleLoading, setIsScheduleLoading] = React.useState(false)
   const [scheduleLoadError, setScheduleLoadError] = React.useState<string | null>(null)
+  const scheduleDatasetByBatchDateRef = React.useRef<Map<string, ScheduleDataset>>(new Map())
 
   const [geoFileStatusText, setGeoFileStatusText] = React.useState<string | null>(null)
   const [isLocationTracking, setIsLocationTracking] = React.useState(false)
@@ -261,23 +309,10 @@ export function useBuildMapApp() {
       .then((manifest) => {
         if (cancelled) return
         setScheduleManifest(manifest)
-
-        const firstDate = manifest.dates[0]
-        if (!firstDate || firstDate.files.length === 0) {
-          setScheduleBatchDate('')
-          setScheduleDataset(new ScheduleDataset([]))
-          return
-        }
-
-        setScheduleBatchDate((current) => {
-          if (current.length > 0 && manifest.dates.some((item) => item.date === current)) return current
-          return firstDate.date
-        })
       })
       .catch((error: unknown) => {
         if (cancelled) return
         setScheduleDataset(new ScheduleDataset([]))
-        setScheduleBatchDate('')
         setScheduleManifest({ dates: [] })
         setScheduleLoadError(error instanceof Error ? error.message : 'Не удалось загрузить расписание')
       })
@@ -287,11 +322,32 @@ export function useBuildMapApp() {
     }
   }, [])
 
+  const scheduleManifestEntriesByFocusDate = React.useMemo(() => {
+    const entries = scheduleManifest?.dates ?? []
+    if (entries.length === 0) return [] as ScheduleManifest['dates']
+
+    const packageFocusDateIso = schedulePeriodMode === 'week'
+      ? toWeekStartMondayIso(scheduleFocusDateIso)
+      : scheduleFocusDateIso
+
+    return entries
+      .map((entry) => ({
+        entry,
+        packageDateIso: parseScheduleBatchDateToIso(entry.date),
+      }))
+      .filter(({ packageDateIso }) => packageDateIso.length > 0)
+      .filter(({ packageDateIso }) => {
+        const distance = dayDistanceFromIso(packageDateIso, packageFocusDateIso)
+        return distance != null && Math.abs(distance) <= 14
+      })
+      .sort((a, b) => b.packageDateIso.localeCompare(a.packageDateIso))
+      .map(({ entry }) => entry)
+  }, [scheduleFocusDateIso, scheduleManifest, schedulePeriodMode])
+
   React.useEffect(() => {
     let cancelled = false
 
-    const dateEntry = scheduleManifest?.dates.find((item) => item.date === scheduleBatchDate)
-    if (!dateEntry || dateEntry.files.length === 0) {
+    if (scheduleManifestEntriesByFocusDate.length === 0) {
       setScheduleDataset(new ScheduleDataset([]))
       setIsScheduleLoading(false)
       return
@@ -300,10 +356,17 @@ export function useBuildMapApp() {
     setIsScheduleLoading(true)
     setScheduleLoadError(null)
 
-    fetchScheduleBatchDataset(dateEntry.date, dateEntry.files.map((file) => file.name))
-      .then((dataset) => {
+    Promise.all(scheduleManifestEntriesByFocusDate.map(async (entry) => {
+      const cached = scheduleDatasetByBatchDateRef.current.get(entry.date)
+      if (cached) return cached
+
+      const dataset = await fetchScheduleBatchDataset(entry.date, entry.files.map((file) => file.name))
+      scheduleDatasetByBatchDateRef.current.set(entry.date, dataset)
+      return dataset
+    }))
+      .then((datasets) => {
         if (cancelled) return
-        setScheduleDataset(dataset)
+        setScheduleDataset(ScheduleDataset.merge(datasets))
       })
       .catch((error: unknown) => {
         if (cancelled) return
@@ -318,15 +381,7 @@ export function useBuildMapApp() {
     return () => {
       cancelled = true
     }
-  }, [scheduleManifest, scheduleBatchDate])
-
-  const scheduleFocusDateIso = React.useMemo(() => {
-    return parseScheduleBatchDateToIso(scheduleBatchDate)
-  }, [scheduleBatchDate])
-
-  const schedulePackageDates = React.useMemo(() => {
-    return scheduleManifest?.dates.map((item) => item.date) ?? []
-  }, [scheduleManifest])
+  }, [scheduleManifestEntriesByFocusDate])
 
   const selectedBuildNumber = React.useMemo(() => buildNumberFromBuildId(selectedBuild), [selectedBuild])
 
@@ -1086,11 +1141,24 @@ export function useBuildMapApp() {
 
   const onSetSchedulePeriodMode = React.useCallback((mode: SchedulePeriodMode) => {
     setSchedulePeriodMode(mode)
+    if (mode === 'week') {
+      setScheduleFocusDateIso(toWeekStartMondayIso(getTodayIso()))
+      return
+    }
+
+    setScheduleFocusDateIso((current) => {
+      if (parseIsoDateOnly(current)) return current
+      return getTodayIso()
+    })
   }, [])
 
-  const onSetScheduleBatchDate = React.useCallback((date: string) => {
-    setScheduleBatchDate(date)
-  }, [])
+  const onSetScheduleFocusDate = React.useCallback((dateIso: string) => {
+    const parsed = parseIsoDateOnly(dateIso)
+    if (!parsed) return
+
+    const normalized = toIsoDateLocal(parsed)
+    setScheduleFocusDateIso(schedulePeriodMode === 'week' ? toWeekStartMondayIso(normalized) : normalized)
+  }, [schedulePeriodMode])
 
   const onSetActiveRouteFrom = React.useCallback(() => {
     setActiveRouteEndpoint('from')
@@ -1143,8 +1211,6 @@ export function useBuildMapApp() {
     isScheduleModalOpen,
     schedulePeriodMode,
     scheduleFocusDateIso,
-    schedulePackageDates,
-    scheduleBatchDate,
     isScheduleLoading,
     scheduleLoadError,
     roomGraph,
@@ -1225,7 +1291,7 @@ export function useBuildMapApp() {
     onOpenScheduleModal,
     onCloseScheduleModal,
     onSetSchedulePeriodMode,
-    onSetScheduleBatchDate,
+    onSetScheduleFocusDate,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
