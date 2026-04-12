@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "generate:rooms": "node scripts/generate-room-json.mjs",
+    "generate:schedule": "node scripts/sync-schedule-data.mjs",
     "predev": "npm run generate:rooms",
     "dev": "vite --host --port 5173",
-    "prebuild": "npm run generate:rooms",
+    "prebuild": "npm run generate:rooms && npm run generate:schedule",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

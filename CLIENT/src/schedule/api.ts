@@ -1,4 +1,4 @@
-import { plansApiUrl } from '../map/rooms/utils/roomData'
+import { plansApiUrl, publicAssetUrl } from '../map/rooms/utils/roomData'
 import { ScheduleDataset, ScheduleLesson } from './domain'
 
 export type ScheduleManifest = {
@@ -12,21 +12,49 @@ export type ScheduleManifest = {
   }>
 }
 
-export async function fetchScheduleManifest(): Promise<ScheduleManifest> {
+function isScheduleManifest(value: unknown): value is ScheduleManifest {
+  return Boolean(value && typeof value === 'object' && Array.isArray((value as Record<string, unknown>).dates))
+}
+
+function scheduleStaticManifestUrl(): string {
+  return publicAssetUrl('schedule/manifest.json')
+}
+
+function scheduleStaticCsvUrl(date: string, name: string): string {
+  const safeDate = encodeURIComponent(date.trim())
+  const safeName = encodeURIComponent(name.trim())
+  return publicAssetUrl(`schedule/${safeDate}/${safeName}`)
+}
+
+async function fetchScheduleManifestFromApi(): Promise<ScheduleManifest> {
   const response = await fetch(plansApiUrl('/api/schedule/manifest'))
   if (!response.ok) {
     throw new Error(`Ошибка загрузки манифеста расписания (${response.status})`)
   }
 
   const data: unknown = await response.json()
-  if (!data || typeof data !== 'object' || !Array.isArray((data as Record<string, unknown>).dates)) {
+  if (!isScheduleManifest(data)) {
     throw new Error('Неверный формат манифеста расписания')
   }
 
-  return data as ScheduleManifest
+  return data
 }
 
-export async function fetchScheduleCsv(date: string, name: string): Promise<string> {
+async function fetchScheduleManifestFromStatic(): Promise<ScheduleManifest> {
+  const response = await fetch(scheduleStaticManifestUrl())
+  if (!response.ok) {
+    throw new Error(`Ошибка загрузки локального манифеста расписания (${response.status})`)
+  }
+
+  const data: unknown = await response.json()
+  if (!isScheduleManifest(data)) {
+    throw new Error('Неверный формат локального манифеста расписания')
+  }
+
+  return data
+}
+
+async function fetchScheduleCsvFromApi(date: string, name: string): Promise<string> {
   const url = new URL(plansApiUrl('/api/schedule/file'), window.location.origin)
   url.searchParams.set('date', date)
   url.searchParams.set('name', name)
@@ -37,6 +65,31 @@ export async function fetchScheduleCsv(date: string, name: string): Promise<stri
   }
 
   return response.text()
+}
+
+async function fetchScheduleCsvFromStatic(date: string, name: string): Promise<string> {
+  const response = await fetch(scheduleStaticCsvUrl(date, name))
+  if (!response.ok) {
+    throw new Error(`Ошибка загрузки локального CSV (${response.status})`)
+  }
+
+  return response.text()
+}
+
+export async function fetchScheduleManifest(): Promise<ScheduleManifest> {
+  try {
+    return await fetchScheduleManifestFromApi()
+  } catch {
+    return fetchScheduleManifestFromStatic()
+  }
+}
+
+export async function fetchScheduleCsv(date: string, name: string): Promise<string> {
+  try {
+    return await fetchScheduleCsvFromApi(date, name)
+  } catch {
+    return fetchScheduleCsvFromStatic(date, name)
+  }
 }
 
 export async function fetchScheduleBatchDataset(date: string, fileNames: string[]): Promise<ScheduleDataset> {
