@@ -37,6 +37,13 @@ function caseFold(value: string | null | undefined): string {
   return (value ?? '').trim().toLocaleLowerCase('ru-RU')
 }
 
+const CORRIDOR_ROOM_ID = 1
+const CORRIDOR_CATEGORY_KEY = caseFold('коридор')
+
+function isCorridorRoom(room: Room): boolean {
+  return room.roomID === CORRIDOR_ROOM_ID || caseFold(room.category) === CORRIDOR_CATEGORY_KEY
+}
+
 function normalizeRoomNoToken(value: string | null | undefined): string {
   return caseFold(value).replace(/\s+/g, '').replace(/^№/u, '')
 }
@@ -571,7 +578,7 @@ export function useBuildMapApp() {
   const categoryOptions = React.useMemo(() => {
     const byCaseFold = new Map<string, string>()
     for (const r of rooms) {
-      if (!isInteractiveRoom(r)) continue
+      if (!isInteractiveRoom(r) && !isCorridorRoom(r)) continue
       const label = (r.category ?? '').trim()
       if (label.length === 0) continue
 
@@ -584,7 +591,13 @@ export function useBuildMapApp() {
   const selectedCategoryColor = React.useMemo(() => {
     if (selectedCategory === '__all__') return null
     const selectedCategoryKey = caseFold(selectedCategory)
-    const match = rooms.find((r) => isInteractiveRoom(r) && caseFold(r.category) === selectedCategoryKey)
+    const isCorridorCategory = selectedCategoryKey === CORRIDOR_CATEGORY_KEY
+    const match = rooms.find((r) => {
+      const isCorridor = isCorridorRoom(r)
+      if (!isInteractiveRoom(r) && !isCorridor) return false
+      if (isCorridorCategory) return isCorridor
+      return caseFold(r.category) === selectedCategoryKey
+    })
     if (!match) return null
     return getRoomFillColor(match.roomID, match.category)
   }, [rooms, selectedCategory])
@@ -686,15 +699,23 @@ export function useBuildMapApp() {
     if (!isFiltering) return null
     const q = caseFold(searchText)
     const selectedCategoryKey = selectedCategory === '__all__' ? '' : caseFold(selectedCategory)
+    const isCorridorCategory = selectedCategoryKey === CORRIDOR_CATEGORY_KEY
     const set = new Set<string>()
 
     for (const r of rooms) {
-      if (!isInteractiveRoom(r)) continue
+      const isCorridor = isCorridorRoom(r)
+      if (!isInteractiveRoom(r) && !isCorridor) continue
       const category = caseFold(r.category)
       const roomNo = (r.roomNo ?? '').trim()
       const description = formatRoomDescription(r.roomID, r.description)
 
-      if (selectedCategoryKey.length > 0 && category !== selectedCategoryKey) continue
+      if (selectedCategoryKey.length > 0) {
+        if (isCorridorCategory) {
+          if (!isCorridor) continue
+        } else if (category !== selectedCategoryKey) {
+          continue
+        }
+      }
 
       if (q.length > 0) {
         const ok = caseFold(roomNo).includes(q) || caseFold(description).includes(q)
@@ -709,7 +730,10 @@ export function useBuildMapApp() {
 
   const smartSearchData = useSmartSearch({ manifest, selectedBuild, searchText, isInteractiveRoom })
 
-  const totalRooms = React.useMemo(() => rooms.filter(isInteractiveRoom).length, [rooms])
+  const totalRooms = React.useMemo(
+    () => rooms.filter((room) => isInteractiveRoom(room) && !isCorridorRoom(room)).length,
+    [rooms],
+  )
   const matchedRooms = matchedKeys ? matchedKeys.size : totalRooms
 
   const bumpGraphicsPresetRefreshToken = React.useCallback(() => {

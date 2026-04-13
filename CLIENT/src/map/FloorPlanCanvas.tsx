@@ -23,6 +23,7 @@ import { getSceneColors } from './floorplan/utils/sceneColors';
 import { isInteractiveRoomArea } from './floorplan/utils/interactivity';
 import { HIDDEN_ROOM_IDS, PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
 import { buildRoundedRoutePoints, buildRouteJumpGroups } from '../navigation/mapRouteUi';
+import { HudButton } from '../components/ui/hud';
 
 function RouteShaderTicker({ material }: { material: THREE.ShaderMaterial }) {
   useFrame((_, delta) => {
@@ -699,9 +700,10 @@ export function FloorPlanCanvas({
               <Html key={group.key} position={[group.x, group.y, 0]} sprite center zIndexRange={[90, 10]}>
                 <div className="routeStairJumpGroup">
                   {group.buttons.map((jump) => (
-                    <button
+                    <HudButton
                       key={jump.key}
-                      type="button"
+                      title={jump.label}
+                      data={{ action: 'route-jump-floor', targetFloorId: jump.targetFloorId }}
                       className="routeStairJumpBtn"
                       onPointerDown={(e) => {
                         e.stopPropagation();
@@ -716,12 +718,12 @@ export function FloorPlanCanvas({
                         suppressMapTapFromOverlay();
                         onRouteFloorJump?.(jump.targetFloorId);
                       }}
-                      title={jump.title}
+                      hint={jump.title}
                       aria-label={jump.title}
                     >
                       <span className="routeStairJumpEmoji" aria-hidden>{jump.emoji}</span>
                       <span className="routeStairJumpText">{jump.label}</span>
-                    </button>
+                    </HudButton>
                   ))}
                 </div>
               </Html>
@@ -733,8 +735,9 @@ export function FloorPlanCanvas({
           <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.58, 0]}>
             <Html position={[routeEndpointGeoControl.x, routeEndpointGeoControl.y, 0]} sprite center zIndexRange={[90, 10]}>
               <div className="routeEndGeoGroup">
-                <button
-                  type="button"
+                <HudButton
+                  title={routeEndpointGeoControl.text}
+                  data={{ action: 'route-endpoint-geo', mode: routeEndpointGeoControl.mode, targetFloorId: routeEndpointGeoControl.targetFloorId }}
                   className="routeEndGeoBtn"
                   onPointerDown={(e) => {
                     e.stopPropagation();
@@ -749,12 +752,12 @@ export function FloorPlanCanvas({
                     suppressMapTapFromOverlay();
                     onRouteEndpointGeoAction?.(routeEndpointGeoControl.mode, routeEndpointGeoControl.targetFloorId);
                   }}
-                  title={routeEndpointGeoControl.text}
+                  hint={routeEndpointGeoControl.text}
                   aria-label={routeEndpointGeoControl.text}
                 >
                   <span className="routeEndGeoEmoji" aria-hidden>{routeEndpointGeoControl.icon}</span>
                   <span className="routeEndGeoText">{routeEndpointGeoControl.text}</span>
-                </button>
+                </HudButton>
               </div>
             </Html>
           </group>

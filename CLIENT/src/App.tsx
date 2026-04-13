@@ -1,4 +1,5 @@
-﻿import './App.css'
+﻿import * as React from 'react'
+import './App.css'
 import { FloorPlanCanvas } from './map/FloorPlanCanvas'
 import { RoomInfoModal } from './map/rooms/components/RoomInfoModal'
 import { RoomHoverTooltip } from './map/rooms/components/RoomHoverTooltip'
@@ -9,6 +10,7 @@ import { GraphicsPresetAdminModal } from './components/app/GraphicsPresetAdminMo
 import { OfficesDirectory } from './components/app/OfficesDirectory'
 import { ScheduleModal } from './components/app/ScheduleModal'
 import { ScheduleRoomModal } from './components/app/ScheduleRoomModal'
+import { HudButton, HudPanel } from './components/ui/hud'
 import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
 import gpsButtonIcon from '../assets/icon/free-icon-gps-navigation-4398552.png'
@@ -20,6 +22,9 @@ function formatIsoDateForUi(value: string): string {
 }
 
 function App() {
+  const [mapModeDockOpen, setMapModeDockOpen] = React.useState(true)
+  const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
+
   const {
     error,
     rooms,
@@ -127,6 +132,12 @@ function App() {
     onSetActiveRouteTo,
     onSetMainEntrance,
   } = useBuildMapApp()
+
+  React.useEffect(() => {
+    if (!isAdminMode) {
+      setGeoAdminOpen(true)
+    }
+  }, [isAdminMode])
 
   if (error) {
     return (
@@ -268,14 +279,22 @@ function App() {
       ) : null}
 
       {isAdminMode && selectedGeoDraft ? (
-        <div className="geoAdminPanel">
-          <div className="geoAdminHeader">
-            <div className="geoAdminTitle">Геопривязка: {buildLabel(selectedBuild)}</div>
-            <div className="geoAdminMeta">Этаж: {floorLabel(selectedGeoDraft.floorId)} · заполнено: {selectedGeoFilledCount}/4</div>
+        <HudPanel
+          title={`Геопривязка: ${buildLabel(selectedBuild)}`}
+          context={geoAdminOpen ? `Этаж: ${floorLabel(selectedGeoDraft.floorId)} · заполнено: ${selectedGeoFilledCount}/4` : undefined}
+          className={geoAdminOpen ? 'geoAdminPanel' : 'geoAdminPanel geoAdminPanelCollapsed'}
+          headerClassName="geoAdminHeader"
+          titleClassName="geoAdminTitle"
+          contextClassName="geoAdminMeta"
+          bodyClassName="geoAdminBody"
+          collapsible
+          expanded={geoAdminOpen}
+          onToggle={() => setGeoAdminOpen((open) => !open)}
+          toggleButtonClassName="geoAdminToggle"
+        >
             {selectedFloor !== selectedGeoDraft.floorId ? (
               <div className="geoAdminWarn">Для наглядности точек переключитесь на {floorLabel(selectedGeoDraft.floorId)}</div>
             ) : null}
-          </div>
 
           <div className="geoAdminRows">
             {geoCornerIds.map((id) => {
@@ -309,18 +328,18 @@ function App() {
           </div>
 
           <div className="geoAdminActions">
-            <button type="button" className="geoAdminClearBtn" onClick={clearSelectedBuildGeoInputs}>
-              Очистить 
-            </button>
-            <button type="button" className="geoAdminSaveBtn" onClick={saveSelectedBuildGeoToFile}>
+            <HudButton title="Очистить" data={{ action: 'geo-clear' }} className="geoAdminClearBtn" onClick={clearSelectedBuildGeoInputs}>
+              Очистить
+            </HudButton>
+            <HudButton title="Сохранить" data={{ action: 'geo-save' }} className="geoAdminSaveBtn" onClick={saveSelectedBuildGeoToFile}>
               Сохранить
-            </button>
+            </HudButton>
             <div className="geoAdminHint">
               Для позиционирования заполните минимум 3 угла, рекомендуется все 4.
             </div>
           </div>
           {geoFileStatusText ? <div className="geoAdminFileStatus" aria-live="polite">{geoFileStatusText}</div> : null}
-        </div>
+        </HudPanel>
       ) : null}
 
       <OfficesDirectory
@@ -330,41 +349,55 @@ function App() {
         onOpenCabinet={openOfficeOnMap}
       />
 
-      <div className="mapModeDock" aria-label="Режим карты">
-        <button
-          type="button"
+      <HudPanel
+        title="Режим карты"
+        className={mapModeDockOpen ? 'mapModeDock' : 'mapModeDock mapModeDockCollapsed'}
+        headerClassName="mapModeDockHeader"
+        titleClassName="mapModeDockTitle"
+        bodyClassName="mapModeDockBody"
+        collapsible
+        expanded={mapModeDockOpen}
+        onToggle={() => setMapModeDockOpen((open) => !open)}
+        toggleButtonClassName="mapModeDockToggle"
+      >
+        <HudButton
+          title="Обычный"
+          data={{ mode: 'normal' }}
           className={mapMode === 'normal' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
           onClick={onSetRouteModeNormal}
         >
           Обычный
-        </button>
-        <button
-          type="button"
+        </HudButton>
+        <HudButton
+          title="Маршруты"
+          data={{ mode: 'routes' }}
           className={mapMode === 'routes' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
           onClick={onSetRouteModeRoutes}
         >
           Маршруты
-        </button>
-        <button
-          type="button"
+        </HudButton>
+        <HudButton
+          title="Расписание"
+          data={{ mode: 'schedule' }}
           className={mapMode === 'schedule' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
           onClick={onSetRouteModeSchedule}
         >
           Расписание
-        </button>
-      </div>
+        </HudButton>
+      </HudPanel>
 
-      <button
-        type="button"
+      <HudButton
+        title="GPS"
+        data={{ action: 'toggle-gps' }}
         className={isLocationTracking ? 'gpsFab gpsFabActive' : 'gpsFab'}
         onClick={locateUserOnMap}
         aria-label={isLocationTracking ? 'Выключить позиционирование' : 'Включить позиционирование'}
-        title={isLocationTracking
+        hint={isLocationTracking
           ? (isLocating ? 'GPS: идёт уточнение местоположения' : 'Выключить GPS')
           : 'Включить GPS'}
       >
         <img className="gpsFabIcon" src={gpsButtonIcon} alt="" aria-hidden="true" />
-      </button>
+      </HudButton>
 
       {mapMode === 'routes' ? (
         <div className="routeBottomCluster">
@@ -378,28 +411,31 @@ function App() {
           <div className="mapModeSwitchWrap">
             <div className="mapModeRouteMeta">
               <div className="routeEndpointSwitch">
-                <button
-                  type="button"
+                <HudButton
+                  title="Откуда"
+                  data={{ endpoint: 'from' }}
                   className={activeRouteEndpoint === 'from' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
                   onClick={onSetActiveRouteFrom}
                 >
                   Откуда
-                </button>
-                <button
-                  type="button"
+                </HudButton>
+                <HudButton
+                  title="Куда"
+                  data={{ endpoint: 'to' }}
                   className={activeRouteEndpoint === 'to' ? 'routeEndpointBtn routeEndpointBtnActive' : 'routeEndpointBtn'}
                   onClick={onSetActiveRouteTo}
                 >
                   Куда
-                </button>
-                <button
-                  type="button"
+                </HudButton>
+                <HudButton
+                  title="От главного входа"
+                  data={{ endpoint: 'main-entrance' }}
                   className="routeMainEntranceBtn"
                   onClick={onSetMainEntrance}
-                  title="Сбросить точку старта к главному входу"
+                  hint="Сбросить точку старта к главному входу"
                 >
                   От главного входа
-                </button>
+                </HudButton>
               </div>
               <div className="routeMetaLine">Откуда: {routeFrom ? routeFrom.label : 'Главный вход'}</div>
               <div className="routeMetaLine">Куда: {routeTo ? routeTo.label : 'Выберите кабинет или воспользуйтесь поиском'}</div>
@@ -421,20 +457,22 @@ function App() {
         <div className="scheduleBottomCluster">
           <div className="schedulePeriodDock">
             <div className="schedulePeriodSwitch" role="group" aria-label="Период отображения">
-              <button
-                type="button"
+              <HudButton
+                title="Неделя"
+                data={{ period: 'week' }}
                 className={schedulePeriodMode === 'week' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
                 onClick={() => onSetSchedulePeriodMode('week')}
               >
                 Неделя
-              </button>
-              <button
-                type="button"
+              </HudButton>
+              <HudButton
+                title="День"
+                data={{ period: 'day' }}
                 className={schedulePeriodMode === 'day' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
                 onClick={() => onSetSchedulePeriodMode('day')}
               >
                 День
-              </button>
+              </HudButton>
             </div>
 
             <label className="scheduleCalendarField">
@@ -457,9 +495,9 @@ function App() {
             </div>
           </div>
 
-          <button type="button" className="scheduleOpenBtn" onClick={onOpenScheduleModal}>
+          <HudButton title="Показать расписание" data={{ action: 'open-schedule-table' }} className="scheduleOpenBtn" onClick={onOpenScheduleModal}>
             Показать расписание
-          </button>
+          </HudButton>
         </div>
       ) : null}
 

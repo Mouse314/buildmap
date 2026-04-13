@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Room } from '../utils/Room';
 import { getCategoryByRoomId } from '../utils/roomCategories';
 import { formatRoomDescription } from '../utils/stairDirection';
+import { HudAnchoredModal, HudButton } from '../../../components/ui/hud';
 
 function text(value: string | undefined): string {
   return (value ?? '').trim();
@@ -104,13 +105,6 @@ export function RoomInfoModal({
   const category = text(room.category);
   const description = formatRoomDescription(room.roomID, room.description);
   const areaText = React.useMemo(() => formatAreaM2(room.areaM2), [room.areaM2]);
-
-  const modalRef = React.useRef<HTMLDivElement | null>(null);
-  const [placement, setPlacement] = React.useState<'above' | 'below'>('above');
-  const [pos, setPos] = React.useState<{ left: number; top: number }>({
-    left: anchor.x,
-    top: anchor.y,
-  });
   const [draft, setDraft] = React.useState<RoomDraft>(() => toDraft(room));
   const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveError, setSaveError] = React.useState<string>('');
@@ -120,57 +114,6 @@ export function RoomInfoModal({
     setSaveStatus('idle');
     setSaveError('');
   }, [room]);
-
-  React.useLayoutEffect(() => {
-    const el = modalRef.current;
-    if (!el) return;
-
-    const padding = 12;
-    const gap = 12;
-
-    const topBarEl = document.querySelector<HTMLElement>('.topBar');
-    const topBarBottom = topBarEl ? topBarEl.getBoundingClientRect().bottom : 0;
-    const safeTop = Math.max(padding, Math.ceil(topBarBottom) + 8);
-
-    const r = el.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
-
-    const left = clamp(anchor.x, padding + r.width / 2, vw - padding - r.width / 2);
-
-    const canPlaceAbove = anchor.y - gap - r.height >= safeTop;
-    const canPlaceBelow = anchor.y + gap + r.height <= vh - padding;
-
-    let nextPlacement: 'above' | 'below' = placement;
-
-    if (nextPlacement === 'above' && !canPlaceAbove && canPlaceBelow) {
-      nextPlacement = 'below';
-    } else if (nextPlacement === 'below' && !canPlaceBelow && canPlaceAbove) {
-      nextPlacement = 'above';
-    } else if (!canPlaceAbove && canPlaceBelow) {
-      nextPlacement = 'below';
-    } else if (canPlaceAbove) {
-      nextPlacement = 'above';
-    }
-
-    const topMin = nextPlacement === 'above' ? safeTop + r.height + gap : safeTop - gap;
-    const topMaxRaw = nextPlacement === 'above' ? vh - padding : vh - padding - r.height - gap;
-    const topMax = Math.max(topMin, topMaxRaw);
-    const top = clamp(anchor.y, topMin, topMax);
-
-    setPlacement(nextPlacement);
-    setPos({ left, top });
-  }, [anchor.x, anchor.y, isAdminMode, placement, room.roomID, saveError, saveStatus]);
-
-  React.useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
 
   const initialDraft = React.useMemo(() => toDraft(room), [room]);
   const hasDraftChanges = !equalDraft(draft, initialDraft);
@@ -215,32 +158,22 @@ export function RoomInfoModal({
   };
 
   return (
-    <div
-      className="roomModalOverlay"
-      role="dialog"
-      aria-modal="true"
-      onPointerDown={(e) => {
-        if (e.pointerType !== 'mouse') return;
-        if (e.target === e.currentTarget) onClose();
-      }}
+    <HudAnchoredModal
+      isOpen
+      anchor={anchor}
+      onClose={onClose}
+      title="Информация о комнате"
+      overlayClassName="roomModalOverlay"
+      surfaceClassName={`roomModal ${isAdminMode ? 'roomModalAdmin' : ''}`}
+      headerClassName="roomModalHeader"
+      titleClassName="roomModalTitle"
+      closeButtonClassName="roomModalClose"
+      bodyClassName="roomModalBody"
+      aboveClassName="roomModalAbove"
+      belowClassName="roomModalBelow"
+      reflowToken={`${room.roomID}:${isAdminMode ? 'admin' : 'view'}:${saveStatus}:${saveError}`}
     >
-      <div
-        ref={modalRef}
-        className={
-          placement === 'above'
-            ? `roomModal ${isAdminMode ? 'roomModalAdmin' : ''} roomModalAbove`
-            : `roomModal ${isAdminMode ? 'roomModalAdmin' : ''} roomModalBelow`
-        }
-        style={{ left: pos.left, top: pos.top }}
-      >
-        <div className="roomModalHeader">
-          <div className="roomModalTitle">Информация о комнате</div>
-          <button type="button" className="roomModalClose" onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-
-        <div className="roomModalBody">
+        <div className="roomModalBodyInner">
           {isAdminMode ? (
             <>
               <div className="roomModalRow">
@@ -385,32 +318,33 @@ export function RoomInfoModal({
 
           {onBuildRoute ? (
             <div className="roomModalActions">
-              <button
-                type="button"
+              <HudButton
+                title="Построить маршрут"
+                data={{ action: 'build-route-from-room', roomKey: room.key }}
                 className="roomModalRouteBtn"
                 onClick={() => onBuildRoute(room)}
               >
                 Построить маршрут
-              </button>
+              </HudButton>
             </div>
           ) : null}
 
           {isAdminMode && onSaveRoom ? (
             <div className="roomModalActions">
-              <button
-                type="button"
+              <HudButton
+                title={saveStatus === 'saving' ? 'Сохранение...' : 'Сохранить в файл'}
+                data={{ action: 'save-room' }}
                 className="roomModalSaveBtn"
                 disabled={!hasDraftChanges || saveStatus === 'saving'}
                 onClick={onSaveClick}
               >
                 {saveStatus === 'saving' ? 'Сохранение...' : 'Сохранить в файл'}
-              </button>
+              </HudButton>
               {saveStatus === 'saved' ? <div className="roomModalSaveHint">Изменения сохранены</div> : null}
               {saveStatus === 'error' ? <div className="roomModalSaveError">{saveError}</div> : null}
             </div>
           ) : null}
         </div>
-      </div>
-    </div>
+    </HudAnchoredModal>
   );
 }

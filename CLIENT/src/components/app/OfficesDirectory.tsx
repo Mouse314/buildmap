@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { OfficeLocation, OfficeNode, OfficesHierarchyData } from '../../app/offices/types';
+import { HudButton, HudModal } from '../ui/hud';
 
 type OfficesDirectoryProps = {
   data: OfficesHierarchyData | null;
@@ -158,40 +159,31 @@ export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }
 
   return (
     <>
-      <button
-        type="button"
+      <HudButton
+        title="Структура ВятГУ"
+        data={{ action: 'open-offices-directory' }}
         className="officesDirectoryFab"
         onClick={() => setOpen(true)}
-        title="Открыть таблицу институтов, факультетов и кафедр"
+        hint="Открыть таблицу институтов, факультетов и кафедр"
       >
         Структура ВятГУ
-      </button>
+      </HudButton>
 
-      {open ? (
-        <div className="officesOverlay" onClick={() => setOpen(false)}>
-          <aside className="officesTableModal" onClick={(event) => event.stopPropagation()} aria-label="Факультеты и кафедры">
-            <div className="officesPanelHeader">
-              <div>
-                <div className="officesPanelTitle">Институты, Факультеты и Кафедры</div>
-                {data ? (
-                  <div className="officesPanelMeta" title="Сколько подразделений удалось сопоставить с комнатами на карте">
-                    Найдено на карте: {data.stats.mappedRows}/{data.stats.totalRows}
-                  </div>
-                ) : (
-                  <div className="officesPanelMeta">Загрузка данных...</div>
-                )}
-              </div>
-              <button
-                type="button"
-                className="officesCloseButton"
-                onClick={() => setOpen(false)}
-                title="Закрыть таблицу"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="officesTableWrap">
+      <HudModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Институты, Факультеты и Кафедры"
+        context={data
+          ? `Найдено на карте: ${data.stats.mappedRows}/${data.stats.totalRows}`
+          : 'Загрузка данных...'}
+        overlayClassName="officesOverlay"
+        surfaceClassName="officesTableModal"
+        headerClassName="officesPanelHeader"
+        titleClassName="officesPanelTitle"
+        contextClassName="officesPanelMeta"
+        closeButtonClassName="roomModalClose"
+        bodyClassName="officesTableWrap"
+      >
               {rows.length > 0 ? (
                 <table className="officesTable">
                   <thead>
@@ -239,17 +231,18 @@ export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }
 
                           <td title={cabinetLabel || 'Кабинет не указан'}>
                             {row.location && cabinetLabel.length > 0 ? (
-                              <button
-                                type="button"
+                              <HudButton
+                                title={cabinetLabel}
+                                data={{ action: 'open-cabinet-on-map', roomKey: row.location.roomKey }}
                                 className="officesCabinetLink"
                                 onClick={() => {
                                   onOpenCabinet(row.location as OfficeLocation, row.node);
                                   setOpen(false);
                                 }}
-                                title={`Открыть ${cabinetLabel} на карте: ${buildLabel(row.location.buildId)}, ${floorLabel(row.location.floorId)}`}
+                                hint={`Открыть ${cabinetLabel} на карте: ${buildLabel(row.location.buildId)}, ${floorLabel(row.location.floorId)}`}
                               >
                                 {cabinetLabel}
-                              </button>
+                              </HudButton>
                             ) : (
                               <span className="officesMuted">{cabinetLabel || '—'}</span>
                             )}
@@ -262,10 +255,7 @@ export function OfficesDirectory({ data, buildLabel, floorLabel, onOpenCabinet }
               ) : (
                 <div className="officesEmpty">Файл с иерархией не найден или пуст.</div>
               )}
-            </div>
-          </aside>
-        </div>
-      ) : null}
+      </HudModal>
     </>
   );
 }

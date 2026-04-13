@@ -6,6 +6,7 @@ import {
   ScheduleDataset,
   type ScheduleColumnKey,
 } from '../../schedule/domain'
+import { HudModal } from '../ui/hud'
 
 type ScheduleModalProps = {
   isOpen: boolean
@@ -165,18 +166,19 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
   }
 
   return (
-    <div className="scheduleOverlay" onClick={onClose}>
-      <div className="scheduleModal" onClick={(e) => e.stopPropagation()}>
-        <div className="scheduleModalHeader">
-          <div>
-            <div className="scheduleModalTitle">Расписание подгрупп</div>
-            <div className="scheduleModalMeta">CSV из папки parsed_schedule с фильтрацией по всем столбцам</div>
-          </div>
-          <button type="button" className="scheduleCloseButton" onClick={onClose} aria-label="Закрыть">
-            ×
-          </button>
-        </div>
-
+    <HudModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Расписание подгрупп"
+      context="CSV из папки parsed_schedule с фильтрацией по всем столбцам"
+      overlayClassName="scheduleOverlay"
+      surfaceClassName="scheduleModal"
+      headerClassName="scheduleModalHeader"
+      titleClassName="scheduleModalTitle"
+      contextClassName="scheduleModalMeta"
+      closeButtonClassName="roomModalClose"
+      bodyClassName="scheduleModalBody"
+    >
         <div className="scheduleControlsGrid">
           <label className="scheduleField">
             <span className="scheduleFieldLabel">Пакет расписания</span>
@@ -306,7 +308,6 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
             </div>
           </>
         ) : null}
-      </div>
-    </div>
+    </HudModal>
   )
 }

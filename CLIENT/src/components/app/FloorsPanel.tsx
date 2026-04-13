@@ -1,3 +1,5 @@
+import { HudButton, HudPanel } from '../ui/hud';
+
 type FloorsPanelProps = {
   floorOptions: string[];
   selectedFloor: string;
@@ -12,25 +14,29 @@ export function FloorsPanel({
   onSelectFloor,
 }: FloorsPanelProps) {
   return (
-    <div className="sidePanel sidePanelLeft" aria-label="Этажи">
-      <div className="floorButtons">
+    <HudPanel
+      title="Этажи"
+      className="sidePanel sidePanelLeft"
+      bodyClassName="floorButtons"
+      showHeader={false}
+    >
         {floorOptions.map((f) => {
           const selected = f === selectedFloor;
           const short = f.match(/floor(\d+)/i)?.[1] ?? f;
           return (
-            <button
+            <HudButton
               key={f}
-              type="button"
+              title={short}
+              context={floorLabel(f)}
+              hint={floorLabel(f)}
               className={selected ? 'floorButton floorButtonSelected' : 'floorButton'}
               aria-pressed={selected}
-              title={floorLabel(f)}
               onClick={() => onSelectFloor(f)}
             >
               {short}
-            </button>
+            </HudButton>
           );
         })}
-      </div>
-    </div>
+    </HudPanel>
   );
 }

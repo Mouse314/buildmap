@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { HudButton } from './ui/hud'
 
 export type GlassDropdownOption = {
   value: string
@@ -50,8 +51,9 @@ export function GlassDropdown({
       className={['glassDropdown', className].filter(Boolean).join(' ')}
       data-open={open ? 'true' : 'false'}
     >
-      <button
-        type="button"
+      <HudButton
+        title={selectedLabel}
+        data={{ action: 'toggle-glass-dropdown' }}
         className={['glassDropdownButton', buttonClassName].filter(Boolean).join(' ')}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -67,15 +69,16 @@ export function GlassDropdown({
         <span className="glassDropdownChevron" aria-hidden>
           ▾
         </span>
-      </button>
+      </HudButton>
 
       <div className="glassDropdownMenu" role="listbox">
         {options.map((opt) => {
           const selected = opt.value === value
           return (
-            <button
+            <HudButton
               key={opt.value}
-              type="button"
+              title={opt.label}
+              data={{ action: 'select-glass-dropdown-option', value: opt.value }}
               className={selected ? 'glassDropdownItem glassDropdownItemSelected' : 'glassDropdownItem'}
               role="option"
               aria-selected={selected}
@@ -85,7 +88,7 @@ export function GlassDropdown({
               }}
             >
               {opt.label}
-            </button>
+            </HudButton>
           )
         })}
       </div>

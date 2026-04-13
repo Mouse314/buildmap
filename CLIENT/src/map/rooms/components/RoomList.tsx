@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { RoomPolygon } from '../utils/roomData';
 import { formatRoomDescription } from '../utils/stairDirection';
+import { HudButton } from '../../../components/ui/hud';
 
 type RoomListEntry = {
   roomID: number;
@@ -62,16 +63,18 @@ export function RoomList({
           const title = room.roomNo.length > 0 ? room.roomNo : `ID ${room.roomID}`;
 
           return (
-            <button
+            <HudButton
               key={room.roomID}
-              type="button"
+              title={title}
+              context={room.description.length > 0 ? room.description : undefined}
+              data={{ action: 'select-room-from-list', roomID: room.roomID }}
               className={isSelected ? 'roomListItem roomListItemSelected' : 'roomListItem'}
               onClick={() => onSelectRoomID(isSelected ? null : room.roomID)}
-              title={room.description.length > 0 ? `${title} — ${room.description}` : title}
+              hint={room.description.length > 0 ? `${title} — ${room.description}` : title}
             >
               <div className="roomListItemTitle">{title}</div>
               {room.description.length > 0 ? <div className="roomListItemDesc">{room.description}</div> : null}
-            </button>
+            </HudButton>
           );
         })}
       </div>

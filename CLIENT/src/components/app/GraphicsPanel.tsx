@@ -1,4 +1,5 @@
 import { listGraphicsPresets, type GraphicsPresetId } from '../../map/graphicsPresets';
+import { HudButton, HudPanel } from '../ui/hud';
 
 type GraphicsPanelProps = {
   graphicsOpen: boolean;
@@ -24,41 +25,37 @@ export function GraphicsPanel({
   const graphicsPresets = listGraphicsPresets();
 
   return (
-    <div className="sidePanel sidePanelRight" aria-label="Настройки графики">
-      <div className="sidePanelHeader">
-        <div className="sidePanelTitle">Настройки графики</div>
-        <button
-          type="button"
-          className="sidePanelToggle"
-          aria-expanded={graphicsOpen}
-          aria-controls="graphics-panel-body"
-          title={graphicsOpen ? 'Свернуть' : 'Развернуть'}
-          onClick={onToggle}
-        >
-          {graphicsOpen ? '▾' : '▸'}
-        </button>
-      </div>
-
-      {graphicsOpen ? (
-        <div className="sidePanelBody" id="graphics-panel-body">
+    <HudPanel
+      title="Настройки графики"
+      className="sidePanel sidePanelRight"
+      headerClassName="sidePanelHeader"
+      titleClassName="sidePanelTitle"
+      bodyClassName="sidePanelBody"
+      collapsible
+      expanded={graphicsOpen}
+      onToggle={onToggle}
+      toggleButtonClassName="sidePanelToggle"
+    >
           <div className="graphicsButtons">
             {graphicsPresets.map((p) => {
               const selected = graphicsPreset === p.id;
               const needsWarning = p.id === 'medium' || p.id === 'max';
               return (
-                <button
+                <HudButton
                   key={p.id}
-                  type="button"
+                  title={p.label}
+                  context={needsWarning ? 'Только для мощных устройств' : undefined}
+                  data={{ presetId: p.id }}
+                  hint={p.title}
                   className={
                     selected ? 'topButton graphicsButton graphicsButtonSelected' : 'topButton graphicsButton'
                   }
                   aria-pressed={selected}
                   onClick={() => onSelectPreset(p.id)}
-                  title={p.title}
                 >
                   {p.label}
                   {needsWarning ? <span className="graphicsWarningMark" aria-hidden> ⚠️</span> : null}
-                </button>
+                </HudButton>
               );
             })}
           </div>
@@ -68,29 +65,30 @@ export function GraphicsPanel({
           </div>
           <hr className="graphicsDivider" />
           <div className="graphicsExtraToggles">
-            <button
-              type="button"
+            <HudButton
+              title="Сетка графа"
+              data={{ action: 'toggle-graph-overlay' }}
+              hint="Показать или скрыть сетку графа"
               className={showGraphOverlay ? 'topButton graphicsButton graphicsButtonSelected' : 'topButton graphicsButton'}
               aria-pressed={showGraphOverlay}
               onClick={onToggleGraphOverlay}
-              title="Показать или скрыть сетку графа"
             >
               Сетка графа
-            </button>
+            </HudButton>
 
             {isAdminMode ? (
-              <button
-                type="button"
+              <HudButton
+                title="Тонкая настройка пресетов"
+                context="Админ-режим"
+                data={{ action: 'open-preset-settings' }}
+                hint="Открыть детальную настройку графических пресетов"
                 className="topButton graphicsButton graphicsPresetSettingsButton"
                 onClick={onOpenPresetSettings}
-                title="Открыть детальную настройку графических пресетов"
               >
                 Тонкая настройка пресетов
-              </button>
+              </HudButton>
             ) : null}
           </div>
-        </div>
-      ) : null}
-    </div>
+    </HudPanel>
   );
 }

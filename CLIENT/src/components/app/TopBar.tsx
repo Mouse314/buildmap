@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { GlassDropdown } from '../GlassDropdown';
 import { listGraphicsPresets, type GraphicsPresetId } from '../../map/graphicsPresets';
+import { HudButton, HudModal } from '../ui/hud';
 
 type SearchIndexedRoom = {
     key: string;
@@ -179,15 +180,16 @@ export function TopBar({
                         />
                     </div>
                     {searchText.length > 0 || selectedCategory !== '__all__' ? (
-                        <button
+                        <HudButton
+                            title="×"
+                            data={{ action: 'clear-search' }}
                             className="topSearchClear"
-                            type="button"
                             aria-label="Очистить категорию и поле поиска"
-                            title="очистить категорию и поле поиска"
+                            hint="очистить категорию и поле поиска"
                             onClick={onClearSearch}
                         >
                             ×
-                        </button>
+                        </HudButton>
                     ) : null}
                     <input
                         ref={searchInputRef}
@@ -207,9 +209,11 @@ export function TopBar({
                                         <div className="smartSearchGroupTitle">В текущем корпусе</div>
                                         <div className="smartSearchItems">
                                             {smartSearchData.currentBuildMatches.map((item) => (
-                                                <button
+                                                <HudButton
                                                     key={`cur-${item.buildId}-${item.floorId}-${item.key}`}
-                                                    type="button"
+                                                    title={formatSearchPrimary(item)}
+                                                    context={floorLabel(item.floorId)}
+                                                    data={{ action: 'pick-current-build-room', roomKey: item.key }}
                                                     className="smartSearchItem"
                                                     onClick={() => {
                                                         onPickSearchRoom(item);
@@ -221,7 +225,7 @@ export function TopBar({
                                                             {formatSearchPrimary(item)}
                                                     </span>
                                                     <span className="smartSearchSecondary">{floorLabel(item.floorId)}</span>
-                                                </button>
+                                                </HudButton>
                                             ))}
                                         </div>
                                     </div>
@@ -234,9 +238,11 @@ export function TopBar({
                                             <div className="smartSearchGroupTitle">В других корпусах</div>
                                             <div className="smartSearchItems">
                                                 {smartSearchData.otherBuildMatches.map((item) => (
-                                                    <button
+                                                    <HudButton
                                                         key={`oth-${item.buildId}-${item.floorId}-${item.key}`}
-                                                        type="button"
+                                                        title={formatSearchPrimary(item)}
+                                                        context={`${buildLabel(item.buildId)} · ${floorLabel(item.floorId)}`}
+                                                        data={{ action: 'pick-other-build-room', roomKey: item.key }}
                                                         className="smartSearchItem"
                                                         onClick={() => {
                                                             onPickSearchRoom(item);
@@ -248,7 +254,7 @@ export function TopBar({
                                                                 {formatSearchPrimary(item)}
                                                         </span>
                                                         <span className="smartSearchSecondary">{buildLabel(item.buildId)} · {floorLabel(item.floorId)}</span>
-                                                    </button>
+                                                    </HudButton>
                                                 ))}
                                             </div>
                                         </div>
@@ -262,9 +268,10 @@ export function TopBar({
                                             <div className="smartSearchGroupTitle">Категории</div>
                                             <div className="smartSearchItems smartSearchItemsCategories">
                                                 {smartSearchData.categoryMatches.map((category) => (
-                                                    <button
+                                                    <HudButton
                                                         key={`cat-${category}`}
-                                                        type="button"
+                                                        title={category}
+                                                        data={{ action: 'pick-category', category }}
                                                         className="smartSearchCategoryItem"
                                                         onClick={() => {
                                                             onPickSearchCategory(category);
@@ -273,7 +280,7 @@ export function TopBar({
                                                         }}
                                                     >
                                                         {category}
-                                                    </button>
+                                                    </HudButton>
                                                 ))}
                                             </div>
                                         </div>
@@ -289,30 +296,42 @@ export function TopBar({
                 </div>
             </div>
 
-            <button className="topButton topThemeButton topDesktopOnly" type="button" onClick={onToggleTheme}>
+            <HudButton
+                title={theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
+                data={{ action: 'toggle-theme' }}
+                className="topButton topThemeButton topDesktopOnly"
+                onClick={onToggleTheme}
+            >
                 {theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
-            </button>
+            </HudButton>
 
-                <button
+                <HudButton
+                    title={isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                    data={{ action: 'toggle-admin' }}
                     className={isAdminMode ? 'topButton topDesktopOnly adminModeButton adminModeButtonActive' : 'topButton topDesktopOnly adminModeButton'}
-                    type="button"
                     onClick={onToggleAdminMode}
                 >
                     {isAdminMode ? 'Админ: ВКЛ' : 'админ'}
-                </button>
+                </HudButton>
 
-                <button className="topButton topDesktopOnly" type="button" onClick={() => setBugReportOpen(true)}>
+                <HudButton
+                    title="Сообщить об ошибке"
+                    data={{ action: 'open-bug-report' }}
+                    className="topButton topDesktopOnly"
+                    onClick={() => setBugReportOpen(true)}
+                >
                     Сообщить об ошибке
-                </button>
+                </HudButton>
 
-                <button
+                <HudButton
+                    title="☰"
+                    data={{ action: 'open-mobile-controls' }}
                     className="topButton mobileControlsButton"
-                    type="button"
                     aria-label="Открыть боковое меню"
                     onClick={() => setMobileControlsOpen(true)}
                 >
                     ☰
-                </button>
+                </HudButton>
             </div>
 
             {mobileControlsOpen ? (
@@ -324,13 +343,14 @@ export function TopBar({
                     >
                         <div className="mobileControlsHeader">
                             <div className="mobileControlsTitle">Меню</div>
-                            <button
-                                className="topButton mobileControlsClose"
-                                type="button"
+                            <HudButton
+                                title="×"
+                                data={{ action: 'close-mobile-controls' }}
+                                className="roomModalClose mobileControlsClose"
                                 onClick={() => setMobileControlsOpen(false)}
                             >
                                 ×
-                            </button>
+                            </HudButton>
                         </div>
 
                         <div className="mobileControlsBody">
@@ -368,9 +388,12 @@ export function TopBar({
                                         const selected = graphicsPreset === p.id;
                                         const needsWarning = p.id === 'medium' || p.id === 'max';
                                         return (
-                                            <button
+                                            <HudButton
                                                 key={p.id}
-                                                type="button"
+                                                title={p.label}
+                                                context={needsWarning ? 'Требует мощное устройство' : undefined}
+                                                data={{ action: 'select-graphics-preset', presetId: p.id }}
+                                                hint={p.title}
                                                 className={
                                                     selected
                                                         ? 'topButton graphicsButton graphicsButtonSelected'
@@ -378,11 +401,10 @@ export function TopBar({
                                                 }
                                                 aria-pressed={selected}
                                                 onClick={() => onSelectPreset(p.id)}
-                                                title={p.title}
                                             >
                                                 {p.label}
                                                 {needsWarning ? <span className="graphicsWarningMark" aria-hidden>⚠️</span> : null}
-                                            </button>
+                                            </HudButton>
                                         );
                                     })}
                                 </div>
@@ -393,22 +415,28 @@ export function TopBar({
                             </div>
 
                             <div className="mobileControlsRow">
-                                <button className="topButton" type="button" onClick={onToggleTheme}>
+                                <HudButton
+                                    title={theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
+                                    data={{ action: 'toggle-theme-mobile' }}
+                                    className="topButton"
+                                    onClick={onToggleTheme}
+                                >
                                     {theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
-                                </button>
+                                </HudButton>
                             </div>
 
                             <div className="mobileControlsRow">
-                                <button
+                                <HudButton
+                                    title={isLocationTracking ? 'GPS: ВКЛ' : 'Моё местоположение'}
+                                    data={{ action: 'toggle-location' }}
                                     className={isLocationTracking
                                         ? 'topButton locationButton locationButtonActive'
                                         : 'topButton locationButton'}
-                                    type="button"
                                     onClick={onLocateUser}
                                     aria-pressed={isLocationTracking}
                                 >
                                     {isLocationTracking ? 'GPS: ВКЛ' : 'Моё местоположение'}
-                                </button>
+                                </HudButton>
                             </div>
 
                             {locationStatusText ? (
@@ -418,36 +446,47 @@ export function TopBar({
                             ) : null}
 
                             <div className="mobileControlsRow">
-                                <button
+                                <HudButton
+                                    title={isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                                    data={{ action: 'toggle-admin-mobile' }}
                                     className={isAdminMode ? 'topButton adminModeButton adminModeButtonActive' : 'topButton adminModeButton'}
-                                    type="button"
                                     onClick={onToggleAdminMode}
                                 >
                                     {isAdminMode ? 'Админ: ВКЛ' : 'админ'}
-                                </button>
+                                </HudButton>
                             </div>
 
                             <div className="mobileControlsRow">
-                                <button
+                                <HudButton
+                                    title="Сообщить об ошибке"
+                                    data={{ action: 'open-bug-report-mobile' }}
                                     className="topButton"
-                                    type="button"
                                     onClick={() => {
                                         setMobileControlsOpen(false);
                                         setBugReportOpen(true);
                                     }}
                                 >
                                     Сообщить об ошибке
-                                </button>
+                                </HudButton>
                             </div>
                         </div>
                     </aside>
                 </div>
             ) : null}
 
-            {bugReportOpen ? (
-                <div className="bugReportOverlay" role="dialog" aria-modal="true" aria-label="Сообщение об ошибке">
-                    <form className="bugReportModal" onSubmit={submitBugReport}>
-                        <div className="bugReportTitle">Сообщение об ошибке</div>
+            <HudModal
+                isOpen={bugReportOpen}
+                onClose={() => {
+                    setBugReportOpen(false);
+                    setBugReportText('');
+                }}
+                title="Сообщение об ошибке"
+                overlayClassName="bugReportOverlay"
+                surfaceClassName="bugReportModal"
+                titleClassName="bugReportTitle"
+                bodyClassName="bugReportBody"
+            >
+                    <form className="bugReportForm" onSubmit={submitBugReport}>
                         <textarea
                             className="bugReportInput"
                             value={bugReportText}
@@ -457,23 +496,23 @@ export function TopBar({
                             autoFocus
                         />
                         <div className="bugReportActions">
-                            <button
+                            <HudButton
+                                title="Отмена"
+                                data={{ action: 'cancel-bug-report' }}
                                 className="topButton bugReportButton"
-                                type="button"
                                 onClick={() => {
                                     setBugReportOpen(false);
                                     setBugReportText('');
                                 }}
                             >
                                 Отмена
-                            </button>
-                            <button className="topButton bugReportButton" type="submit">
+                            </HudButton>
+                            <HudButton title="Отправить" data={{ action: 'submit-bug-report' }} className="topButton bugReportButton" type="submit">
                                 Отправить
-                            </button>
+                            </HudButton>
                         </div>
                     </form>
-                </div>
-            ) : null}
+            </HudModal>
         </>
     );
 }

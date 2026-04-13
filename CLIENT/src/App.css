@@ -10,6 +10,137 @@
   min-height: 0;
 }
 
+.hudButton {
+  cursor: pointer;
+  font: inherit;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hudButton:focus,
+.hudButton:focus-visible {
+  outline: none;
+}
+
+.hudButton::-moz-focus-inner {
+  border: 0;
+}
+
+.hudButton:disabled {
+  cursor: not-allowed;
+}
+
+.hudButtonContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.hudButtonTextWrap {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hudButtonContext {
+  font-size: 0.68rem;
+  line-height: 1.1;
+  opacity: 0.74;
+  font-weight: 700;
+}
+
+.hudPanel,
+.hudModalSurface {
+  min-width: 0;
+}
+
+.hudPanelHeader,
+.hudModalHeader {
+  min-width: 0;
+}
+
+.hudPanelTitleWrap,
+.hudModalTitleWrap {
+  min-width: 0;
+}
+
+.hudPanelTitle,
+.hudModalTitle,
+.hudModalContext,
+.hudPanelContext {
+  overflow-wrap: anywhere;
+}
+
+.hudPanelBodyWrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+  overflow: hidden;
+  transition: grid-template-rows 230ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hudPanelBodyWrapExpanded {
+  grid-template-rows: 1fr;
+  overflow: visible;
+}
+
+.hudPanelBodyWrapCollapsed {
+  grid-template-rows: 0fr;
+  overflow: hidden;
+}
+
+.hudPanelBody {
+  min-height: 0;
+  overflow: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 180ms ease,
+    transform 230ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hudPanelBodyWrapCollapsed > .hudPanelBody {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+
+.hudModalOverlay,
+.hudAnchoredModalOverlay {
+  animation: none;
+}
+
+.hudModalSurface {
+  opacity: 1;
+  animation: none;
+}
+
+.hudAnchoredModalSurface {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes hudModalOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hudModalSurfaceFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .appError {
   padding: 16px;
 }
@@ -27,9 +158,9 @@
 :root {
   --ui-window-radius: 22px;
   --ui-window-border: 2px solid rgba(206, 209, 255, 0.32);
-  --ui-window-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08)), rgba(167, 167, 167, 0.74);
+  --ui-window-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02)), rgba(167, 167, 167, 0.38);
   --ui-window-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
-  --ui-window-filter: blur(7px) saturate(122%);
+  --ui-window-filter: blur(14px) saturate(145%);
   --ui-menu-radius: 16px;
   --ui-menu-border: 2px solid rgba(206, 209, 255, 0.3);
   --ui-menu-bg: linear-gradient(155deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08)), rgba(167, 167, 167, 0.7);
@@ -127,12 +258,12 @@
 
 .roomModalAbove {
   transform: translate(-50%, calc(-100% - 12px));
-  animation: roomModalAboveIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: none;
 }
 
 .roomModalBelow {
   transform: translate(-50%, 12px);
-  animation: roomModalBelowIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: none;
 }
 
 @keyframes roomModalOverlayIn {
@@ -168,8 +299,17 @@
 
 @media (prefers-reduced-motion: reduce) {
   .roomModalOverlay,
-  .roomModal {
+  .roomModal,
+  .hudModalOverlay,
+  .hudAnchoredModalOverlay,
+  .hudModalSurface,
+  .hudAnchoredModalSurface {
     animation: none;
+  }
+
+  .hudPanelBodyWrap,
+  .hudPanelBody {
+    transition: none;
   }
 }
 
@@ -190,7 +330,9 @@
   font-weight: 700;
 }
 
-.roomModalClose {
+.roomModalClose,
+.hudModalClose,
+.hudAnchoredModalClose {
   height: 34px;
   width: 34px;
   padding: 0;
@@ -203,7 +345,9 @@
   background: rgba(255, 255, 255, 0.353);
 }
 
-.roomModalClose:hover {
+.roomModalClose:hover,
+.hudModalClose:hover,
+.hudAnchoredModalClose:hover {
   transition: 150ms ease-out;
   border-color: rgba(0, 0, 0, 0.22);
   background: rgba(255, 9, 9, 0.5);
@@ -429,9 +573,6 @@
   z-index: 125;
   left: 12px;
   bottom: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   border-radius: 20px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.72);
@@ -439,6 +580,48 @@
   -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   padding: 10px;
+}
+
+.mapModeDockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mapModeDockTitle {
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.mapModeDockToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 30px;
+  border-radius: 10px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.22);
+  color: #111;
+  font-weight: 800;
+}
+
+.mapModeDockBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mapModeDockCollapsed {
+  width: fit-content;
+  max-width: calc(100vw - 24px);
+  padding: 8px 10px;
+}
+
+.mapModeDockCollapsed .mapModeDockTitle {
+  white-space: nowrap;
 }
 
 .mapModeDock .mapModeBtn {
@@ -553,7 +736,7 @@
   position: absolute;
   z-index: 1260;
   left: 12px;
-  bottom: 140px;
+  bottom: 190px;
   width: min(96vw, 520px);
   border-radius: 16px;
   border: 2px solid rgba(206, 209, 255, 0.267);
@@ -566,14 +749,7 @@
 
 .geoAdminHeader {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.geoAdminHeaderTop {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
 }
@@ -584,14 +760,34 @@
 }
 
 .geoAdminToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 30px;
   width: 30px;
+  border-radius: 9px;
+  border: 2px solid rgba(206, 209, 255, 0.267);
+  background: rgba(255, 255, 255, 0.22);
+  color: #111;
+  font-weight: 800;
 }
 
 .geoAdminBody {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 8px;
+}
+
+.geoAdminPanelCollapsed {
+  width: fit-content;
+  max-width: calc(100vw - 24px);
+  padding: 10px 12px;
+}
+
+.geoAdminPanelCollapsed .geoAdminTitle,
+.geoAdminPanelCollapsed .geoAdminMeta {
+  white-space: nowrap;
 }
 
 .geoAdminMeta {
@@ -1170,9 +1366,9 @@
   max-height: min(70vh, 680px);
   border-radius: 16px;
   border: 2px solid rgba(206, 209, 255, 0.3);
-  background: rgba(167, 167, 167, 0.8);
-  backdrop-filter: blur(7px) saturate(118%);
-  -webkit-backdrop-filter: blur(7px) saturate(118%);
+  background: rgba(167, 167, 167, 0.42);
+  backdrop-filter: blur(5px) saturate(140%);
+  -webkit-backdrop-filter: blur(5px) saturate(140%);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
@@ -1185,12 +1381,12 @@
 
 .scheduleRoomModalAbove {
   transform: translate(-50%, calc(-100% - 12px));
-  animation: scheduleRoomModalAboveIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: none;
 }
 
 .scheduleRoomModalBelow {
   transform: translate(-50%, 12px);
-  animation: scheduleRoomModalBelowIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: none;
 }
 
 @keyframes scheduleRoomModalAboveIn {
@@ -1352,6 +1548,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.scheduleModalBody {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
 }
 
 .scheduleModalHeader {
@@ -1651,7 +1854,7 @@
     left: 8px;
     right: 8px;
     width: auto;
-    bottom: 128px;
+    bottom: 182px;
   }
 
   .geoAdminRow {
@@ -1802,6 +2005,11 @@
   padding: 0 12px;
 }
 
+.sidePanel .graphicsButton,
+.sidePanel .floorButton {
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+}
+
 .graphicsWarningMark {
   margin-left: 6px;
   line-height: 1;
@@ -1841,6 +2049,12 @@
   background: rgba(167, 167, 167, 0.72);
   border-color: rgba(206, 209, 255, 0.55);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(206, 209, 255, 0.55);
+}
+
+.sidePanel .graphicsButtonSelected,
+.sidePanel .topButton.graphicsButtonSelected,
+.sidePanel .floorButtonSelected {
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(206, 209, 255, 0.5);
 }
 
 .floorButton {
@@ -2083,15 +2297,28 @@
 }
 
 .topSearchClear {
-  width: 42px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  border-radius: 50vh;
-  opacity: 0.6;
-  font-weight: 700;
+  align-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.34);
+  opacity: 0.92;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
+}
+
+.topSearchClear:hover {
+  transition: 150ms ease-out;
+  border-color: rgba(0, 0, 0, 0.22);
+  background: rgba(255, 9, 9, 0.5);
 }
 
 .topButton {
@@ -2194,6 +2421,16 @@
   margin-bottom: 0;
 }
 
+.bugReportBody {
+  padding: 0;
+}
+
+.bugReportForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .bugReportInput {
   width: 100%;
   box-sizing: border-box;
@@ -2262,9 +2499,7 @@
 }
 
 .mobileControlsClose {
-  min-width: 40px;
-  width: 40px;
-  padding: 0;
+  flex-shrink: 0;
 }
 
 .mobileControlsBody {
@@ -2496,9 +2731,9 @@
   background: #0b0f19;
   color: #f3f4f6;
   --ui-window-border: 2px solid rgba(255, 255, 255, 0.18);
-  --ui-window-bg: linear-gradient(155deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)), rgba(18, 18, 18, 0.8);
+  --ui-window-bg: linear-gradient(155deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.008)), rgba(18, 18, 18, 0.48);
   --ui-window-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
-  --ui-window-filter: blur(7px) saturate(116%);
+  --ui-window-filter: blur(14px) saturate(132%);
   --ui-menu-border: 2px solid rgba(255, 255, 255, 0.18);
   --ui-menu-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)), rgba(18, 18, 18, 0.78);
   --ui-menu-shadow: 0 10px 42px rgba(41, 35, 78, 0.48);
@@ -2512,7 +2747,6 @@
 .appRoot[data-theme='dark'] .topSelect,
 .appRoot[data-theme='dark'] .topSearch,
 .appRoot[data-theme='dark'] .topButton,
-.appRoot[data-theme='dark'] .roomModal,
 .appRoot[data-theme='dark'] .roomHoverTip,
 .appRoot[data-theme='dark'] .glassDropdownMenu,
 .appRoot[data-theme='dark'] .smartSearchPanel,
@@ -2556,6 +2790,12 @@
   border-color: rgba(255, 255, 255, 0.26);
   background: rgba(18, 18, 18, 0.82);
   box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.appRoot[data-theme='dark'] .sidePanel .graphicsButtonSelected,
+.appRoot[data-theme='dark'] .sidePanel .topButton.graphicsButtonSelected,
+.appRoot[data-theme='dark'] .sidePanel .floorButtonSelected {
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .appRoot[data-theme='dark'] .topButton.graphicsButtonSelected {
@@ -2718,12 +2958,18 @@
   opacity: 0.78;
 }
 
-.appRoot[data-theme='dark'] .roomModalClose {
+.appRoot[data-theme='dark'] .roomModalClose,
+.appRoot[data-theme='dark'] .hudModalClose,
+.appRoot[data-theme='dark'] .hudAnchoredModalClose,
+.appRoot[data-theme='dark'] .topSearchClear {
   border-color: rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.08);
 }
 
-.appRoot[data-theme='dark'] .roomModalClose:hover {
+.appRoot[data-theme='dark'] .roomModalClose:hover,
+.appRoot[data-theme='dark'] .hudModalClose:hover,
+.appRoot[data-theme='dark'] .hudAnchoredModalClose:hover,
+.appRoot[data-theme='dark'] .topSearchClear:hover {
   border-color: rgba(255, 255, 255, 0.26);
   background: rgba(255, 9, 9, 0.35);
 }
@@ -2731,7 +2977,7 @@
 .appRoot[data-theme='dark'] .scheduleRoomModal {
   color: #f3f4f6;
   border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(18, 18, 18, 0.82);
+  background: rgba(18, 18, 18, 0.46);
   box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
 }
 
@@ -2810,9 +3056,9 @@
   max-height: calc(100vh - 24px);
   border-radius: 20px;
   border: 2px solid rgba(206, 209, 255, 0.32);
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08)), rgba(167, 167, 167, 0.74);
-  backdrop-filter: blur(7px) saturate(118%);
-  -webkit-backdrop-filter: blur(7px) saturate(118%);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02)), rgba(167, 167, 167, 0.38);
+  backdrop-filter: blur(5px) saturate(140%);
+  -webkit-backdrop-filter: blur(5px) saturate(140%);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
   display: flex;
   flex-direction: column;

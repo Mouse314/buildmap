@@ -6,6 +6,7 @@ import {
   type GraphicsPresetId,
   type GraphicsPresetsById,
 } from '../../map/graphicsPresets';
+import { HudButton, HudModal } from '../ui/hud';
 
 type GraphicsPresetAdminModalProps = {
   isOpen: boolean;
@@ -90,46 +91,35 @@ export function GraphicsPresetAdminModal({
   const defaultActive = defaultPresetsById[activePresetId];
 
   return (
-    <div
-      className="graphicsPresetAdminOverlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Подробная настройка графики"
-      onPointerDown={(event) => {
-        if (event.target !== event.currentTarget) return;
-        onClose();
-      }}
+    <HudModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Подробная настройка графики"
+      context="Изменения применяются сразу, сохранение фиксирует их в файле для следующих запусков"
+      overlayClassName="graphicsPresetAdminOverlay"
+      surfaceClassName="graphicsPresetAdminModal"
+      headerClassName="graphicsPresetAdminHeader"
+      titleClassName="graphicsPresetAdminTitle"
+      contextClassName="graphicsPresetAdminMeta"
+      closeButtonClassName="roomModalClose"
+      bodyClassName="graphicsPresetAdminModalBody"
     >
-      <div className="graphicsPresetAdminModal">
-        <div className="graphicsPresetAdminHeader">
-          <div>
-            <div className="graphicsPresetAdminTitle">Подробная настройка графики</div>
-            <div className="graphicsPresetAdminMeta">Изменения применяются сразу, сохранение фиксирует их в файле для следующих запусков</div>
-          </div>
-          <button
-            type="button"
-            className="graphicsPresetAdminClose"
-            onClick={onClose}
-            aria-label="Закрыть"
-          >
-            ×
-          </button>
-        </div>
-
         <div className="graphicsPresetAdminBody">
           <aside className="graphicsPresetAdminTabs" aria-label="Выбор пресета">
             {(['min', 'medium', 'max'] as GraphicsPresetId[]).map((id) => {
               const selected = id === activePresetId;
               return (
-                <button
+                <HudButton
                   key={id}
-                  type="button"
+                  title={draftById[id].label}
+                  context={id}
+                  data={{ action: 'select-graphics-admin-tab', presetId: id }}
                   className={selected ? 'graphicsPresetAdminTab graphicsPresetAdminTabActive' : 'graphicsPresetAdminTab'}
                   onClick={() => setActivePresetId(id)}
                 >
                   <span>{draftById[id].label}</span>
                   <small>{id}</small>
-                </button>
+                </HudButton>
               );
             })}
           </aside>
@@ -325,8 +315,9 @@ export function GraphicsPresetAdminModal({
             <div className="graphicsPresetAdminGroup">
               <div className="graphicsPresetAdminGroupHeader">
                 <strong>N8AO</strong>
-                <button
-                  type="button"
+                <HudButton
+                  title={active.postFx.n8ao ? 'Отключить' : 'Включить'}
+                  data={{ action: 'toggle-n8ao' }}
                   className="graphicsPresetAdminToggle"
                   onClick={() =>
                     updatePreset(activePresetId, (current) => ({
@@ -348,7 +339,7 @@ export function GraphicsPresetAdminModal({
                   }
                 >
                   {active.postFx.n8ao ? 'Отключить' : 'Включить'}
-                </button>
+                </HudButton>
               </div>
 
               {active.postFx.n8ao ? (
@@ -460,8 +451,9 @@ export function GraphicsPresetAdminModal({
             <div className="graphicsPresetAdminGroup">
               <div className="graphicsPresetAdminGroupHeader">
                 <strong>Bloom</strong>
-                <button
-                  type="button"
+                <HudButton
+                  title={active.postFx.bloom ? 'Отключить' : 'Включить'}
+                  data={{ action: 'toggle-bloom' }}
                   className="graphicsPresetAdminToggle"
                   onClick={() =>
                     updatePreset(activePresetId, (current) => ({
@@ -484,7 +476,7 @@ export function GraphicsPresetAdminModal({
                   }
                 >
                   {active.postFx.bloom ? 'Отключить' : 'Включить'}
-                </button>
+                </HudButton>
               </div>
 
               {active.postFx.bloom ? (
@@ -622,8 +614,9 @@ export function GraphicsPresetAdminModal({
             <div className="graphicsPresetAdminGroup">
               <div className="graphicsPresetAdminGroupHeader">
                 <strong>Vignette</strong>
-                <button
-                  type="button"
+                <HudButton
+                  title={active.postFx.vignette ? 'Отключить' : 'Включить'}
+                  data={{ action: 'toggle-vignette' }}
                   className="graphicsPresetAdminToggle"
                   onClick={() =>
                     updatePreset(activePresetId, (current) => ({
@@ -643,7 +636,7 @@ export function GraphicsPresetAdminModal({
                   }
                 >
                   {active.postFx.vignette ? 'Отключить' : 'Включить'}
-                </button>
+                </HudButton>
               </div>
 
               {active.postFx.vignette ? (
@@ -706,17 +699,12 @@ export function GraphicsPresetAdminModal({
         </div>
 
         <div className="graphicsPresetAdminFooter">
-          <button
-            type="button"
-            className="graphicsPresetAdminAction"
-            onClick={onClose}
-          >
+          <HudButton title="Закрыть" data={{ action: 'close-graphics-admin' }} className="graphicsPresetAdminAction" onClick={onClose}>
             Закрыть
-          </button>
+          </HudButton>
         </div>
 
         {statusText ? <div className="graphicsPresetAdminStatus">{statusText}</div> : null}
-      </div>
-    </div>
+    </HudModal>
   );
 }
