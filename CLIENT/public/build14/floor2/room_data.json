@@ -29372,7 +29372,7 @@
     "key": "bl:773",
     "blenderID": 773,
     "roomID": 1,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 9.28,
     "vertexIndices": [
       1288,
@@ -29410,7 +29410,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:774",

@@ -6787,7 +6787,7 @@
     "key": "bl:196",
     "blenderID": 196,
     "roomID": 2,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 0.29,
     "vertexIndices": [
       374,
@@ -6815,7 +6815,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "техническое помещение"
   },
   {
     "key": "bl:197",
@@ -7120,7 +7121,7 @@
     "key": "bl:202",
     "blenderID": 202,
     "roomID": 1,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 8.76,
     "vertexIndices": [
       301,
@@ -7158,7 +7159,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:203",
@@ -25376,7 +25378,6 @@
     "key": "bl:650",
     "blenderID": 650,
     "roomID": 7,
-    "description": "Зрительный зал",
     "areClosed": false,
     "areaM2": 1.5,
     "vertexIndices": [
@@ -25410,7 +25411,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "актовый зал"
   },
   {
     "key": "bl:651",

@@ -1262,25 +1262,72 @@
   opacity: 0.82;
 }
 
-.scheduleRoomTable {
-  width: 100%;
-  border-collapse: collapse;
+.scheduleRoomGrid {
+  --schedule-room-col-group: 1.1fr;
+  --schedule-room-col-time: 0.9fr;
+  --schedule-room-col-subgroup: 1fr;
+  --schedule-room-col-discipline: 1.1fr;
+  --schedule-room-col-type: 0.9fr;
+  --schedule-room-col-teacher: 1.2fr;
+  min-width: 740px;
   font-size: 0.8rem;
 }
 
-.scheduleRoomTable th,
-.scheduleRoomTable td {
+.scheduleRoomGridHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.scheduleRoomGridBody {
+  position: relative;
+}
+
+.scheduleRoomGridRow,
+.scheduleRoomDayHeaderRow {
+  display: grid;
+  grid-template-columns:
+    var(--schedule-room-col-group)
+    var(--schedule-room-col-time)
+    var(--schedule-room-col-subgroup)
+    var(--schedule-room-col-discipline)
+    var(--schedule-room-col-type)
+    var(--schedule-room-col-teacher);
+}
+
+.scheduleRoomGridHeaderCell,
+.scheduleRoomGridCell {
+  min-width: 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   padding: 8px 9px;
   text-align: left;
   vertical-align: top;
 }
 
-.scheduleRoomTable thead th {
-  position: sticky;
-  top: 0;
+.scheduleRoomGridHeaderCell {
   background: rgba(255, 255, 255, 0.76);
-  z-index: 1;
+  font-weight: 800;
+}
+
+.scheduleRoomGroupsCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scheduleRoomDayHeader {
+  grid-column: 1 / -1;
+  border-top: 2px solid rgba(0, 0, 0, 0.28);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 9px 6px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.15px;
+}
+
+.scheduleRoomDayHeaderRow:first-child .scheduleRoomDayHeader {
+  border-top: 0;
 }
 
 .scheduleOverlay {
@@ -1534,10 +1581,25 @@
     max-height: min(78vh, 760px);
   }
 
-  .scheduleRoomTable th,
-  .scheduleRoomTable td {
+  .scheduleRoomGrid {
+    min-width: 640px;
+    --schedule-room-col-group: 1.8fr;
+    --schedule-room-col-time: 0.9fr;
+    --schedule-room-col-subgroup: 0.95fr;
+    --schedule-room-col-discipline: 1fr;
+    --schedule-room-col-type: 0.85fr;
+    --schedule-room-col-teacher: 1.05fr;
+  }
+
+  .scheduleRoomGridHeaderCell,
+  .scheduleRoomGridCell {
     font-size: 0.74rem;
     padding: 6px 7px;
+  }
+
+  .scheduleRoomDayHeader {
+    font-size: 0.82rem;
+    padding: 8px 7px 5px;
   }
 }
 
@@ -2664,6 +2726,49 @@
 .appRoot[data-theme='dark'] .roomModalClose:hover {
   border-color: rgba(255, 255, 255, 0.26);
   background: rgba(255, 9, 9, 0.35);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomModal {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 18, 0.82);
+  box-shadow: 0 10px 50px rgba(41, 35, 78, 0.55);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomHeader {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomMeta,
+.appRoot[data-theme='dark'] .scheduleRoomEmpty {
+  color: rgba(243, 244, 246, 0.86);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomClose {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomClose:hover {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomGridHeaderCell,
+.appRoot[data-theme='dark'] .scheduleRoomGridCell {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomGridHeaderCell {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.appRoot[data-theme='dark'] .scheduleRoomDayHeader {
+  border-top-color: rgba(255, 255, 255, 0.3);
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .appRoot[data-theme='dark'] .glassDropdownItem {

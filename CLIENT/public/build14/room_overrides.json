@@ -1,7 +1,7 @@
 {
   "version": 1,
   "buildId": "build14",
-  "updatedAt": "2026-04-09T12:30:36.090Z",
+  "updatedAt": "2026-04-13T09:02:39.035Z",
   "floors": {
     "floor1": {
       "bl:524": {
@@ -31,8 +31,97 @@
         "areClosed": false,
         "areaM2": 0.2,
         "build": null,
-        "floor": null,
-        "updatedAt": "2026-04-09T12:30:36.090Z"
+        "floor": null
+      },
+      "bl:13": {
+        "roomID": 11,
+        "roomNo": "147",
+        "category": "спортивный зал",
+        "description": "Воллейбольный зал",
+        "areClosed": false,
+        "areaM2": 116.29,
+        "build": null,
+        "floor": null
+      },
+      "bl:113": {
+        "roomID": 11,
+        "roomNo": "115",
+        "category": "спортивный зал",
+        "description": "Гимнастический зал",
+        "areClosed": false,
+        "areaM2": 112.71,
+        "build": null,
+        "floor": null
+      },
+      "bl:644": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 13.45,
+        "build": null,
+        "floor": null
+      },
+      "bl:100": {
+        "roomID": 12,
+        "roomNo": "147/1",
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 15.45,
+        "build": null,
+        "floor": null
+      },
+      "bl:91": {
+        "roomID": 12,
+        "roomNo": "147/2",
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 16.68,
+        "build": null,
+        "floor": null
+      },
+      "bl:541": {
+        "roomID": 11,
+        "roomNo": "108",
+        "category": "спортивный зал",
+        "description": "Воллейбольный и баскетбольный зал",
+        "areClosed": false,
+        "areaM2": 274.17,
+        "build": null,
+        "floor": null
+      },
+      "bl:586": {
+        "roomID": 15,
+        "roomNo": "107/1",
+        "category": "Администрация",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 20.98,
+        "build": null,
+        "floor": null
+      },
+      "bl:612": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 12.46,
+        "build": null,
+        "floor": null
+      },
+      "bl:613": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 12.71,
+        "build": null,
+        "floor": null
       }
     },
     "floor3": {
@@ -51,6 +140,49 @@
         "description": null,
         "areClosed": false,
         "areaM2": 7.14,
+        "build": null,
+        "floor": null
+      },
+      "bl:650": {
+        "roomID": 7,
+        "roomNo": null,
+        "category": "актовый зал",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 1.5,
+        "build": null,
+        "floor": null
+      },
+      "bl:196": {
+        "roomID": 2,
+        "roomNo": null,
+        "category": "техническое помещение",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 0.29,
+        "build": null,
+        "floor": null
+      },
+      "bl:202": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 8.76,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-04-13T09:02:39.035Z"
+      }
+    },
+    "floor2": {
+      "bl:773": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 9.28,
         "build": null,
         "floor": null
       }

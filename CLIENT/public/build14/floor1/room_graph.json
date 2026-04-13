@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-12T12:23:16.144Z",
+  "generatedAt": "2026-04-13T09:03:04.448Z",
   "nodes": [
     {
       "key": "bl:13",
       "roomID": 11,
-      "roomNo": null,
+      "roomNo": "147",
       "kind": "room",
       "x": -1.183,
       "y": 3.058
@@ -149,7 +149,7 @@
     {
       "key": "bl:91",
       "roomID": 12,
-      "roomNo": null,
+      "roomNo": "147/2",
       "kind": "room",
       "x": -3.682,
       "y": -6.556
@@ -197,7 +197,7 @@
     {
       "key": "bl:100",
       "roomID": 12,
-      "roomNo": null,
+      "roomNo": "147/1",
       "kind": "room",
       "x": -2.029,
       "y": -9.96
@@ -253,7 +253,7 @@
     {
       "key": "bl:113",
       "roomID": 11,
-      "roomNo": null,
+      "roomNo": "115",
       "kind": "room",
       "x": 12.696,
       "y": 3.071
@@ -1829,7 +1829,7 @@
     {
       "key": "bl:541",
       "roomID": 11,
-      "roomNo": null,
+      "roomNo": "108",
       "kind": "room",
       "x": 71.588,
       "y": -18.244
@@ -1965,7 +1965,7 @@
     {
       "key": "bl:586",
       "roomID": 15,
-      "roomNo": "108",
+      "roomNo": "107/1",
       "kind": "room",
       "x": 57.931,
       "y": -21.554
@@ -2181,7 +2181,7 @@
     {
       "key": "bl:644",
       "roomID": 1,
-      "roomNo": "147",
+      "roomNo": null,
       "kind": "room",
       "x": 0.833,
       "y": -7.396

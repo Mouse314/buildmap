@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 export type ScheduleRoomLesson = {
-  group: string
+  groups: string[]
   date: string
   weekday: string
   time: string
@@ -81,6 +81,40 @@ export function ScheduleRoomModal({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
+  const normalizedLessons = React.useMemo(() => {
+    return lessons.map((lesson) => ({
+      ...lesson,
+      groups: lesson.groups.filter((value) => value.trim().length > 0),
+    }))
+  }, [lessons])
+
+  const dayBlocks = React.useMemo(() => {
+    const blocks: Array<{
+      dayKey: string
+      date: string
+      weekday: string
+      lessons: typeof normalizedLessons
+    }> = []
+
+    for (const lesson of normalizedLessons) {
+      const dayKey = `${lesson.date}\u0001${lesson.weekday}`
+      const prev = blocks[blocks.length - 1]
+
+      if (!prev || prev.dayKey !== dayKey) {
+        blocks.push({
+          dayKey,
+          date: lesson.date,
+          weekday: lesson.weekday,
+          lessons: [lesson],
+        })
+      } else {
+        prev.lessons.push(lesson)
+      }
+    }
+
+    return blocks
+  }, [normalizedLessons])
+
   return (
     <div
       className="scheduleRoomOverlay"
@@ -99,7 +133,7 @@ export function ScheduleRoomModal({
           <div>
             <div className="scheduleRoomTitle">Расписание кабинета {roomLabel}</div>
             <div className="scheduleRoomMeta">
-              Режим: {periodMode === 'day' ? 'день' : 'неделя'} · занятий: {lessons.length}
+              Режим: {periodMode === 'day' ? 'день' : 'неделя'} · занятий: {normalizedLessons.length}
             </div>
           </div>
           <button type="button" className="scheduleRoomClose" onClick={onClose} aria-label="Закрыть">
@@ -108,35 +142,51 @@ export function ScheduleRoomModal({
         </div>
 
         <div className="scheduleRoomBody">
-          {lessons.length === 0 ? (
+          {normalizedLessons.length === 0 ? (
             <div className="scheduleRoomEmpty">Для этого кабинета в выбранном периоде занятий нет.</div>
           ) : (
-            <table className="scheduleRoomTable">
-              <thead>
-                <tr>
-                  <th>Группа</th>
-                  <th>Дата</th>
-                  <th>Время</th>
-                  <th>Подгруппа</th>
-                  <th>Дисциплина</th>
-                  <th>Тип</th>
-                  <th>Преподаватель</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lessons.map((lesson, idx) => (
-                  <tr key={`schedule-room-${idx}`}>
-                    <td>{lesson.group || '—'}</td>
-                    <td>{lesson.date} · {lesson.weekday}</td>
-                    <td>{lesson.time}</td>
-                    <td>{lesson.subgroup}</td>
-                    <td>{lesson.discipline}</td>
-                    <td>{lesson.lessonType}</td>
-                    <td>{lesson.teacher}</td>
-                  </tr>
+            <div className="scheduleRoomGrid" role="table" aria-label={`Расписание кабинета ${roomLabel}`}>
+              <div className="scheduleRoomGridHeader" role="rowgroup">
+                <div className="scheduleRoomGridRow" role="row">
+                  <div className="scheduleRoomGridHeaderCell" role="columnheader">Группа</div>
+                  <div className="scheduleRoomGridHeaderCell" role="columnheader">Время</div>
+                  <div className="scheduleRoomGridHeaderCell" role="columnheader">Подгруппа</div>
+                  <div className="scheduleRoomGridHeaderCell" role="columnheader">Дисциплина</div>
+                  <div className="scheduleRoomGridHeaderCell" role="columnheader">Тип</div>
+                  <div className="scheduleRoomGridHeaderCell" role="columnheader">Преподаватель</div>
+                </div>
+              </div>
+
+              <div className="scheduleRoomGridBody" role="rowgroup">
+                {dayBlocks.map((block, blockIndex) => (
+                  <React.Fragment key={`schedule-room-day-${block.dayKey}-${blockIndex}`}>
+                    <div className="scheduleRoomDayHeaderRow" role="row">
+                      <div className="scheduleRoomDayHeader" role="cell">
+                        {block.date} · {block.weekday}
+                      </div>
+                    </div>
+                    {block.lessons.map((lesson, lessonIndex) => (
+                      <div className="scheduleRoomGridRow" role="row" key={`schedule-room-${blockIndex}-${lessonIndex}`}>
+                        <div className="scheduleRoomGridCell" role="cell">
+                          {lesson.groups.length > 0 ? (
+                            <div className="scheduleRoomGroupsCell">
+                              {lesson.groups.map((group, groupIndex) => (
+                                <div key={`group-${blockIndex}-${lessonIndex}-${groupIndex}`}>{group}</div>
+                              ))}
+                            </div>
+                          ) : '—'}
+                        </div>
+                        <div className="scheduleRoomGridCell" role="cell">{lesson.time}</div>
+                        <div className="scheduleRoomGridCell" role="cell">{lesson.subgroup || '—'}</div>
+                        <div className="scheduleRoomGridCell" role="cell">{lesson.discipline || '—'}</div>
+                        <div className="scheduleRoomGridCell" role="cell">{lesson.lessonType || '—'}</div>
+                        <div className="scheduleRoomGridCell" role="cell">{lesson.teacher || '—'}</div>
+                      </div>
+                    ))}
+                  </React.Fragment>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           )}
         </div>
       </div>

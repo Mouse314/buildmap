@@ -525,6 +525,7 @@
     "key": "bl:13",
     "blenderID": 13,
     "roomID": 11,
+    "roomNo": "147",
     "description": "Воллейбольный зал",
     "areClosed": false,
     "areaM2": 116.29,
@@ -564,7 +565,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "спортивный зал"
   },
   {
     "key": "bl:14",
@@ -3521,6 +3523,7 @@
     "key": "bl:91",
     "blenderID": 91,
     "roomID": 12,
+    "roomNo": "147/2",
     "areClosed": false,
     "areaM2": 16.68,
     "vertexIndices": [
@@ -3559,7 +3562,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:92",
@@ -3972,6 +3976,7 @@
     "key": "bl:100",
     "blenderID": 100,
     "roomID": 12,
+    "roomNo": "147/1",
     "areClosed": false,
     "areaM2": 15.45,
     "vertexIndices": [
@@ -4010,7 +4015,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:101",
@@ -4499,6 +4505,7 @@
     "key": "bl:113",
     "blenderID": 113,
     "roomID": 11,
+    "roomNo": "115",
     "description": "Гимнастический зал",
     "areClosed": false,
     "areaM2": 112.71,
@@ -4548,7 +4555,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "спортивный зал"
   },
   {
     "key": "bl:114",
@@ -24334,6 +24342,7 @@
     "key": "bl:541",
     "blenderID": 541,
     "roomID": 11,
+    "roomNo": "108",
     "description": "Воллейбольный и баскетбольный зал",
     "areClosed": false,
     "areaM2": 274.17,
@@ -24373,7 +24382,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "спортивный зал"
   },
   {
     "key": "bl:542",
@@ -26258,7 +26268,7 @@
     "key": "bl:586",
     "blenderID": 586,
     "roomID": 15,
-    "roomNo": "108",
+    "roomNo": "107/1",
     "areClosed": false,
     "areaM2": 20.98,
     "vertexIndices": [
@@ -26307,7 +26317,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Администрация"
   },
   {
     "key": "bl:587",
@@ -27522,7 +27533,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:613",
@@ -27576,7 +27588,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:614",
@@ -29054,7 +29067,6 @@
     "key": "bl:644",
     "blenderID": 644,
     "roomID": 1,
-    "roomNo": "147",
     "areClosed": false,
     "areaM2": 13.45,
     "vertexIndices": [
@@ -29173,7 +29185,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:645",

@@ -167,6 +167,20 @@ function scheduleGroupLabelFromSourceFile(sourceFile: string): string {
   return noExt.replace(/_\d{8}_\d{6}$/u, '')
 }
 
+function uniqJoin(values: Array<string | null | undefined>, delimiter = ' / '): string {
+  const seen = new Set<string>()
+  const ordered: string[] = []
+  for (const value of values) {
+    const normalized = String(value ?? '').trim()
+    if (normalized.length === 0) continue
+    const key = caseFold(normalized)
+    if (seen.has(key)) continue
+    seen.add(key)
+    ordered.push(normalized)
+  }
+  return ordered.join(delimiter)
+}
+
 export function useBuildMapApp() {
   const {
     manifest,
@@ -442,11 +456,20 @@ export function useBuildMapApp() {
 
   const scheduleHeatByRoomKey = React.useMemo(() => {
     const counts: Record<string, number> = {}
+    const slotsByRoom = new Map<string, Set<string>>()
 
     for (const item of scheduleRowsForSelectedBuild) {
       const key = roomTokenToKey.get(item.roomToken)
       if (!key) continue
-      counts[key] = (counts[key] ?? 0) + 1
+      const slotDate = item.row.dateIso ?? item.row.date
+      const slotKey = `${slotDate}\u0001${item.row.time}`
+      const slots = slotsByRoom.get(key) ?? new Set<string>()
+      slots.add(slotKey)
+      slotsByRoom.set(key, slots)
+    }
+
+    for (const [key, slots] of slotsByRoom) {
+      counts[key] = slots.size
     }
 
     return counts
@@ -462,7 +485,7 @@ export function useBuildMapApp() {
 
   const scheduleRoomLessonsByKey = React.useMemo(() => {
     const map = new Map<string, Array<{
-      group: string
+      groups: string[]
       date: string
       weekday: string
       time: string
@@ -474,24 +497,58 @@ export function useBuildMapApp() {
       dateIso: string
     }>>()
 
+    const groupedByRoomAndSlot = new Map<string, Map<string, Array<(typeof scheduleRowsForSelectedBuild)[number]['row']>>>()
+
     for (const item of scheduleRowsForSelectedBuild) {
       const roomKey = roomTokenToKey.get(item.roomToken)
       if (!roomKey) continue
 
-      const list = map.get(roomKey) ?? []
-      list.push({
-        group: scheduleGroupLabelFromSourceFile(item.row.sourceFile),
-        date: item.row.date,
-        weekday: item.row.weekday,
-        time: item.row.time,
-        subgroup: item.row.subgroup,
-        discipline: item.row.discipline,
-        lessonType: item.row.lessonType,
-        teacher: item.row.teacher,
-        cabinet: item.row.cabinet,
-        dateIso: item.row.dateIso ?? '',
-      })
-      map.set(roomKey, list)
+      const slotDate = item.row.dateIso ?? item.row.date
+      const slotKey = `${slotDate}\u0001${item.row.time}`
+      const bySlot = groupedByRoomAndSlot.get(roomKey) ?? new Map()
+      const slotRows = bySlot.get(slotKey) ?? []
+      slotRows.push(item.row)
+      bySlot.set(slotKey, slotRows)
+      groupedByRoomAndSlot.set(roomKey, bySlot)
+    }
+
+    for (const [roomKey, bySlot] of groupedByRoomAndSlot) {
+      const lessons: Array<{
+        groups: string[]
+        date: string
+        weekday: string
+        time: string
+        subgroup: string
+        discipline: string
+        lessonType: string
+        teacher: string
+        cabinet: string
+        dateIso: string
+      }> = []
+
+      for (const slotRows of bySlot.values()) {
+        if (slotRows.length === 0) continue
+
+        const first = slotRows[0]
+        const groups = slotRows
+          .map((row) => scheduleGroupLabelFromSourceFile(row.sourceFile))
+          .filter((value) => value.length > 0)
+
+        lessons.push({
+          groups,
+          date: first.date,
+          weekday: first.weekday,
+          time: first.time,
+          subgroup: uniqJoin(slotRows.map((row) => row.subgroup)),
+          discipline: uniqJoin(slotRows.map((row) => row.discipline)),
+          lessonType: uniqJoin(slotRows.map((row) => row.lessonType)),
+          teacher: uniqJoin(slotRows.map((row) => row.teacher)),
+          cabinet: uniqJoin(slotRows.map((row) => row.cabinet)),
+          dateIso: first.dateIso ?? '',
+        })
+      }
+
+      map.set(roomKey, lessons)
     }
 
     for (const lessons of map.values()) {
