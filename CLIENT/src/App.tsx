@@ -10,6 +10,7 @@ import { GraphicsPresetAdminModal } from './components/app/GraphicsPresetAdminMo
 import { OfficesDirectory } from './components/app/OfficesDirectory'
 import { ScheduleModal } from './components/app/ScheduleModal'
 import { ScheduleRoomModal } from './components/app/ScheduleRoomModal'
+import { ScheduleStatsModal } from './components/app/ScheduleStatsModal'
 import { HudButton, HudPanel } from './components/ui/hud'
 import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
@@ -24,6 +25,7 @@ function formatIsoDateForUi(value: string): string {
 function App() {
   const [mapModeDockOpen, setMapModeDockOpen] = React.useState(true)
   const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
+  const [isScheduleStatsModalOpen, setIsScheduleStatsModalOpen] = React.useState(false)
 
   const {
     error,
@@ -49,6 +51,11 @@ function App() {
     isScheduleModalOpen,
     schedulePeriodMode,
     scheduleFocusDateIso,
+    scheduleTeacherFilter,
+    scheduleGroupFilter,
+    scheduleTeacherSuggestions,
+    scheduleGroupSuggestions,
+    scheduleStatsSummary,
     isScheduleLoading,
     scheduleLoadError,
     roomGraph,
@@ -128,6 +135,8 @@ function App() {
     onCloseScheduleModal,
     onSetSchedulePeriodMode,
     onSetScheduleFocusDate,
+    onSetScheduleTeacherFilter,
+    onSetScheduleGroupFilter,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
@@ -138,6 +147,12 @@ function App() {
       setGeoAdminOpen(true)
     }
   }, [isAdminMode])
+
+  React.useEffect(() => {
+    if (mapMode !== 'schedule') {
+      setIsScheduleStatsModalOpen(false)
+    }
+  }, [mapMode])
 
   if (error) {
     return (
@@ -475,35 +490,98 @@ function App() {
               </HudButton>
             </div>
 
-            <label className="scheduleCalendarField">
-              <span>Календарь</span>
-              <input
-                type="date"
-                value={scheduleFocusDateIso}
-                onChange={(e) => onSetScheduleFocusDate(e.target.value)}
-              />
-            </label>
+            <div className="scheduleCalendarColumn">
+              <label className="scheduleCalendarField">
+                <span>Календарь</span>
+                <input
+                  type="date"
+                  value={scheduleFocusDateIso}
+                  onChange={(e) => onSetScheduleFocusDate(e.target.value)}
+                />
+              </label>
 
-            <div className="schedulePeriodMeta" aria-live="polite">
-              {isScheduleLoading
-                ? 'Загружаем расписание...'
-                : (scheduleLoadError
-                    ? `Ошибка: ${scheduleLoadError}`
-                    : (schedulePeriodMode === 'week'
-                        ? `Неделя с ${formatIsoDateForUi(scheduleFocusDateIso)}`
-                        : `День: ${formatIsoDateForUi(scheduleFocusDateIso)}`))}
+              <div className="schedulePeriodMeta" aria-live="polite">
+                {isScheduleLoading
+                  ? 'Загружаем расписание...'
+                  : (scheduleLoadError
+                      ? `Ошибка: ${scheduleLoadError}`
+                      : (schedulePeriodMode === 'week'
+                          ? `Неделя с ${formatIsoDateForUi(scheduleFocusDateIso)}`
+                          : `День: ${formatIsoDateForUi(scheduleFocusDateIso)}`))}
+              </div>
             </div>
+
+            <div className="scheduleMapFiltersColumn">
+              <label className="scheduleMapFilterField">
+                <span>Преподаватель</span>
+                <input
+                  type="search"
+                  className="scheduleMapFilterInput"
+                  value={scheduleTeacherFilter}
+                  onChange={(e) => onSetScheduleTeacherFilter(e.target.value)}
+                  placeholder="Поиск по преподавателям"
+                  list="schedule-teacher-filter-options"
+                  title="Фильтр по преподавателю"
+                />
+                <datalist id="schedule-teacher-filter-options">
+                  {scheduleTeacherSuggestions.map((teacher) => (
+                    <option key={`schedule-teacher-${teacher}`} value={teacher} />
+                  ))}
+                </datalist>
+              </label>
+
+              <label className="scheduleMapFilterField">
+                <span>Группа</span>
+                <input
+                  type="search"
+                  className="scheduleMapFilterInput"
+                  value={scheduleGroupFilter}
+                  onChange={(e) => onSetScheduleGroupFilter(e.target.value)}
+                  placeholder="Поиск по группам"
+                  list="schedule-group-filter-options"
+                  title="Фильтр по группе"
+                />
+                <datalist id="schedule-group-filter-options">
+                  {scheduleGroupSuggestions.map((group) => (
+                    <option key={`schedule-group-${group}`} value={group} />
+                  ))}
+                </datalist>
+              </label>
+            </div>
+
           </div>
 
-          <HudButton title="Показать расписание" data={{ action: 'open-schedule-table' }} className="scheduleOpenBtn" onClick={onOpenScheduleModal}>
-            Показать расписание
-          </HudButton>
+          <div className="scheduleActionsColumn">
+            <HudButton title="Показать расписание" data={{ action: 'open-schedule-table' }} className="scheduleOpenBtn" onClick={onOpenScheduleModal}>
+              Показать расписание
+            </HudButton>
+            <HudButton
+              title="Статистика"
+              data={{ action: 'open-schedule-stats' }}
+              className="scheduleOpenBtn scheduleStatsOpenBtn"
+              onClick={() => setIsScheduleStatsModalOpen(true)}
+            >
+              Статистика
+            </HudButton>
+          </div>
         </div>
       ) : null}
 
       <ScheduleModal
         isOpen={isScheduleModalOpen}
         onClose={onCloseScheduleModal}
+      />
+
+      <ScheduleStatsModal
+        isOpen={isScheduleStatsModalOpen}
+        onClose={() => setIsScheduleStatsModalOpen(false)}
+        periodMode={schedulePeriodMode}
+        focusDateIso={scheduleFocusDateIso}
+        teacherFilter={scheduleTeacherFilter}
+        groupFilter={scheduleGroupFilter}
+        isLoading={isScheduleLoading}
+        loadError={scheduleLoadError}
+        summary={scheduleStatsSummary}
       />
     </div>
   )

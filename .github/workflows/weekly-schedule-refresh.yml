@@ -1,0 +1,66 @@
+name: Weekly Schedule Refresh
+
+on:
+  schedule:
+    # Thursday 16:30 UTC (19:30 Moscow).
+    - cron: '30 16 * * 4'
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'Дата для парсинга (YYYY-MM-DD). Если пусто, берется текущая дата Europe/Moscow.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-schedule-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install parser dependencies
+        run: python -m pip install -r SERVER/schedule_parser/requirements.txt
+
+      - name: Download and parse schedule
+        shell: bash
+        run: |
+          TARGET_DATE="${{ github.event.inputs.target_date }}"
+          if [ -z "$TARGET_DATE" ]; then
+            TARGET_DATE="$(TZ=Europe/Moscow date +%F)"
+          fi
+
+          echo "REFRESH_DATE=$TARGET_DATE" >> "$GITHUB_ENV"
+
+          cd SERVER/schedule_parser
+          python parser.py --date "$TARGET_DATE" --pdf-dir schedule --output-dir parsed_schedule
+
+      - name: Sync parsed CSV to client public schedule
+        run: node CLIENT/scripts/sync-schedule-data.mjs
+
+      - name: Commit and push changes
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- SERVER/schedule_parser/parsed_schedule CLIENT/public/schedule)" ]; then
+            echo "No schedule changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add SERVER/schedule_parser/parsed_schedule CLIENT/public/schedule
+          git commit -m "chore(schedule): weekly refresh for ${REFRESH_DATE}"
+          git push

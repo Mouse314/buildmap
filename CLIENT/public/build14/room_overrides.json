@@ -1,7 +1,7 @@
 {
   "version": 1,
   "buildId": "build14",
-  "updatedAt": "2026-04-13T09:02:39.035Z",
+  "updatedAt": "2026-04-13T11:13:10.346Z",
   "floors": {
     "floor1": {
       "bl:524": {
@@ -122,6 +122,87 @@
         "areaM2": 12.71,
         "build": null,
         "floor": null
+      },
+      "bl:69": {
+        "roomID": 2,
+        "roomNo": null,
+        "category": "техническое помещение",
+        "description": "Вахта",
+        "areClosed": false,
+        "areaM2": 10.92,
+        "build": null,
+        "floor": null
+      },
+      "bl:392": {
+        "roomID": 14,
+        "roomNo": null,
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.15,
+        "build": null,
+        "floor": null
+      },
+      "bl:217": {
+        "roomID": 8,
+        "roomNo": "122",
+        "category": "кабинет",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 38.74,
+        "build": null,
+        "floor": null
+      },
+      "bl:321": {
+        "roomID": 18,
+        "roomNo": "130",
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 66.1,
+        "build": null,
+        "floor": null
+      },
+      "bl:332": {
+        "roomID": 18,
+        "roomNo": "131",
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 43.01,
+        "build": null,
+        "floor": null
+      },
+      "bl:316": {
+        "roomID": 18,
+        "roomNo": null,
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 0.46,
+        "build": null,
+        "floor": null
+      },
+      "bl:328": {
+        "roomID": 18,
+        "roomNo": null,
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 0.92,
+        "build": null,
+        "floor": null
+      },
+      "bl:334": {
+        "roomID": 18,
+        "roomNo": "140",
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 47.89,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-04-13T11:13:10.346Z"
       }
     },
     "floor3": {
@@ -171,8 +252,7 @@
         "areClosed": true,
         "areaM2": 8.76,
         "build": null,
-        "floor": null,
-        "updatedAt": "2026-04-13T09:02:39.035Z"
+        "floor": null
       }
     },
     "floor2": {

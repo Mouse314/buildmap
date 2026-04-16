@@ -4,6 +4,59 @@ Backend part of the project.
 
 This directory is intentionally kept in the monorepo and is pushed to GitHub together with the CLIENT app.
 
+## Schedule Parser
+
+Parser scripts are stored in `SERVER/schedule_parser`.
+
+### What It Does
+
+- Downloads current schedule PDF files from VyatSU into `SERVER/schedule_parser/schedule`.
+- Clears the PDF folder before each download run to keep it clean.
+- Parses downloaded PDFs into CSV files in `SERVER/schedule_parser/parsed_schedule`.
+- Keeps old CSV files (no automatic cleanup for parsed CSV).
+
+### First-Time Setup
+
+PowerShell (from repository root):
+
+```powershell
+Set-Location .\SERVER\schedule_parser
+.\run_parser.ps1
+```
+
+`run_parser.ps1` creates local venv (`SERVER/schedule_parser/.venv`) if needed and runs parser.
+
+### Main Run Commands
+
+PowerShell (from `SERVER/schedule_parser`):
+
+```powershell
+# Parse only existing local PDFs (default mode, no download)
+.\run_parser.ps1
+
+# Full pipeline with download + parse (explicit mode)
+.\run_parser.ps1 -Download
+
+# Full pipeline for explicit date
+.\run_parser.ps1 -Download -Date 2026-04-16
+
+# Direct parser call (parse only existing local PDFs)
+.\.venv\Scripts\python.exe .\parser.py --skip-download --pdf-dir .\schedule
+```
+
+### Useful Options
+
+- `--date YYYY-MM-DD` or `--date DD.MM.YYYY` - target date for selecting schedule PDFs.
+- `--pdf-dir <path>` - directory where PDFs are downloaded/read from.
+- `--output-dir <path>` - directory root where CSV files are saved.
+- `--skip-download` - do not download PDFs, parse only local files in `--pdf-dir`.
+- `--min-delay` and `--max-delay` - delay range between HTTP requests.
+
+### Failure Behavior
+
+- If download fails for all files (`downloaded = 0` and `failed > 0`), parsing is not started.
+- If at least one PDF is downloaded, parsing is executed for downloaded files.
+
 ## Plans API
 
 This server exposes floor plan data so the client can load a selected building and floor from backend endpoints.

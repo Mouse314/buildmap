@@ -2454,6 +2454,7 @@
     "key": "bl:69",
     "blenderID": 69,
     "roomID": 2,
+    "description": "Вахта",
     "areClosed": false,
     "areaM2": 10.92,
     "vertexIndices": [
@@ -2517,7 +2518,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "техническое помещение"
   },
   {
     "key": "bl:70",
@@ -9199,7 +9201,7 @@
   {
     "key": "bl:217",
     "blenderID": 217,
-    "roomID": 14,
+    "roomID": 8,
     "roomNo": "122",
     "areClosed": false,
     "areaM2": 38.74,
@@ -9249,7 +9251,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:218",
@@ -13910,7 +13913,7 @@
   {
     "key": "bl:316",
     "blenderID": 316,
-    "roomID": 8,
+    "roomID": 18,
     "areClosed": true,
     "areaM2": 0.46,
     "vertexIndices": [
@@ -13939,7 +13942,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Компьютерный класс"
   },
   {
     "key": "bl:317",
@@ -14110,7 +14114,7 @@
   {
     "key": "bl:321",
     "blenderID": 321,
-    "roomID": 8,
+    "roomID": 18,
     "roomNo": "130",
     "areClosed": false,
     "areaM2": 66.1,
@@ -14165,7 +14169,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Компьютерный класс"
   },
   {
     "key": "bl:322",
@@ -14414,7 +14419,7 @@
   {
     "key": "bl:328",
     "blenderID": 328,
-    "roomID": 8,
+    "roomID": 18,
     "areClosed": true,
     "areaM2": 0.92,
     "vertexIndices": [
@@ -14443,7 +14448,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Компьютерный класс"
   },
   {
     "key": "bl:329",
@@ -14622,7 +14628,7 @@
   {
     "key": "bl:332",
     "blenderID": 332,
-    "roomID": 8,
+    "roomID": 18,
     "roomNo": "131",
     "areClosed": false,
     "areaM2": 43.01,
@@ -14707,7 +14713,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Компьютерный класс"
   },
   {
     "key": "bl:333",
@@ -14841,7 +14848,7 @@
   {
     "key": "bl:334",
     "blenderID": 334,
-    "roomID": 8,
+    "roomID": 18,
     "roomNo": "140",
     "areClosed": false,
     "areaM2": 47.89,
@@ -14886,7 +14893,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Компьютерный класс"
   },
   {
     "key": "bl:335",
@@ -17642,7 +17650,7 @@
   {
     "key": "bl:392",
     "blenderID": 392,
-    "roomID": 2,
+    "roomID": 14,
     "areClosed": false,
     "areaM2": 0.15,
     "vertexIndices": [
@@ -17671,7 +17679,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Кафедра"
   },
   {
     "key": "bl:393",

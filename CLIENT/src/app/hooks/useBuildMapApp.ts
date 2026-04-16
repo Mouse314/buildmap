@@ -188,6 +188,20 @@ function uniqJoin(values: Array<string | null | undefined>, delimiter = ' / '): 
   return ordered.join(delimiter)
 }
 
+function mapCounterToBucket(counter: Map<string, number>): Array<{ label: string; count: number }> {
+  return Array.from(counter.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count
+      return a.label.localeCompare(b.label, 'ru-RU')
+    })
+}
+
+function incrementCounter(counter: Map<string, number>, value: string | null | undefined, fallbackLabel: string): void {
+  const label = String(value ?? '').trim() || fallbackLabel
+  counter.set(label, (counter.get(label) ?? 0) + 1)
+}
+
 export function useBuildMapApp() {
   const {
     manifest,
@@ -269,6 +283,8 @@ export function useBuildMapApp() {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = React.useState(false)
   const [schedulePeriodMode, setSchedulePeriodMode] = React.useState<SchedulePeriodMode>('week')
   const [scheduleFocusDateIso, setScheduleFocusDateIso] = React.useState<string>(() => toWeekStartMondayIso(getTodayIso()))
+  const [scheduleTeacherFilter, setScheduleTeacherFilter] = React.useState<string>('')
+  const [scheduleGroupFilter, setScheduleGroupFilter] = React.useState<string>('')
   const [scheduleManifest, setScheduleManifest] = React.useState<ScheduleManifest | null>(null)
   const [scheduleDataset, setScheduleDataset] = React.useState<ScheduleDataset | null>(null)
   const [isScheduleLoading, setIsScheduleLoading] = React.useState(false)
@@ -431,12 +447,102 @@ export function useBuildMapApp() {
     return ScheduleDataset.rowsByPeriod(scheduleDataset.rows, schedulePeriodMode, scheduleFocusDateIso)
   }, [scheduleDataset, schedulePeriodMode, scheduleFocusDateIso])
 
+  const scheduleTeacherOptions = React.useMemo(() => {
+    if (!scheduleDataset) return [] as string[]
+    const seen = new Set<string>()
+    const values: string[] = []
+
+    for (const row of scheduleDataset.rows) {
+      const teacher = row.teacher.trim()
+      if (teacher.length === 0) continue
+      const key = caseFold(teacher)
+      if (seen.has(key)) continue
+      seen.add(key)
+      values.push(teacher)
+    }
+
+    return values.sort((a, b) => a.localeCompare(b, 'ru-RU'))
+  }, [scheduleDataset])
+
+  const scheduleGroupOptions = React.useMemo(() => {
+    if (!scheduleDataset) return [] as string[]
+    const seen = new Set<string>()
+    const values: string[] = []
+
+    for (const row of scheduleDataset.rows) {
+      const group = scheduleGroupLabelFromSourceFile(row.sourceFile)
+      if (group.length === 0) continue
+      const key = caseFold(group)
+      if (seen.has(key)) continue
+      seen.add(key)
+      values.push(group)
+    }
+
+    return values.sort((a, b) => a.localeCompare(b, 'ru-RU'))
+  }, [scheduleDataset])
+
+  const scheduleTeacherSuggestions = React.useMemo(() => {
+    const query = caseFold(scheduleTeacherFilter)
+    const source = query.length > 0
+      ? scheduleTeacherOptions.filter((option) => caseFold(option).includes(query))
+      : scheduleTeacherOptions
+    return source.slice(0, 120)
+  }, [scheduleTeacherFilter, scheduleTeacherOptions])
+
+  const scheduleGroupSuggestions = React.useMemo(() => {
+    const query = caseFold(scheduleGroupFilter)
+    const source = query.length > 0
+      ? scheduleGroupOptions.filter((option) => caseFold(option).includes(query))
+      : scheduleGroupOptions
+    return source.slice(0, 120)
+  }, [scheduleGroupFilter, scheduleGroupOptions])
+
+  const scheduleRowsByPeriodFiltered = React.useMemo(() => {
+    const teacherFilterQuery = caseFold(scheduleTeacherFilter)
+    const groupFilterQuery = caseFold(scheduleGroupFilter)
+
+    return scheduleRowsByPeriod.filter((row) => {
+      if (teacherFilterQuery.length > 0) {
+        if (!caseFold(row.teacher).includes(teacherFilterQuery)) return false
+      }
+
+      if (groupFilterQuery.length > 0) {
+        const group = scheduleGroupLabelFromSourceFile(row.sourceFile)
+        if (!caseFold(group).includes(groupFilterQuery)) return false
+      }
+
+      return true
+    })
+  }, [scheduleGroupFilter, scheduleRowsByPeriod, scheduleTeacherFilter])
+
+  const scheduleStatsSummary = React.useMemo(() => {
+    const buildingCounter = new Map<string, number>()
+    const teacherCounter = new Map<string, number>()
+    const groupCounter = new Map<string, number>()
+
+    for (const row of scheduleRowsByPeriodFiltered) {
+      const building = parseCabinetTarget(row.cabinet)?.building ?? ''
+      const group = scheduleGroupLabelFromSourceFile(row.sourceFile)
+
+      incrementCounter(buildingCounter, building, 'Не указан')
+      incrementCounter(teacherCounter, row.teacher, 'Не указан')
+      incrementCounter(groupCounter, group, 'Не указана')
+    }
+
+    return {
+      totalLessons: scheduleRowsByPeriodFiltered.length,
+      buildings: mapCounterToBucket(buildingCounter),
+      teachers: mapCounterToBucket(teacherCounter),
+      groups: mapCounterToBucket(groupCounter),
+    }
+  }, [scheduleRowsByPeriodFiltered])
+
   const scheduleRowsForSelectedBuild = React.useMemo(() => {
     if (!selectedBuildNumber) return [] as Array<{ roomToken: string; row: (typeof scheduleRowsByPeriod)[number] }>
 
     const filtered: Array<{ roomToken: string; row: (typeof scheduleRowsByPeriod)[number] }> = []
     const seen = new Set<string>()
-    for (const row of scheduleRowsByPeriod) {
+    for (const row of scheduleRowsByPeriodFiltered) {
       const target = parseCabinetTarget(row.cabinet)
       if (!target) continue
       if (!knownScheduleBuildNumbers.has(target.building)) continue
@@ -459,7 +565,7 @@ export function useBuildMapApp() {
       filtered.push({ roomToken: target.roomToken, row })
     }
     return filtered
-  }, [knownScheduleBuildNumbers, scheduleRowsByPeriod, selectedBuildNumber])
+  }, [knownScheduleBuildNumbers, scheduleRowsByPeriodFiltered, selectedBuildNumber])
 
   const scheduleHeatByRoomKey = React.useMemo(() => {
     const counts: Record<string, number> = {}
@@ -1241,6 +1347,14 @@ export function useBuildMapApp() {
     setScheduleFocusDateIso(schedulePeriodMode === 'week' ? toWeekStartMondayIso(normalized) : normalized)
   }, [schedulePeriodMode])
 
+  const onSetScheduleTeacherFilter = React.useCallback((value: string) => {
+    setScheduleTeacherFilter(value)
+  }, [])
+
+  const onSetScheduleGroupFilter = React.useCallback((value: string) => {
+    setScheduleGroupFilter(value)
+  }, [])
+
   const onSetActiveRouteFrom = React.useCallback(() => {
     setActiveRouteEndpoint('from')
   }, [setActiveRouteEndpoint])
@@ -1292,6 +1406,13 @@ export function useBuildMapApp() {
     isScheduleModalOpen,
     schedulePeriodMode,
     scheduleFocusDateIso,
+    scheduleTeacherFilter,
+    scheduleGroupFilter,
+    scheduleTeacherOptions,
+    scheduleGroupOptions,
+    scheduleTeacherSuggestions,
+    scheduleGroupSuggestions,
+    scheduleStatsSummary,
     isScheduleLoading,
     scheduleLoadError,
     roomGraph,
@@ -1373,6 +1494,8 @@ export function useBuildMapApp() {
     onCloseScheduleModal,
     onSetSchedulePeriodMode,
     onSetScheduleFocusDate,
+    onSetScheduleTeacherFilter,
+    onSetScheduleGroupFilter,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,

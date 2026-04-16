@@ -1,7 +1,9 @@
+import argparse
 import re
+import shutil
 import sys
+from datetime import date, datetime
 from pathlib import Path
-from datetime import datetime
 
 try:
     import pdfplumber
@@ -22,6 +24,7 @@ ROOM_RE = re.compile(
 TEACHER_RE = re.compile(r'([А-ЯЁA-Z][а-яёa-z]+(?:-[А-ЯЁA-Z][а-яёa-z]+)?\s+[А-ЯЁA-Z]\.\s*[А-ЯЁA-Z]\.)')
 SUBGROUP_RE = re.compile(r'(\d{2}\s*подгруппа)', re.IGNORECASE)
 GROUP_CODE_RE = re.compile(r'\b[А-Яа-яЁёA-Za-z]{1,8}[БбBb6]?-?\d{4}-\d{2}-\d{2}\b')
+PLAIN_GROUP_CODE_RE = re.compile(r'\b\d{4}-\d{2}-\d{2}\b')
 DATE_RE = re.compile(r'\b(\d{1,2}[./]\d{1,2}[./]\d{2,4})\b')
 DAY_RE = re.compile(
     r'\b(понедельник|вторник|среда|четверг|пятница|суббота|воскресенье)\b',
@@ -36,6 +39,8 @@ LESSON_TYPE_PATTERNS = [
     ("Практическое занятие", re.compile(r'практическ\w*\s+заняти\w*', re.IGNORECASE)),
     ("Лекция", re.compile(r'\bлекц(?:ия|ии|ионн(?:ое|ая|ые|ой)?)?\b', re.IGNORECASE)),
 ]
+INITIALS_ONLY_RE = re.compile(r'^[А-ЯЁA-Z]\.\s*[А-ЯЁA-Z]\.?$')
+ROOM_VALUE_RE = re.compile(r'^\d{1,2}-\d{3}(?:[а-яёa-z])?(?:/\d{1,3})?$', re.IGNORECASE)
 DAYS = [
     "понедельник",
     "вторник",
@@ -45,6 +50,114 @@ DAYS = [
     "суббота",
     "воскресенье",
 ]
+
+
+def parse_cli_date(raw):
+    raw_text = str(raw or "").strip()
+
+    try:
+        return datetime.strptime(raw_text, "%Y-%m-%d").date()
+    except ValueError:
+        pass
+
+    normalized = raw_text.replace("_", ".").replace("-", ".").replace("/", ".")
+    for fmt in ("%d.%m.%Y", "%d.%m.%y"):
+        try:
+            return datetime.strptime(normalized, fmt).date()
+        except ValueError:
+            continue
+
+    raise argparse.ArgumentTypeError("Некорректный формат --date. Используйте YYYY-MM-DD или DD.MM.YYYY")
+
+
+def build_arg_parser(default_pdf_dir: Path, default_output_dir: Path):
+    parser = argparse.ArgumentParser(
+        description=(
+            "Единый пайплайн расписания: скачать PDF на выбранную дату и распарсить их в CSV."
+        )
+    )
+    parser.add_argument(
+        "--date",
+        type=parse_cli_date,
+        default=date.today(),
+        help="Дата для выбора актуальных PDF: YYYY-MM-DD или DD.MM.YYYY (по умолчанию сегодня)",
+    )
+    parser.add_argument(
+        "--pdf-dir",
+        type=Path,
+        default=default_pdf_dir,
+        help="Папка для загружаемых PDF",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=default_output_dir,
+        help="Корень папки для итоговых CSV",
+    )
+    parser.add_argument(
+        "--skip-download",
+        action="store_true",
+        help="Не скачивать новые PDF, а парсить уже существующие в --pdf-dir",
+    )
+    parser.add_argument("--min-delay", type=float, default=1.0, help="Минимальная задержка между запросами (сек)")
+    parser.add_argument("--max-delay", type=float, default=2.0, help="Максимальная задержка между запросами (сек)")
+    return parser
+
+
+def ensure_empty_directory(directory: Path):
+    directory.mkdir(parents=True, exist_ok=True)
+    for child in directory.iterdir():
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+
+
+def download_current_schedule_pdfs(target_date: date, output_dir: Path, min_delay: float, max_delay: float):
+    try:
+        import requests
+        from web_worm.download_current_schedule_pdfs import collect_links_for_date, download_links
+    except ModuleNotFoundError as exc:
+        missing = exc.name or "unknown package"
+        print(f"Missing Python package for downloader: {missing}")
+        print("Install dependencies in local venv:")
+        print("  .\\.venv\\Scripts\\pip.exe install -r .\\requirements.txt")
+        return 0, 1
+
+    print(f"\nПодготовка папки PDF: {output_dir}")
+    ensure_empty_directory(output_dir)
+    print("Папка PDF очищена перед скачиванием.")
+
+    session = requests.Session()
+    session.headers.update(
+        {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/123.0.0.0 Safari/537.36"
+            )
+        }
+    )
+
+    try:
+        links = collect_links_for_date(session, target_date)
+    except requests.RequestException as exc:
+        print(f"Не удалось загрузить страницу расписания: {exc}")
+        return 0, 1
+
+    if not links:
+        print("Подходящие PDF для выбранной даты не найдены.")
+        return 0, 0
+
+    downloaded, failed = download_links(
+        session=session,
+        links=links,
+        output_dir=output_dir,
+        min_delay=min_delay,
+        max_delay=max_delay,
+        overwrite=False,
+    )
+    return downloaded, failed
 
 
 def normalize_cell(value):
@@ -167,6 +280,99 @@ def normalize_room_value(raw_room):
     return text
 
 
+def canonicalize_room_value(raw_room):
+    text = str(raw_room or "").strip()
+    if not text:
+        return "Не указан"
+
+    lowered = text.lower()
+    if lowered in {"не указан", "не указано", "nan", "none"}:
+        return "Не указан"
+
+    normalized = normalize_room_value(text)
+    return normalized if normalized else "Не указан"
+
+
+def is_valid_room_value(raw_room):
+    value = canonicalize_room_value(raw_room)
+    if value == "Не указан":
+        return False
+    return bool(ROOM_VALUE_RE.fullmatch(value))
+
+
+def build_mode_map(df, key_cols):
+    if df.empty:
+        return {}
+
+    grouped = (
+        df.groupby(key_cols, dropna=False)["Кабинет"]
+        .agg(lambda series: series.value_counts().index[0])
+        .reset_index(name="mode_room")
+    )
+    return {
+        tuple(row[col] for col in key_cols): row["mode_room"]
+        for _, row in grouped.iterrows()
+    }
+
+
+def fill_rooms_by_key_sets(cleaned, key_sets):
+    room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
+    unknown_or_invalid_mask = room_series.apply(lambda value: not is_valid_room_value(value))
+
+    for key_cols in key_sets:
+        if not unknown_or_invalid_mask.any():
+            break
+
+        known_df = cleaned.loc[
+            ~unknown_or_invalid_mask,
+            key_cols + ["Кабинет"],
+        ].drop_duplicates()
+        mode_map = build_mode_map(known_df, key_cols)
+        if not mode_map:
+            continue
+
+        for idx in cleaned.index[unknown_or_invalid_mask]:
+            key = tuple(cleaned.at[idx, col] for col in key_cols)
+            room_value = mode_map.get(key)
+            if room_value and is_valid_room_value(room_value):
+                cleaned.at[idx, "Кабинет"] = canonicalize_room_value(room_value)
+
+        room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
+        unknown_or_invalid_mask = room_series.apply(lambda value: not is_valid_room_value(value))
+
+    # Last resort: force-fill remaining missing rooms with most frequent valid room in this PDF file.
+    if unknown_or_invalid_mask.any():
+        valid_rooms = cleaned.loc[~unknown_or_invalid_mask, "Кабинет"]
+        if not valid_rooms.empty:
+            fallback_room = valid_rooms.value_counts().index[0]
+            cleaned.loc[unknown_or_invalid_mask, "Кабинет"] = fallback_room
+
+
+def apply_mode_maps_to_rooms(cleaned, key_sets, mode_maps, fallback_room=None):
+    room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
+    unknown_or_invalid_mask = room_series.apply(lambda value: not is_valid_room_value(value))
+
+    for key_cols in key_sets:
+        if not unknown_or_invalid_mask.any():
+            break
+
+        mode_map = mode_maps.get(tuple(key_cols), {})
+        if not mode_map:
+            continue
+
+        for idx in cleaned.index[unknown_or_invalid_mask]:
+            key = tuple(cleaned.at[idx, col] for col in key_cols)
+            room_value = mode_map.get(key)
+            if room_value and is_valid_room_value(room_value):
+                cleaned.at[idx, "Кабинет"] = canonicalize_room_value(room_value)
+
+        room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
+        unknown_or_invalid_mask = room_series.apply(lambda value: not is_valid_room_value(value))
+
+    if unknown_or_invalid_mask.any() and fallback_room and is_valid_room_value(fallback_room):
+        cleaned.loc[unknown_or_invalid_mask, "Кабинет"] = canonicalize_room_value(fallback_room)
+
+
 def extract_lesson_type(text):
     source = str(text or "")
     for lesson_type, pattern in LESSON_TYPE_PATTERNS:
@@ -281,6 +487,7 @@ def clean_discipline(raw_text, teacher, room):
     text = raw_text
 
     text = GROUP_CODE_RE.sub(" ", text)
+    text = PLAIN_GROUP_CODE_RE.sub(" ", text)
     text = ROOM_RE.sub(" ", text)
     if teacher != "Не указан":
         text = text.replace(teacher, " ")
@@ -306,6 +513,121 @@ def postprocess_schedule_df(df):
         return df
 
     cleaned = df.drop_duplicates().copy()
+
+    # Recover missing date/day values for fragmented table rows.
+    date_text = cleaned["Дата"].fillna("").astype(str).str.strip()
+    date_text = date_text.replace({"": pd.NA, "nan": pd.NA, "None": pd.NA})
+    date_text = date_text.ffill().bfill()
+    cleaned["Дата"] = date_text.fillna("")
+
+    parsed_dates = pd.to_datetime(cleaned["Дата"], format="%d.%m.%y", errors="coerce")
+    weekday_names = parsed_dates.dt.dayofweek.map(
+        {
+            0: "понедельник",
+            1: "вторник",
+            2: "среда",
+            3: "четверг",
+            4: "пятница",
+            5: "суббота",
+            6: "воскресенье",
+        }
+    )
+
+    day_text = cleaned["День недели"].fillna("").astype(str).str.strip().str.lower()
+    day_text = day_text.replace({"": pd.NA, "nan": pd.NA, "none": pd.NA})
+    missing_day_mask = day_text.isna() & parsed_dates.notna()
+    day_text.loc[missing_day_mask] = weekday_names.loc[missing_day_mask]
+    cleaned["День недели"] = day_text.fillna("")
+
+    # Drop known parser artifacts: split initials and empty-discipline rows with unknown teacher.
+    discipline_text = cleaned["Дисциплина"].fillna("").astype(str).str.strip()
+    discipline_compact = discipline_text.str.replace(r"\s+", "", regex=True)
+    teacher_unknown_mask = cleaned["Преподаватель"].fillna("").astype(str).str.strip().str.lower().eq("не указан")
+    discipline_placeholder_mask = discipline_text.str.lower().isin({"", "не указано", "не указан"})
+    discipline_initials_mask = discipline_compact.apply(lambda value: bool(INITIALS_ONLY_RE.fullmatch(value)))
+
+    artifact_mask = teacher_unknown_mask & (discipline_placeholder_mask | discipline_initials_mask)
+    if artifact_mask.any():
+        cleaned = cleaned.loc[~artifact_mask].copy()
+
+    teacher_series = cleaned["Преподаватель"].fillna("").astype(str).str.strip()
+    cleaned["Кабинет"] = cleaned["Кабинет"].apply(canonicalize_room_value)
+    room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
+
+    # Some rows contain teacher initials in room column due PDF column shifts.
+    shifted_teacher_mask = teacher_series.str.lower().eq("не указан") & room_series.apply(
+        lambda value: bool(TEACHER_RE.fullmatch(value))
+    )
+    if shifted_teacher_mask.any():
+        cleaned.loc[shifted_teacher_mask, "Преподаватель"] = room_series.loc[shifted_teacher_mask]
+        cleaned.loc[shifted_teacher_mask, "Кабинет"] = "Не указан"
+
+    teacher_unknown_mask = cleaned["Преподаватель"].fillna("").astype(str).str.strip().str.lower().eq("не указан")
+    known_teacher_df = cleaned.loc[
+        ~teacher_unknown_mask,
+        ["Дата", "День недели", "Время", "Дисциплина", "Подгруппа", "Преподаватель"],
+    ].drop_duplicates()
+    if not known_teacher_df.empty:
+        teacher_map = {
+            (row["Дата"], row["День недели"], row["Время"], row["Дисциплина"], row["Подгруппа"]): row["Преподаватель"]
+            for _, row in known_teacher_df.iterrows()
+        }
+        for idx in cleaned.index[teacher_unknown_mask]:
+            key = (
+                cleaned.at[idx, "Дата"],
+                cleaned.at[idx, "День недели"],
+                cleaned.at[idx, "Время"],
+                cleaned.at[idx, "Дисциплина"],
+                cleaned.at[idx, "Подгруппа"],
+            )
+            teacher_value = teacher_map.get(key)
+            if teacher_value:
+                cleaned.at[idx, "Преподаватель"] = teacher_value
+
+    room_unknown_mask = cleaned["Кабинет"].fillna("").astype(str).str.strip().str.lower().eq("не указан")
+    known_room_df = cleaned.loc[
+        ~room_unknown_mask,
+        ["Дата", "День недели", "Время", "Дисциплина", "Подгруппа", "Преподаватель", "Кабинет"],
+    ].drop_duplicates()
+    if not known_room_df.empty:
+        room_map = {
+            (
+                row["Дата"],
+                row["День недели"],
+                row["Время"],
+                row["Дисциплина"],
+                row["Подгруппа"],
+                row["Преподаватель"],
+            ): row["Кабинет"]
+            for _, row in known_room_df.iterrows()
+        }
+        for idx in cleaned.index[room_unknown_mask]:
+            key = (
+                cleaned.at[idx, "Дата"],
+                cleaned.at[idx, "День недели"],
+                cleaned.at[idx, "Время"],
+                cleaned.at[idx, "Дисциплина"],
+                cleaned.at[idx, "Подгруппа"],
+                cleaned.at[idx, "Преподаватель"],
+            )
+            room_value = room_map.get(key)
+            if room_value:
+                cleaned.at[idx, "Кабинет"] = canonicalize_room_value(room_value)
+
+    # Prioritize room completeness: infer cabinet values with progressively broader matching keys.
+    fill_rooms_by_key_sets(
+        cleaned,
+        key_sets=[
+            ["Дата", "День недели", "Время", "Дисциплина", "Подгруппа", "Преподаватель"],
+            ["Дата", "День недели", "Время", "Дисциплина", "Подгруппа"],
+            ["Дата", "День недели", "Время", "Дисциплина", "Преподаватель"],
+            ["Дата", "День недели", "Время", "Дисциплина"],
+            ["Дисциплина", "Подгруппа", "Преподаватель"],
+            ["Дисциплина", "Преподаватель"],
+            ["Преподаватель"],
+            ["Дисциплина"],
+        ],
+    )
 
     continuation_mask = cleaned["Дисциплина"].str.lower().str.startswith("физической культуре и спорту", na=False)
     idx_to_drop = []
@@ -489,15 +811,18 @@ def parse_schedule_pdf(pdf_path):
     return df
 
 
-def find_schedule_files(search_root: Path):
+def find_schedule_files(search_root: Path, preferred_dir: Path | None = None):
     search_root = search_root.resolve()
 
-    candidate_dirs = [
-        search_root / "schedule",
-        search_root / "schedules",
-        search_root.parent / "schedule",
-        search_root.parent / "schedules",
-    ]
+    if preferred_dir is not None:
+        candidate_dirs = [preferred_dir.resolve()]
+    else:
+        candidate_dirs = [
+            search_root / "schedule",
+            search_root / "schedules",
+            search_root.parent / "schedule",
+            search_root.parent / "schedules",
+        ]
 
     found_files = []
     seen = set()
@@ -610,64 +935,170 @@ def analyze_schedule_anomalies(df):
         "reason_counts": reason_counts,
     }
 
-# Использование скрипта:
-if __name__ == "__main__":
-    script_dir = Path(__file__).resolve().parent
-    schedule_files = find_schedule_files(script_dir)
 
-    if not schedule_files:
-        print("Файлы PDF не найдены. Положите расписание в папку schedule рядом со скриптом.")
-    else:
-        exported_files = []
-        anomaly_reports = []
-        output_root = script_dir / "parsed_schedule"
+def to_display_path(path: Path, base_dir: Path):
+    resolved_path = path.resolve()
+    try:
+        return resolved_path.relative_to(base_dir.resolve())
+    except ValueError:
+        return resolved_path
 
-        for pdf_path in schedule_files:
-            try:
-                schedule_df = parse_schedule_pdf(str(pdf_path))
-            except Exception as e:
-                print(f"Ошибка при обработке файла {pdf_path.name}: {e}")
-                continue
 
-            if schedule_df.empty:
-                print(f"Файл {pdf_path.name} обработан, но данных не найдено.")
-                continue
+def parse_schedule_files_to_csv(schedule_files, output_root: Path, script_dir: Path):
+    exported_files = []
+    anomaly_reports = []
+    total_rows = 0
+    total_anomalous_rows = 0
+    total_reason_counts = {}
+    prepared_items = []
 
-            group_name_raw = detect_group_name_from_pdf(pdf_path)
-            group_name = sanitize_filename_component(group_name_raw, pdf_path.stem)
-            first_date_label = sanitize_filename_component(get_first_schedule_date_label(schedule_df), "unknown-date")
+    for pdf_path in schedule_files:
+        try:
+            schedule_df = parse_schedule_pdf(str(pdf_path))
+        except Exception as e:
+            print(f"Ошибка при обработке файла {pdf_path.name}: {e}")
+            continue
 
-            schedule_df.insert(0, "Файл", pdf_path.name)
+        if schedule_df.empty:
+            print(f"Файл {pdf_path.name} обработан, но данных не найдено.")
+            continue
 
-            per_file_csv = output_root / first_date_label / f"{group_name}.csv"
-            saved_per_file_csv = save_csv_with_fallback(schedule_df, per_file_csv)
-            exported_files.append(saved_per_file_csv)
-            rel_saved = saved_per_file_csv.relative_to(script_dir)
-            print(f"Сохранён файл: {rel_saved} ({len(schedule_df)} строк)")
+        group_name_raw = detect_group_name_from_pdf(pdf_path)
+        group_name = sanitize_filename_component(group_name_raw, pdf_path.stem)
+        first_date_label = sanitize_filename_component(get_first_schedule_date_label(schedule_df), "unknown-date")
 
-            anomaly_info = analyze_schedule_anomalies(schedule_df)
-            anomaly_reports.append({
+        schedule_df.insert(0, "Файл", pdf_path.name)
+
+        prepared_items.append(
+            {
                 "group_name": group_name,
+                "first_date_label": first_date_label,
+                "schedule_df": schedule_df,
+            }
+        )
+
+    if not prepared_items:
+        print("Не удалось получить данные из найденных PDF-файлов.")
+        return 0
+
+    combined_df = pd.concat([item["schedule_df"] for item in prepared_items], ignore_index=True)
+    global_room_key_sets = [
+        ["Дисциплина", "Подгруппа", "Преподаватель"],
+        ["Дисциплина", "Преподаватель"],
+        ["Преподаватель"],
+        ["Дисциплина"],
+    ]
+    global_mode_maps = {}
+    valid_global_df = combined_df.loc[combined_df["Кабинет"].apply(is_valid_room_value)].copy()
+    global_fallback_room = None
+    if not valid_global_df.empty:
+        global_fallback_room = valid_global_df["Кабинет"].value_counts().index[0]
+
+    for key_cols in global_room_key_sets:
+        known_df = valid_global_df[key_cols + ["Кабинет"]].drop_duplicates()
+        global_mode_maps[tuple(key_cols)] = build_mode_map(known_df, key_cols)
+
+    for item in prepared_items:
+        schedule_df = item["schedule_df"].copy()
+        apply_mode_maps_to_rooms(
+            schedule_df,
+            global_room_key_sets,
+            global_mode_maps,
+            fallback_room=global_fallback_room,
+        )
+
+        per_file_csv = output_root / item["first_date_label"] / f"{item['group_name']}.csv"
+        saved_per_file_csv = save_csv_with_fallback(schedule_df, per_file_csv)
+        exported_files.append(saved_per_file_csv)
+        rel_saved = to_display_path(saved_per_file_csv, script_dir)
+        print(f"Сохранён файл: {rel_saved} ({len(schedule_df)} строк)")
+
+        anomaly_info = analyze_schedule_anomalies(schedule_df)
+        total_rows += int(anomaly_info["total_rows"])
+        total_anomalous_rows += int(anomaly_info["anomalous_rows"])
+        for reason, count in anomaly_info["reason_counts"].items():
+            total_reason_counts[reason] = total_reason_counts.get(reason, 0) + int(count)
+
+        anomaly_reports.append(
+            {
+                "group_name": item["group_name"],
                 "csv_path": rel_saved,
                 "total_rows": anomaly_info["total_rows"],
                 "anomalous_rows": anomaly_info["anomalous_rows"],
                 "reason_counts": anomaly_info["reason_counts"],
-            })
+            }
+        )
 
-        if not exported_files:
-            print("Не удалось получить данные из найденных PDF-файлов.")
+    output_display = to_display_path(output_root, script_dir)
+    print(f"\nЭкспорт завершён: {len(exported_files)} файл(ов) в папке {output_display}")
+    print(f"Итого аномалий: {total_anomalous_rows} из {total_rows} строк")
+    if total_reason_counts:
+        total_reasons_line = "; ".join(
+            f"{reason}: {count}" for reason, count in sorted(total_reason_counts.items())
+        )
+        print(f"Итог по причинам: {total_reasons_line}")
+    print("\nАнализ аномальных строк по результирующим CSV:")
+    for report in anomaly_reports:
+        print(
+            f"- {report['group_name']}: {report['anomalous_rows']} из {report['total_rows']} аномальных строк"
+            f" ({report['csv_path']})"
+        )
+        if report["reason_counts"]:
+            reasons_line = "; ".join(
+                f"{reason}: {count}" for reason, count in report["reason_counts"].items()
+            )
+            print(f"  Причины: {reasons_line}")
         else:
-            print(f"\nЭкспорт завершён: {len(exported_files)} файл(ов) в папке {output_root.relative_to(script_dir)}")
-            print("\nАнализ аномальных строк по результирующим CSV:")
-            for report in anomaly_reports:
-                print(
-                    f"- {report['group_name']}: {report['anomalous_rows']} из {report['total_rows']} аномальных строк"
-                    f" ({report['csv_path']})"
-                )
-                if report["reason_counts"]:
-                    reasons_line = "; ".join(
-                        f"{reason}: {count}" for reason, count in report["reason_counts"].items()
-                    )
-                    print(f"  Причины: {reasons_line}")
-                else:
-                    print("  Причины: не обнаружены")
+            print("  Причины: не обнаружены")
+
+    return len(exported_files)
+
+
+def main():
+    script_dir = Path(__file__).resolve().parent
+    parser = build_arg_parser(
+        default_pdf_dir=script_dir / "schedule",
+        default_output_dir=script_dir / "parsed_schedule",
+    )
+    args = parser.parse_args()
+
+    if args.min_delay < 1.0:
+        parser.error("--min-delay должен быть >= 1.0")
+    if args.max_delay < args.min_delay:
+        parser.error("--max-delay должен быть >= --min-delay")
+
+    pdf_dir = args.pdf_dir.resolve()
+    output_root = args.output_dir.resolve()
+
+    download_failed = 0
+    if args.skip_download:
+        print(f"Пропуск скачивания PDF. Будет использована папка: {pdf_dir}")
+    else:
+        print(f"Дата для скачивания PDF: {args.date.isoformat()}")
+        downloaded, failed = download_current_schedule_pdfs(
+            target_date=args.date,
+            output_dir=pdf_dir,
+            min_delay=args.min_delay,
+            max_delay=args.max_delay,
+        )
+        print(f"Скачано PDF: {downloaded}")
+        print(f"Ошибок скачивания: {failed}")
+        download_failed = failed
+
+        if downloaded == 0 and failed > 0:
+            print("Скачивание полностью завершилось с ошибками. Парсинг не будет запущен.")
+            return 2
+
+    schedule_files = find_schedule_files(script_dir, preferred_dir=pdf_dir)
+    if not schedule_files:
+        print(f"Файлы PDF не найдены в папке: {pdf_dir}")
+        return 0 if download_failed == 0 else 2
+
+    exported_count = parse_schedule_files_to_csv(schedule_files, output_root=output_root, script_dir=script_dir)
+    if exported_count == 0:
+        return 1
+    return 0 if download_failed == 0 else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
