@@ -317,29 +317,80 @@ export function computeRoute(args: {
     }
   }
 
-  const floor1 = floors.find((f) => /floor1/i.test(f.floorId))
-  if (!floor1) return null
+  const resolveNearestRoomNodeId = (
+    floorId: string,
+    point: { x: number; y: number },
+    allowedNodeKeys?: Set<string>,
+  ): string | null => {
+    const floor = floors.find((f) => f.floorId === floorId)
+    if (!floor) return null
 
-  const entranceLabels = floor1.rooms.filter(
-    (r) => r.roomID === 200 && (r.description ?? '').toUpperCase().includes('ВХОД'),
-  )
-  const entranceLabel = entranceLabels.sort((a, b) => centerOf(a.points).y - centerOf(b.points).y)[0]
-  if (!entranceLabel) return null
-  const entrancePoint = centerOf(entranceLabel.points)
-
-  let entranceStartNodeId: string | null = null
-  let minStartDist = Number.POSITIVE_INFINITY
-  for (const node of floor1.graph.nodes) {
-    if ((node.kind ?? 'room') !== 'room') continue
-    const globalId = `${floor1.floorId}|${node.key}`
-    if (!nodeById.has(globalId)) continue
-    const d = distance2D(entrancePoint, node)
-    if (d < minStartDist) {
-      minStartDist = d
-      entranceStartNodeId = globalId
+    let nearestNodeId: string | null = null
+    let nearestDist = Number.POSITIVE_INFINITY
+    for (const node of floor.graph.nodes) {
+      if ((node.kind ?? 'room') !== 'room') continue
+      if (allowedNodeKeys && !allowedNodeKeys.has(node.key)) continue
+      const globalId = `${floorId}|${node.key}`
+      if (!nodeById.has(globalId)) continue
+      const d = distance2D(point, node)
+      if (d < nearestDist) {
+        nearestDist = d
+        nearestNodeId = globalId
+      }
     }
+
+    return nearestNodeId
   }
-  if (!entranceStartNodeId) return null
+
+  const collectStreetLinkedRoomNodeKeys = (floorId: string): Set<string> => {
+    const floor = floors.find((f) => f.floorId === floorId)
+    if (!floor) return new Set<string>()
+
+    const kindByKey = new Map(floor.graph.nodes.map((n) => [n.key, (n.kind ?? 'room') as 'room' | 'street']))
+    const result = new Set<string>()
+
+    for (const edge of floor.graph.edges) {
+      const fromKind = kindByKey.get(edge.from)
+      const toKind = kindByKey.get(edge.to)
+
+      if (fromKind === 'room' && toKind === 'street') result.add(edge.from)
+      if (fromKind === 'street' && toKind === 'room') result.add(edge.to)
+    }
+
+    return result
+  }
+
+  const resolveEntranceStartNodeIds = (args: {
+    floorId: string
+    preferredPoint?: { x: number; y: number }
+  }): string[] => {
+    const floor = floors.find((f) => f.floorId === args.floorId)
+    if (!floor) return []
+
+    const entranceLabels = floor.rooms.filter(
+      (r) => r.roomID === 200 && (r.description ?? '').toUpperCase().includes('ВХОД'),
+    )
+    if (entranceLabels.length === 0) return []
+
+    const streetLinkedRoomNodeKeys = collectStreetLinkedRoomNodeKeys(args.floorId)
+    const preferredAllowedKeys = streetLinkedRoomNodeKeys.size > 0 ? streetLinkedRoomNodeKeys : undefined
+
+    const ordered = args.preferredPoint
+      ? [...entranceLabels].sort(
+        (left, right) => distance2D(centerOf(left.points), args.preferredPoint!) - distance2D(centerOf(right.points), args.preferredPoint!),
+      )
+      : [...entranceLabels].sort((left, right) => centerOf(left.points).y - centerOf(right.points).y)
+
+    const unique = new Set<string>()
+    for (const label of ordered) {
+      const center = centerOf(label.points)
+      const preferred = resolveNearestRoomNodeId(args.floorId, center, preferredAllowedKeys)
+      const fallback = preferred ?? resolveNearestRoomNodeId(args.floorId, center)
+      if (fallback) unique.add(fallback)
+    }
+
+    return Array.from(unique)
+  }
 
   const resolveNodeId = (candidate: RouteTarget): string | null => {
     const floor = floors.find((f) => f.floorId === candidate.floorId)
@@ -370,59 +421,100 @@ export function computeRoute(args: {
     return resolved
   }
 
-  const startNodeId = args.source ? resolveNodeId(args.source) : entranceStartNodeId
-  if (!startNodeId) return null
+  const floor1 = floors.find((f) => /floor1/i.test(f.floorId))
 
   const targetNodeId = resolveNodeId(args.target)
   if (!targetNodeId) return null
 
-  const dist = new Map<string, number>()
-  const prev = new Map<string, string | null>()
-  const queue = new Set<string>()
+  const targetNode = nodeById.get(targetNodeId)
 
-  for (const id of nodeById.keys()) {
-    dist.set(id, Number.POSITIVE_INFINITY)
-    prev.set(id, null)
-    queue.add(id)
-  }
-  dist.set(startNodeId, 0)
+  const runShortestPath = (startNodeId: string): { total: number; path: string[] } | null => {
+    const dist = new Map<string, number>()
+    const prev = new Map<string, string | null>()
+    const queue = new Set<string>()
 
-  while (queue.size > 0) {
-    let current: string | null = null
-    let best = Number.POSITIVE_INFINITY
-    for (const id of queue) {
-      const d = dist.get(id) ?? Number.POSITIVE_INFINITY
-      if (d < best) {
-        best = d
-        current = id
+    for (const id of nodeById.keys()) {
+      dist.set(id, Number.POSITIVE_INFINITY)
+      prev.set(id, null)
+      queue.add(id)
+    }
+    dist.set(startNodeId, 0)
+
+    while (queue.size > 0) {
+      let current: string | null = null
+      let best = Number.POSITIVE_INFINITY
+      for (const id of queue) {
+        const d = dist.get(id) ?? Number.POSITIVE_INFINITY
+        if (d < best) {
+          best = d
+          current = id
+        }
+      }
+      if (!current || !Number.isFinite(best)) break
+      queue.delete(current)
+      if (current === targetNodeId) break
+
+      const neighbors = adjacency.get(current) ?? []
+      for (const edge of neighbors) {
+        if (!queue.has(edge.to)) continue
+        const alt = best + edge.weight
+        if (alt < (dist.get(edge.to) ?? Number.POSITIVE_INFINITY)) {
+          dist.set(edge.to, alt)
+          prev.set(edge.to, current)
+        }
       }
     }
-    if (!current || !Number.isFinite(best)) break
-    queue.delete(current)
-    if (current === targetNodeId) break
 
-    const neighbors = adjacency.get(current) ?? []
-    for (const edge of neighbors) {
-      if (!queue.has(edge.to)) continue
-      const alt = best + edge.weight
-      if (alt < (dist.get(edge.to) ?? Number.POSITIVE_INFINITY)) {
-        dist.set(edge.to, alt)
-        prev.set(edge.to, current)
+    const total = dist.get(targetNodeId)
+    if (typeof total !== 'number' || !Number.isFinite(total)) return null
+
+    const path: string[] = []
+    let cursor: string | null = targetNodeId
+    while (cursor) {
+      path.push(cursor)
+      cursor = prev.get(cursor) ?? null
+    }
+    path.reverse()
+    if (path.length < 2) return null
+
+    return { total, path }
+  }
+
+  let bestPathResult: { total: number; path: string[] } | null = null
+
+  if (args.source) {
+    const startNodeId = resolveNodeId(args.source)
+    if (!startNodeId) return null
+    bestPathResult = runShortestPath(startNodeId)
+  } else {
+    const isTargetFloorZero = floorOrderValue(args.target.floorId) === 0
+    if (isTargetFloorZero && targetNode) {
+      const floor0EntranceStartNodeIds = resolveEntranceStartNodeIds({
+        floorId: args.target.floorId,
+        preferredPoint: { x: targetNode.x, y: targetNode.y },
+      })
+      for (const startNodeId of floor0EntranceStartNodeIds) {
+        const candidate = runShortestPath(startNodeId)
+        if (!candidate) continue
+        if (!bestPathResult || candidate.total < bestPathResult.total) {
+          bestPathResult = candidate
+        }
+      }
+    }
+
+    if (!bestPathResult && floor1) {
+      const floor1EntranceStartNodeIds = resolveEntranceStartNodeIds({ floorId: floor1.floorId })
+      const fallbackStartNodeId = floor1EntranceStartNodeIds[0] ?? null
+      if (fallbackStartNodeId) {
+        bestPathResult = runShortestPath(fallbackStartNodeId)
       }
     }
   }
 
-  const total = dist.get(targetNodeId)
-  if (typeof total !== 'number' || !Number.isFinite(total)) return null
+  if (!bestPathResult) return null
 
-  const path: string[] = []
-  let cursor: string | null = targetNodeId
-  while (cursor) {
-    path.push(cursor)
-    cursor = prev.get(cursor) ?? null
-  }
-  path.reverse()
-  if (path.length < 2) return null
+  const total = bestPathResult.total
+  const path = bestPathResult.path
 
   const segments: RouteSegment[] = []
   const floorJumps: RouteFloorJump[] = []

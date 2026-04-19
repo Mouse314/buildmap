@@ -123,9 +123,6 @@ function arePolygonsAdjacent(
   a: { points: Array<{ x: number; y: number }>; vertexIndices?: number[] },
   b: { points: Array<{ x: number; y: number }>; vertexIndices?: number[] },
 ): boolean {
-  const sharedVertices = sharedVertexCount(a.vertexIndices, b.vertexIndices);
-  if (sharedVertices >= 2) return true;
-
   const aSegments = polygonSegments(a.points);
   const bSegments = polygonSegments(b.points);
 
@@ -138,24 +135,7 @@ function arePolygonsAdjacent(
     }
   }
 
-  if (maxSharedBoundary >= 0.05) return true;
-
-  return false;
-}
-
-function sharedVertexCount(aIndices?: number[], bIndices?: number[]): number {
-  if (!Array.isArray(aIndices) || !Array.isArray(bIndices)) return 0;
-  if (aIndices.length === 0 || bIndices.length === 0) return 0;
-
-  const aSet = new Set(aIndices);
-  let count = 0;
-  for (const value of bIndices) {
-    if (aSet.has(value)) {
-      count += 1;
-      if (count >= 2) return count;
-    }
-  }
-  return count;
+  return maxSharedBoundary >= 0.05;
 }
 
 type RoomGraph = {

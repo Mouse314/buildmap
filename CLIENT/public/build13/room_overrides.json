@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "buildId": "build13",
+  "updatedAt": "2026-04-19T17:05:49.307Z",
+  "floors": {
+    "floor0": {
+      "bl:704": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 5.13,
+        "build": null,
+        "floor": null
+      },
+      "bl:708": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 5.1,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-04-19T17:05:49.307Z"
+      }
+    }
+  }
+}

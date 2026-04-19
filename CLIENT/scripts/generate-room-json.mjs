@@ -396,24 +396,7 @@ function polygonCentroid(points) {
   };
 }
 
-function sharedVertexCount(aIndices, bIndices) {
-  if (!Array.isArray(aIndices) || !Array.isArray(bIndices)) return 0;
-  if (aIndices.length === 0 || bIndices.length === 0) return 0;
-
-  const aSet = new Set(aIndices);
-  let count = 0;
-  for (const value of bIndices) {
-    if (aSet.has(value)) {
-      count += 1;
-      if (count >= 2) return count;
-    }
-  }
-  return count;
-}
-
 function computeSharedBoundaryPortal(a, b) {
-  const sharedVertices = sharedVertexCount(a.vertexIndices, b.vertexIndices);
-
   const aSegments = polygonSegments(a.points);
   const bSegments = polygonSegments(b.points);
 
@@ -438,14 +421,6 @@ function computeSharedBoundaryPortal(a, b) {
         y: round3(bestMidpoint.y),
       },
       sharedBoundary: maxSharedBoundary,
-    };
-  }
-
-  if (sharedVertices >= 2) {
-    return {
-      adjacent: true,
-      via: null,
-      sharedBoundary: 0,
     };
   }
 
