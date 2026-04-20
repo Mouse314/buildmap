@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-19T17:26:15.203Z",
+  "generatedAt": "2026-04-20T17:21:32.226Z",
   "nodes": [
     {
       "key": "bl:8",
@@ -957,7 +957,7 @@
     {
       "key": "bl:711",
       "roomID": 8,
-      "roomNo": "107",
+      "roomNo": "107а",
       "kind": "room",
       "x": 5.248,
       "y": 8.541

@@ -16893,7 +16893,7 @@
   {
     "key": "bl:476",
     "blenderID": 476,
-    "roomID": 8,
+    "roomID": 19,
     "roomNo": "119в",
     "areClosed": false,
     "areaM2": 46.76,
@@ -16938,7 +16938,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Рекреация"
   },
   {
     "key": "bl:477",

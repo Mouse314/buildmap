@@ -1,6 +1,20 @@
 {
   "version": 1,
   "buildId": "build16",
-  "updatedAt": "",
-  "floors": {}
+  "updatedAt": "2026-04-20T17:21:15.127Z",
+  "floors": {
+    "floor1": {
+      "bl:476": {
+        "roomID": 19,
+        "roomNo": "119в",
+        "category": "Рекреация",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 46.76,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-04-20T17:21:15.127Z"
+      }
+    }
+  }
 }

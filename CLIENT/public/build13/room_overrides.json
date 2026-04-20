@@ -1,7 +1,7 @@
 {
   "version": 1,
   "buildId": "build13",
-  "updatedAt": "2026-04-19T17:05:49.307Z",
+  "updatedAt": "2026-04-20T17:04:47.348Z",
   "floors": {
     "floor0": {
       "bl:704": {
@@ -22,8 +22,72 @@
         "areClosed": false,
         "areaM2": 5.1,
         "build": null,
+        "floor": null
+      }
+    },
+    "floor1": {
+      "bl:280": {
+        "roomID": 2,
+        "roomNo": null,
+        "category": "техническое помещение",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 0.19,
+        "build": null,
+        "floor": null
+      },
+      "bl:275": {
+        "roomID": 2,
+        "roomNo": null,
+        "category": "техническое помещение",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 0.14,
+        "build": null,
+        "floor": null
+      },
+      "bl:711": {
+        "roomID": 8,
+        "roomNo": "107а",
+        "category": "кабинет",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 18.48,
+        "build": null,
+        "floor": null
+      },
+      "bl:544": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 0.13,
+        "build": null,
         "floor": null,
-        "updatedAt": "2026-04-19T17:05:49.307Z"
+        "updatedAt": "2026-04-20T17:04:47.348Z"
+      }
+    },
+    "floor3": {
+      "bl:220": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.23,
+        "build": null,
+        "floor": null
+      },
+      "bl:216": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.24,
+        "build": null,
+        "floor": null
       }
     }
   }

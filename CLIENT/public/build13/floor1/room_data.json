@@ -9620,7 +9620,7 @@
     "key": "bl:275",
     "blenderID": 275,
     "roomID": 2,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 0.14,
     "vertexIndices": [
       552,
@@ -9648,7 +9648,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "техническое помещение"
   },
   {
     "key": "bl:276",
@@ -9790,7 +9791,7 @@
     "key": "bl:280",
     "blenderID": 280,
     "roomID": 2,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 0.19,
     "vertexIndices": [
       572,
@@ -9818,7 +9819,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "техническое помещение"
   },
   {
     "key": "bl:281",
@@ -18986,7 +18988,7 @@
     "key": "bl:544",
     "blenderID": 544,
     "roomID": 1,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 0.13,
     "vertexIndices": [
       1072,
@@ -19014,7 +19016,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:545",
@@ -27124,7 +27127,7 @@
     "key": "bl:711",
     "blenderID": 711,
     "roomID": 8,
-    "roomNo": "107",
+    "roomNo": "107а",
     "areClosed": false,
     "areaM2": 18.48,
     "vertexIndices": [
@@ -27188,7 +27191,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:712",
