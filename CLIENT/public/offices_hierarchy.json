@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-20T17:21:32.552Z",
+  "generatedAt": "2026-04-21T17:49:53.233Z",
   "stats": {
     "totalRows": 85,
-    "mappedRows": 29,
-    "unmappedRows": 56
+    "mappedRows": 30,
+    "unmappedRows": 55
   },
   "institutes": [
     {
@@ -1098,7 +1098,12 @@
             "roomDigits": "103",
             "isDigitsOnlyRoomNo": true
           },
-          "location": null,
+          "location": {
+            "buildId": "build19",
+            "floorId": "floor1",
+            "roomKey": "bl:1375",
+            "roomNo": "103"
+          },
           "children": [
             {
               "id": "office-61",

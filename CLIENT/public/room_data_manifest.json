@@ -28,6 +28,12 @@
         "floor3",
         "floor4"
       ]
+    },
+    {
+      "id": "build19",
+      "floors": [
+        "floor1"
+      ]
     }
   ]
 }
