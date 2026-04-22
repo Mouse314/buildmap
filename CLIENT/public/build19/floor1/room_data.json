@@ -10250,7 +10250,7 @@
   {
     "key": "bl:297",
     "blenderID": 297,
-    "roomID": 100,
+    "roomID": 1,
     "areClosed": false,
     "areaM2": 0.28,
     "vertexIndices": [
@@ -10279,7 +10279,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:298",
@@ -14331,7 +14332,7 @@
   {
     "key": "bl:416",
     "blenderID": 416,
-    "roomID": 100,
+    "roomID": 12,
     "areClosed": false,
     "areaM2": 0.32,
     "vertexIndices": [
@@ -14360,7 +14361,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:417",
@@ -15774,7 +15776,7 @@
   {
     "key": "bl:458",
     "blenderID": 458,
-    "roomID": 100,
+    "roomID": 12,
     "areClosed": false,
     "areaM2": 0.33,
     "vertexIndices": [
@@ -15803,7 +15805,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:459",
@@ -15876,7 +15879,7 @@
   {
     "key": "bl:461",
     "blenderID": 461,
-    "roomID": 100,
+    "roomID": 12,
     "areClosed": false,
     "areaM2": 0.32,
     "vertexIndices": [
@@ -15905,7 +15908,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:462",
@@ -18564,7 +18568,7 @@
     "key": "bl:539",
     "blenderID": 539,
     "roomID": 1,
-    "areClosed": false,
+    "areClosed": true,
     "areaM2": 1.23,
     "vertexIndices": [
       988,
@@ -18592,7 +18596,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "коридор"
   },
   {
     "key": "bl:540",
@@ -20006,7 +20011,7 @@
   {
     "key": "bl:581",
     "blenderID": 581,
-    "roomID": 100,
+    "roomID": 12,
     "areClosed": false,
     "areaM2": 0.13,
     "vertexIndices": [
@@ -20035,7 +20040,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:582",
@@ -20142,7 +20148,7 @@
   {
     "key": "bl:585",
     "blenderID": 585,
-    "roomID": 100,
+    "roomID": 12,
     "areClosed": false,
     "areaM2": 0.13,
     "vertexIndices": [
@@ -20171,7 +20177,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "раздевалка"
   },
   {
     "key": "bl:586",

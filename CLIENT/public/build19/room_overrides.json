@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "buildId": "build19",
+  "updatedAt": "2026-04-22T11:33:03.097Z",
+  "floors": {
+    "floor1": {
+      "bl:539": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 1.23,
+        "build": null,
+        "floor": null
+      },
+      "bl:297": {
+        "roomID": 1,
+        "roomNo": null,
+        "category": "коридор",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.28,
+        "build": null,
+        "floor": null
+      },
+      "bl:416": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.32,
+        "build": null,
+        "floor": null
+      },
+      "bl:581": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.13,
+        "build": null,
+        "floor": null
+      },
+      "bl:585": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.13,
+        "build": null,
+        "floor": null
+      },
+      "bl:461": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.32,
+        "build": null,
+        "floor": null
+      },
+      "bl:458": {
+        "roomID": 12,
+        "roomNo": null,
+        "category": "раздевалка",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.33,
+        "build": null,
+        "floor": null
+      }
+    },
+    "floor2": {
+      "bl:473": {
+        "roomID": 19,
+        "roomNo": null,
+        "category": "Рекреация",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 11.36,
+        "build": null,
+        "floor": null
+      },
+      "bl:1203": {
+        "roomID": 100,
+        "roomNo": null,
+        "category": "стена",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 1.48,
+        "build": null,
+        "floor": null
+      },
+      "bl:171": {
+        "roomID": 19,
+        "roomNo": null,
+        "category": "Рекреация",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.78,
+        "build": null,
+        "floor": null
+      },
+      "bl:566": {
+        "roomID": 19,
+        "roomNo": null,
+        "category": "Рекреация",
+        "description": "Трибуны",
+        "areClosed": false,
+        "areaM2": 28.12,
+        "build": null,
+        "floor": null
+      },
+      "bl:571": {
+        "roomID": 19,
+        "roomNo": null,
+        "category": "Рекреация",
+        "description": "Трибуны",
+        "areClosed": false,
+        "areaM2": 28.27,
+        "build": null,
+        "floor": null
+      },
+      "bl:576": {
+        "roomID": 19,
+        "roomNo": null,
+        "category": "Рекреация",
+        "description": "Трибуны",
+        "areClosed": false,
+        "areaM2": 35.46,
+        "build": null,
+        "floor": null
+      },
+      "bl:729": {
+        "roomID": 19,
+        "roomNo": null,
+        "category": "Рекреация",
+        "description": "Трибуны",
+        "areClosed": false,
+        "areaM2": 73.27,
+        "build": null,
+        "floor": null
+      }
+    },
+    "floor3": {
+      "bl:392": {
+        "roomID": 100,
+        "roomNo": null,
+        "category": "стена",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 4.11,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-04-22T11:33:03.097Z"
+      }
+    }
+  }
+}

@@ -32,7 +32,9 @@
     {
       "id": "build19",
       "floors": [
-        "floor1"
+        "floor1",
+        "floor2",
+        "floor3"
       ]
     }
   ]
