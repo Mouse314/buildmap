@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
+// Управляет плавным zoom колесом мыши с привязкой к курсору.
 export function SmoothWheelZoom({
   controlsRef,
   isDragging = false,
@@ -40,8 +41,7 @@ export function SmoothWheelZoom({
 
   const targetDistanceRef = React.useRef<number>(50);
 
-  // Timestamp of the last wheel zoom. Used to avoid treating in-progress zoom damping
-  // as an external camera change (e.g. FitView) and to prevent unwanted auto-zoom on load.
+  // Время последнего zoom колесом; нужно, чтобы не путать демпфирование с внешним движением камеры.
   const lastWheelAtRef = React.useRef<number>(-1);
 
   const cursorAnchorRef = React.useRef<
@@ -59,20 +59,18 @@ export function SmoothWheelZoom({
     return Boolean(isDragging || dragRef?.current?.down);
   }, [dragRef, isDragging]);
 
-  // NOTE: We sync targets in the render loop as soon as OrbitControls exists.
-  // This avoids a common race where FitView sets the camera before controlsRef.current
-  // is available, leaving targetDistanceRef at its default and causing an unwanted
-  // smooth "auto-zoom" right after load.
+  // Цели синхронизируются в рендер-цикле сразу после появления OrbitControls,
+  // чтобы избежать нежелательного авто-зума на старте.
 
   React.useEffect(() => {
 
     const el = gl.domElement;
 
     const onWheel = (e: WheelEvent) => {
-      // We handle zoom ourselves.
+      // Масштабирование обрабатываем вручную.
       e.preventDefault();
 
-      // While panning (mouse down), don't let wheel start a new zoom.
+      // Во время перетаскивания не запускаем новый zoom по колесу.
       if (dragRef?.current?.down) return;
 
       const rect = el.getBoundingClientRect();
@@ -95,12 +93,12 @@ export function SmoothWheelZoom({
         return;
       }
 
-      // Perspective: dolly by changing distance to target.
+      // Для перспективной камеры меняем дистанцию до target.
       const curDist = targetDistanceRef.current;
       const nextDist = THREE.MathUtils.clamp(curDist * factor, minDistance, maxDistance);
       targetDistanceRef.current = nextDist;
 
-      // Anchor zoom to cursor on the floor plane.
+      // Привязываем zoom к позиции курсора на плоскости пола.
       ndc.set(ndcX, ndcY);
       raycaster.setFromCamera(ndc, camera as THREE.Camera);
       const hit = raycaster.ray.intersectPlane(plane, tmpPoint);
@@ -126,14 +124,11 @@ export function SmoothWheelZoom({
     const controls = controlsRef.current;
     if (!controls) return;
 
-    // If something else (FitView, external code) has set the camera/target,
-    // keep our targets in sync so we don't introduce unwanted damping.
-    // We only treat a mismatch as "external" if there was no recent wheel zoom.
+    // Если камеру/target изменил внешний код, синхронизируем цели, чтобы не было лишнего демпфирования.
     const now = performance.now();
     const recentlyWheeled = lastWheelAtRef.current >= 0 && now - lastWheelAtRef.current < 350;
 
-    // When the user is actively panning/dragging, don't fight OrbitControls.
-    // Also resync targets so we don't "snap" when dragging ends.
+    // Во время drag не вмешиваемся в OrbitControls и подравниваем цели, чтобы не было рывка после отпускания.
     if (shouldPauseRef()) {
       cursorAnchorRef.current = null;
       if (isOrtho) {
@@ -175,14 +170,14 @@ export function SmoothWheelZoom({
       return;
     }
 
-    // If there's no zoom in progress, leave the camera fully to OrbitControls.
+    // Если zoom не идет, полностью отдаем управление OrbitControls.
     if (!anchor && Math.abs(curDist - targetDist) < 1e-5) {
       return;
     }
 
     const nextDist = THREE.MathUtils.damp(curDist, targetDist, smoothTime, delta);
 
-    // Move camera along its view direction relative to target.
+    // Двигаем камеру вдоль направления взгляда относительно target.
     tmpDir.copy(camera.position).sub(controls.target);
     const len = tmpDir.length();
     if (len < 1e-6) return;
@@ -191,7 +186,7 @@ export function SmoothWheelZoom({
     camera.position.copy(tmpPoint2);
     camera.updateMatrixWorld();
 
-    // Zoom-to-cursor compensation: keep anchored world point under cursor.
+    // Компенсация zoom к курсору: удерживаем закрепленную мировую точку под указателем.
     if (anchor) {
       ndc.set(anchor.ndcX, anchor.ndcY);
       raycaster.setFromCamera(ndc, camera as THREE.Camera);

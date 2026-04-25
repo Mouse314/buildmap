@@ -246,7 +246,6 @@
   padding: 0;
   background: transparent;
   z-index: 1000;
-  /* animation: roomModalOverlayIn 500ms ease-out both; */
 }
 
 .roomModal {
@@ -553,7 +552,6 @@
 .sidePanel {
   position: absolute;
   z-index: 50;
-  /* min-width: 100px; */
   border-radius: 22px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.55);
@@ -1074,7 +1072,6 @@
   align-items: center;
   justify-content: center;
   width: 40px;
-  /* min-width: 40px; */
   height: 40px;
   border-radius: 50%;
   border: 2px solid rgba(206, 209, 255, 0.32);
@@ -2781,7 +2778,7 @@
   right: 0;
 }
 
-/* Ensure selected graphics preset overrides .topButton defaults (order + specificity) */
+/* Выбранный пресет графики должен переопределять базовые стили .topButton. */
 .topButton.graphicsButtonSelected {
   background: rgba(167, 167, 167, 0.72);
   border-color: rgba(206, 209, 255, 0.55);

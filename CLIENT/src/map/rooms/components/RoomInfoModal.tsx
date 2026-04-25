@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Room } from '../utils/Room';
 import { getCategoryByRoomId } from '../utils/roomCategories';
 import { formatRoomDescription } from '../utils/stairDirection';
-import { HudAnchoredModal, HudButton } from '../../../components/ui/hud';
+import { HudAnchoredModal, HudButton } from '../../../interface/ui/hud';
 
 function text(value: string | undefined): string {
   return (value ?? '').trim();

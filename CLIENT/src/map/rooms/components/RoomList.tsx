@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { RoomPolygon } from '../utils/roomData';
 import { formatRoomDescription } from '../utils/stairDirection';
-import { HudButton } from '../../../components/ui/hud';
+import { HudButton } from '../../../interface/ui/hud';
 
 type RoomListEntry = {
   roomID: number;

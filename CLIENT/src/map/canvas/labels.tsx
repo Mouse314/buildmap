@@ -50,7 +50,7 @@ function wrapTextByWords(text: string, maxCharsPerLine: number, maxLines: number
 }
 
 function polygonCentroid(points: Array<{ x: number; y: number }>): { x: number; y: number } {
-  // Area-weighted centroid; falls back to average if degenerate.
+  // Центроид с учетом площади; при вырожденном полигоне используем среднее.
   let signedArea = 0;
   let cx = 0;
   let cy = 0;
@@ -206,6 +206,7 @@ function isSpecialLabel(poly: RoomPolygon): boolean {
   return poly.roomID === 200;
 }
 
+// Отрисовывает подписи помещений и крупный заголовок этажа.
 export function RoomLabels({
   polygons,
   color,

@@ -15,6 +15,7 @@ function caseFold(value: string | null | undefined): string {
   return (value ?? '').trim().toLocaleLowerCase('ru-RU');
 }
 
+// Строит и фильтрует индекс аудиторий для умного поиска по корпусам.
 export function useSmartSearch({
   manifest,
   selectedBuild,
@@ -50,7 +51,7 @@ export function useSmartSearch({
               });
             }
           } catch {
-            // ignore missing floor data
+            // Пропускаем этаж, если его данные недоступны.
           }
         }
       }

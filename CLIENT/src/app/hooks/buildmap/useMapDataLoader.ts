@@ -54,8 +54,7 @@ export function useMapDataLoader() {
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [selectedBuild, selectedFloor])
 
   React.useEffect(() => {
     let cancelled = false

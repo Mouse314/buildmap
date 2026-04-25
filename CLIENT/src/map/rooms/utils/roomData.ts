@@ -73,7 +73,7 @@ export async function loadRoomDataManifest(
       }
       return { builds };
     } catch {
-      // Try the next path variant.
+      // Пробуем следующий вариант пути.
     }
   }
 
@@ -402,7 +402,7 @@ async function loadRoomOverridesFromPublic(buildId: string): Promise<RoomOverrid
       const data: unknown = await response.json();
       return parseRoomOverridesByFloor(data);
     } catch {
-      // Try the next path variant.
+      // Пробуем следующий вариант пути.
     }
   }
 

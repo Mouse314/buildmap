@@ -621,11 +621,11 @@ export function computeRoute(args: {
           )
           if (approach) {
             if (leftIsCorridor) {
-              // corridor -> room: approach inside corridor, then doorway
+              // Коридор -> кабинет: сначала подводим внутри коридора, затем к дверному проему.
               pushPoint(approach)
               pushPoint(passage)
             } else {
-              // room -> corridor: doorway first, then move into corridor centerline
+              // Кабинет -> коридор: сначала проем, затем выход на ось коридора.
               pushPoint(passage)
               pushPoint(approach)
             }

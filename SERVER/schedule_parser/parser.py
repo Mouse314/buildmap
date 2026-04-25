@@ -340,7 +340,7 @@ def fill_rooms_by_key_sets(cleaned, key_sets):
         room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
         unknown_or_invalid_mask = room_series.apply(lambda value: not is_valid_room_value(value))
 
-    # Last resort: force-fill remaining missing rooms with most frequent valid room in this PDF file.
+    # В крайнем случае заполняем пропуски самым частым валидным кабинетом в текущем PDF.
     if unknown_or_invalid_mask.any():
         valid_rooms = cleaned.loc[~unknown_or_invalid_mask, "Кабинет"]
         if not valid_rooms.empty:
@@ -514,7 +514,7 @@ def postprocess_schedule_df(df):
 
     cleaned = df.drop_duplicates().copy()
 
-    # Recover missing date/day values for fragmented table rows.
+    # Восстанавливаем дату и день недели для фрагментированных строк таблицы.
     date_text = cleaned["Дата"].fillna("").astype(str).str.strip()
     date_text = date_text.replace({"": pd.NA, "nan": pd.NA, "None": pd.NA})
     date_text = date_text.ffill().bfill()
@@ -539,7 +539,7 @@ def postprocess_schedule_df(df):
     day_text.loc[missing_day_mask] = weekday_names.loc[missing_day_mask]
     cleaned["День недели"] = day_text.fillna("")
 
-    # Drop known parser artifacts: split initials and empty-discipline rows with unknown teacher.
+    # Удаляем артефакты парсинга: обрывки инициалов и пустые дисциплины с неизвестным преподавателем.
     discipline_text = cleaned["Дисциплина"].fillna("").astype(str).str.strip()
     discipline_compact = discipline_text.str.replace(r"\s+", "", regex=True)
     teacher_unknown_mask = cleaned["Преподаватель"].fillna("").astype(str).str.strip().str.lower().eq("не указан")
@@ -554,7 +554,7 @@ def postprocess_schedule_df(df):
     cleaned["Кабинет"] = cleaned["Кабинет"].apply(canonicalize_room_value)
     room_series = cleaned["Кабинет"].fillna("").astype(str).str.strip()
 
-    # Some rows contain teacher initials in room column due PDF column shifts.
+    # Иногда из-за смещения колонок PDF инициалы преподавателя попадают в столбец кабинета.
     shifted_teacher_mask = teacher_series.str.lower().eq("не указан") & room_series.apply(
         lambda value: bool(TEACHER_RE.fullmatch(value))
     )
@@ -614,7 +614,7 @@ def postprocess_schedule_df(df):
             if room_value:
                 cleaned.at[idx, "Кабинет"] = canonicalize_room_value(room_value)
 
-    # Prioritize room completeness: infer cabinet values with progressively broader matching keys.
+    # Максимально заполняем кабинет, постепенно ослабляя ключ сопоставления.
     fill_rooms_by_key_sets(
         cleaned,
         key_sets=[
@@ -651,8 +651,8 @@ def postprocess_schedule_df(df):
     if idx_to_drop:
         cleaned = cleaned.drop(index=idx_to_drop)
 
-    # Fix occasional noisy Monday date recovery and empty Monday date.
-    # If Monday is followed by Tuesday in the same file block, align Monday to one day before Tuesday.
+    # Исправляем шумное восстановление даты для понедельника и пустые даты понедельника.
+    # Если дальше в том же блоке есть вторник, ставим понедельник на один день раньше.
     date_series = pd.to_datetime(cleaned["Дата"], format="%d.%m.%y", errors="coerce")
     file_series = cleaned["Файл"] if "Файл" in cleaned.columns else pd.Series(["__single__"] * len(cleaned), index=cleaned.index)
     for idx, row in cleaned.iterrows():
@@ -790,8 +790,8 @@ def parse_schedule_pdf(pdf_path):
                             if is_noise_row(discipline, teacher, room):
                                 continue
 
-                            # If day name is read directly from the schedule text, it is more reliable
-                            # than a noisy recovered date and must have priority.
+                            # Если день недели прочитан прямо из текста расписания,
+                            # он надежнее восстановленной шумной даты и имеет приоритет.
                             normalized_day = current_day or weekday_from_date_ru(current_date)
 
                             parsed_data.append({

@@ -22,11 +22,6 @@ import type {
   RoomEditPayload,
 } from './types'
 
-// Temporary test spoof. Set to null to restore real browser geolocation.
-// const LOCATION_SPOOF: { lat: number; lon: number } | null = {
-//   lat: 58.591126,
-//   lon: 49.680707
-// }
 export const LOCATION_SPOOF: { lat: number; lon: number } | null = null
 
 export const PLAN_CORNER_IDS: GeoCornerKey[] = ['nw', 'ne', 'se', 'sw']
@@ -37,6 +32,7 @@ function normalizeText(value: string | undefined): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined
 }
 
+// Применяет локальные правки карточки помещения без запроса к серверу.
 export function applyRoomChangesLocal(room: Room, changes: RoomEditPayload): Room {
   const nextRoomId = typeof changes.roomID === 'number' && Number.isFinite(changes.roomID)
     ? Math.trunc(changes.roomID)
@@ -56,6 +52,7 @@ export function applyRoomChangesLocal(room: Room, changes: RoomEditPayload): Roo
   }
 }
 
+// Преобразует строку координаты в число с поддержкой десятичной запятой.
 export function parseCoordInput(value: string): number | null {
   const cleaned = value.trim().replace(',', '.')
   if (cleaned.length === 0) return null
@@ -196,7 +193,7 @@ export async function loadGeoAnchorsFileFromPublic(buildId: string, floorId: str
       const data: unknown = await response.json()
       return parseGeoAnchorsFromFile(data)
     } catch {
-      // Try the next path variant.
+      // Переходим к следующему возможному пути файла.
     }
   }
 
@@ -342,6 +339,7 @@ export function mapGeoPointToOverlay(
   }
 }
 
+// Готовит геочерновики по корпусам на основе данных floor1 и сохраненных якорей.
 export async function buildGeoDraftByBuild(manifestBuilds: Array<{ id: string; floors: string[] }>): Promise<Record<string, BuildGeoDraft>> {
   const list = await Promise.all(
     manifestBuilds.map(async (build) => {

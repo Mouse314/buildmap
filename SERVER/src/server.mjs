@@ -328,7 +328,7 @@ async function readScheduleManifest() {
           modifiedAt: stats.mtime.toISOString(),
         });
       } catch {
-        // ignore broken file entries
+        // Пропускаем поврежденные или недоступные файлы.
       }
     }
 
@@ -715,6 +715,7 @@ async function handleAdminGraphicsPresetsSave(req, res) {
   }
 }
 
+// Обрабатывает GET-запросы API планов и расписания.
 async function handleGetRequest(req, res) {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
   const pathname = url.pathname.replace(/\/+$/, '') || '/';
@@ -842,26 +843,20 @@ async function bootstrap() {
       ensureOverridesFilesInitialized(),
       ensureGraphicsPresetsFileInitialized(),
     ]);
-    // eslint-disable-next-line no-console
     console.log(
       `[init] room_overrides.json checked for ${initRoomOverrides.buildIdsCount} build(s), created ${initRoomOverrides.createdCount} file(s)`,
     );
-    // eslint-disable-next-line no-console
     console.log(
       `[init] graphics_presets.json ${initGraphicsPresets.created ? 'created' : 'already exists'}`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    // eslint-disable-next-line no-console
     console.warn(`[init] Failed to initialize admin data files: ${message}`);
   }
 
   server.listen(port, host, () => {
-    // eslint-disable-next-line no-console
     console.log(`Plans API server is running on http://${host}:${port}`);
-    // eslint-disable-next-line no-console
     console.log(`Serving data from ${publicRoot}`);
-    // eslint-disable-next-line no-console
     console.log(`Serving schedule data from ${scheduleRoot}`);
   });
 }

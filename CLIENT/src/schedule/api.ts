@@ -70,6 +70,7 @@ async function fetchTextWithRetry(url: string, errorPrefix: string): Promise<str
   throw new Error(`${errorPrefix} (unknown)`)
 }
 
+// Выполняет асинхронную обработку массива с ограничением параллельности.
 async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,
@@ -118,6 +119,7 @@ export async function fetchScheduleCsv(date: string, name: string): Promise<stri
   return fetchScheduleCsvFromStatic(date, name)
 }
 
+// Загружает несколько CSV расписания и объединяет их в единый набор данных.
 export async function fetchScheduleBatchDataset(date: string, fileNames: string[]): Promise<ScheduleDataset> {
   if (fileNames.length === 0) return new ScheduleDataset([])
 
@@ -126,7 +128,7 @@ export async function fetchScheduleBatchDataset(date: string, fileNames: string[
     const csvName = fileNames[idx] ?? ''
     const dataset = ScheduleDataset.fromCsv(text)
 
-    // In map schedule mode, we treat sourceFile as group label and bind it to CSV source.
+    // В режиме карты sourceFile используем как название группы и связь с исходным CSV.
     const rows = dataset.rows.map((row) => {
       return new ScheduleLesson({
         sourceFile: csvName,

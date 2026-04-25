@@ -12,6 +12,7 @@ function floorNumberFromId(floorId: string): number | null {
   return Number.parseInt(m[1], 10)
 }
 
+// Скругляет маршрут для более плавной визуализации линии.
 export function buildRoundedRoutePoints(points: THREE.Vector3[]): THREE.Vector3[] {
   if (points.length <= 2) return points
 
@@ -32,7 +33,7 @@ export function buildRoundedRoutePoints(points: THREE.Vector3[]): THREE.Vector3[
       continue
     }
 
-    // Keep short bends crisp (e.g. doorway approach), so the line enters doors at a visible right angle.
+    // Короткие повороты не скругляем, чтобы вход в дверь оставался визуально четким.
     if (Math.min(lenIn, lenOut) < 1.15) {
       rounded.push(current.clone())
       continue

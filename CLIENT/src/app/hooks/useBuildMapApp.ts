@@ -170,7 +170,7 @@ function scheduleGroupLabelFromSourceFile(sourceFile: string): string {
   if (value.length === 0) return ''
 
   const noExt = value.replace(/\.csv$/i, '')
-  // Parser fallback names can include technical suffixes like _20260411_193135.
+  // Резервные имена парсера могут содержать технический суффикс времени.
   return noExt.replace(/_\d{8}_\d{6}$/u, '')
 }
 
@@ -202,6 +202,7 @@ function incrementCounter(counter: Map<string, number>, value: string | null | u
   counter.set(label, (counter.get(label) ?? 0) + 1)
 }
 
+// Главный хук состояния приложения карты корпусов.
 export function useBuildMapApp() {
   const {
     manifest,

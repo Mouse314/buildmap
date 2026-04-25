@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { type OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { computeBounds, type RoomPolygon } from '../rooms/utils/roomData';
 
+// Автоматически подгоняет камеру под найденные полигоны при поиске.
 export function AutoFitToPolygons({
   polygons,
   controlsRef,
@@ -61,15 +62,15 @@ export function AutoFitToPolygons({
 
     const bounds = computeBounds(polys);
     const centerX = (bounds.minX + bounds.maxX) / 2;
-    // Polygons are created in XY and then rotated by -90° around X,
-    // so their Y maps to world -Z.
+    // Полигоны создаются в XY и поворачиваются на -90° по X,
+    // поэтому их Y соответствует мировой оси -Z.
     const centerZ = -((bounds.minY + bounds.maxY) / 2);
 
     const boxWidth = Math.max(0.001, bounds.maxX - bounds.minX);
     const boxHeight = Math.max(0.001, bounds.maxY - bounds.minY);
     const fitPadding = 1.35;
 
-    // Keep top-down orientation stable.
+    // Фиксируем стабильную ориентацию вида сверху.
     camera.up.set(0, 0, -1);
 
     const aspect = size.width / Math.max(1, size.height);
@@ -88,14 +89,14 @@ export function AutoFitToPolygons({
     goalRef.current.target.set(centerX, 0, centerZ);
     goalRef.current.active = true;
 
-    // Ensure projection matches current size.
+    // Обновляем проекцию под текущий размер viewport.
     if (typeof persp.aspect === 'number') persp.aspect = aspect;
     persp.updateProjectionMatrix?.();
 
     return true;
   }, [camera, enabled, isDragging, size.height, size.width]);
 
-  // Only react to explicit "trigger" changes (i.e. search text edits).
+  // Реагируем только на явное изменение trigger (например, правка текста поиска).
   React.useEffect(() => {
     if (!enabled) return;
     pendingTriggerRef.current = trigger;
@@ -105,7 +106,7 @@ export function AutoFitToPolygons({
     }
   }, [enabled, isDragging, runFit, trigger]);
 
-  // If user was dragging at the time of the edit, apply once after drag ends.
+  // Если во время изменения был drag, применяем автоподгонку после его завершения.
   React.useEffect(() => {
     if (isDragging) return;
     if (pendingTriggerRef.current == null) return;

@@ -3,6 +3,7 @@ import * as React from 'react';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { computeBounds, type RoomPolygon } from '../rooms/utils/roomData';
 
+// Выполняет начальное позиционирование камеры под весь этаж.
 export function FitView({
   polygons,
   controlsRef,
@@ -33,7 +34,7 @@ export function FitView({
     const boxWidth = Math.max(0.001, bounds.maxX - bounds.minX);
     const boxHeight = Math.max(0.001, bounds.maxY - bounds.minY);
 
-    // More padding so initial view doesn't "stick" to a single room.
+    // Добавляем запас, чтобы стартовый кадр не прилипал к одной комнате.
     const fitPadding = 1.45;
 
     const anyCamera = camera as unknown as Record<string, unknown>;
@@ -42,7 +43,6 @@ export function FitView({
     if (isOrtho) {
       const zoom = Math.min(size.width / boxWidth, size.height / boxHeight) * (0.9 / fitPadding);
       const zoomableCamera = camera as unknown as { zoom: number; updateProjectionMatrix: () => void };
-      // eslint-disable-next-line react-hooks/immutability
       zoomableCamera.zoom = zoom;
       zoomableCamera.updateProjectionMatrix();
     } else {

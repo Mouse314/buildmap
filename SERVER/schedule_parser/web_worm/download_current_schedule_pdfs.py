@@ -46,7 +46,7 @@ def parse_yyyymmdd(raw: str) -> date | None:
 
 
 def parse_compact_date8(raw: str) -> date | None:
-    # Site links usually use DDMMYYYY, but keep YYYYMMDD fallback for robustness.
+    # Ссылки на сайте обычно в формате DDMMYYYY, но оставляем запасной разбор YYYYMMDD.
     for fmt in ("%d%m%Y", "%Y%m%d"):
         try:
             return datetime.strptime(raw, fmt).date()
@@ -164,7 +164,7 @@ def collect_links_for_date(session: requests.Session, target_date: date) -> list
     all_anchors = soup.select("div.listPeriod a[href]")
     print(f"Found links in listPeriod: {len(all_anchors)}")
 
-    # Fallback for unexpected markup variants.
+    # Резервный поиск ссылок для нестандартной разметки страницы.
     if not all_anchors:
         all_anchors = soup.select("div.grpPeriod a[href]")
         print(f"Fallback links in grpPeriod: {len(all_anchors)}")

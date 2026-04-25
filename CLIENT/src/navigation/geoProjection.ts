@@ -214,6 +214,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+// Проецирует геопозицию пользователя в координаты плана здания.
 export function projectUserToMap(calibration: GeoCalibration, userGeo: GeoPoint): ProjectedUserPosition {
   const userMeters = geoToLocalMeters(userGeo, calibration.origin);
   const projected = applyAffine(calibration.geoToMap, userMeters);
@@ -229,8 +230,8 @@ export function projectUserToMap(calibration: GeoCalibration, userGeo: GeoPoint)
   const dyMeters = userMeters.y - edgeMeters.y;
   const outsideDistanceM = Math.hypot(dxMeters, dyMeters);
 
-  // Arrow should indicate direction from building edge to user.
-  // Horizontal mirror is required for the glyph orientation on the current map setup.
+  // Стрелка показывает направление от края здания к пользователю.
+  // Горизонтальное отражение нужно для корректной ориентации значка на текущем плане.
   const mapDx = clamped.x - projected.x;
   const mapDy = clamped.y - projected.y;
   const headingDeg = (Math.atan2(mapDy, -mapDx) * 180) / Math.PI;
@@ -244,6 +245,7 @@ export function projectUserToMap(calibration: GeoCalibration, userGeo: GeoPoint)
   };
 }
 
+// Преобразует расстояние в человекочитаемый формат.
 export function formatDistanceHuman(distanceM: number): string {
   if (!Number.isFinite(distanceM) || distanceM < 0) return '0 м';
   if (distanceM < 1000) return `${Math.round(distanceM)} м`;

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 function parseWorldCoordsXY(value: string): Array<{ x: number; y: number }> {
-  // Example: [(-5.591, -21.033), (-1.902, -21.033), ...]
+  // Пример формата: [(-5.591, -21.033), (-1.902, -21.033), ...]
   const matches = value.match(/-?\d+(?:\.\d+)?/g);
   if (!matches || matches.length < 6) return [];
 
@@ -38,7 +38,7 @@ function parseBoolLoose(value: string): boolean | undefined {
 }
 
 function splitSemicolon(line: string): string[] {
-  // CSV here doesn't seem to use quotes; keep it minimal and robust.
+  // В этом CSV обычно нет кавычек, поэтому парсер оставляем простым.
   return line.split(';').map((s) => s.trim());
 }
 
@@ -323,7 +323,7 @@ async function main() {
     if (path.basename(file) !== 'room_data.csv') continue;
 
     const rel = path.relative(publicDir, file).split(path.sep).join('/');
-    // Expected: buildXX/floorY/room_data.csv
+    // Ожидаемый путь: buildXX/floorY/room_data.csv
     const parts = rel.split('/');
     if (parts.length < 3) continue;
     const buildId = parts[0];
@@ -358,14 +358,12 @@ async function main() {
   const manifestPath = path.join(publicDir, 'room_data_manifest.json');
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
-  // eslint-disable-next-line no-console
   console.log(
     `[generate-room-json] Wrote ${totalRooms} rooms and room_graph.json across ${fileCount} floor files; manifest -> public/room_data_manifest.json`,
   );
 }
 
 main().catch((e: unknown) => {
-  // eslint-disable-next-line no-console
   console.error('[generate-room-json] Failed:', e);
   process.exit(1);
 });

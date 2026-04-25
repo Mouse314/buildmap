@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 function parseWorldCoordsXY(value) {
-  // Example: [(-5.591, -21.033), (-1.902, -21.033), ...]
+  // Пример формата: [(-5.591, -21.033), (-1.902, -21.033), ...]
   const matches = value.match(/-?\d+(?:\.\d+)?/g);
   if (!matches || matches.length < 6) return [];
 
@@ -38,7 +38,7 @@ function parseBoolLoose(value) {
 }
 
 function splitSemicolon(line) {
-  // CSV here doesn't seem to use quotes; keep it minimal and robust.
+  // В этом CSV обычно нет кавычек, поэтому парсер оставляем простым.
   return line.split(';').map((s) => s.trim());
 }
 
@@ -681,7 +681,7 @@ async function main() {
     if (path.basename(file) !== 'room_data.csv') continue;
 
     const rel = path.relative(publicDir, file).split(path.sep).join('/');
-    // Expected: buildXX/floorY/room_data.csv
+    // Ожидаемый путь: buildXX/floorY/room_data.csv
     const parts = rel.split('/');
     if (parts.length < 3) continue;
     const buildId = parts[0];

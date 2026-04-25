@@ -49,7 +49,6 @@ export function getRoomFillColor(roomID: RoomId, category?: string): string {
 
   if (!warnedMissing.has(roomID)) {
     warnedMissing.add(roomID);
-    // eslint-disable-next-line no-console
     console.warn(
       `[roomPalette] Missing color for roomID=${roomID}. Add it to ROOM_COLORS in src/map/rooms/roomPalette.ts`,
     );

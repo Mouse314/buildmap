@@ -1,11 +1,11 @@
 export type RoomId = number;
 
 export type Room = {
-  // Stable identifier for UI selection/render keys
+  // Стабильный идентификатор для выбора и рендера в UI.
   key: string;
 
-  // From CSV
-  // Unique identifier exported from Blender (CSV column: ID)
+  // Поля, приходящие из CSV.
+  // Уникальный идентификатор, экспортируемый из Blender (колонка CSV: ID).
   blenderID?: number;
   roomID: RoomId;
   roomNo?: string;
@@ -16,10 +16,10 @@ export type Room = {
   worldCoordsXYRaw?: string;
   points: Array<{ x: number; y: number }>;
 
-  // Derived (not in CSV)
+  // Вычисляемые поля (не из CSV).
   category?: string;
 
-  // Future fields (not filled yet)
+  // Поля для последующего расширения.
   build: string | null;
   floor: string | null;
 };

@@ -13,6 +13,7 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v));
 }
 
+// Ограничивает панорамирование камеры границами плана.
 export function PanBounds({
   enabled,
   controlsRef,
@@ -40,7 +41,7 @@ export function PanBounds({
     target.x = nextX;
     target.z = nextZ;
 
-    // Keep camera/target offset stable: pan camera by the same delta.
+    // Сохраняем смещение между камерой и target, двигая их на одинаковую дельту.
     const cam = controls.object;
     cam.position.x += dx;
     cam.position.z += dz;

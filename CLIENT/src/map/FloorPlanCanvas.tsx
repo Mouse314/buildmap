@@ -23,8 +23,9 @@ import { getSceneColors } from './floorplan/utils/sceneColors';
 import { isInteractiveRoomArea } from './floorplan/utils/interactivity';
 import { HIDDEN_ROOM_IDS, PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
 import { buildRoundedRoutePoints, buildRouteJumpGroups } from '../navigation/mapRouteUi';
-import { HudButton } from '../components/ui/hud';
+import { HudButton } from '../interface/ui/hud';
 
+// Обновляет время в шейдере маршрута для анимации потока.
 function RouteShaderTicker({ material }: { material: THREE.ShaderMaterial }) {
   useFrame((_, delta) => {
     material.uniforms.uTime.value += delta;
@@ -32,6 +33,7 @@ function RouteShaderTicker({ material }: { material: THREE.ShaderMaterial }) {
   return null;
 }
 
+// Строит объемную трубку маршрута по набору точек.
 function RouteTube({ points, material }: { points: THREE.Vector3[]; material: THREE.ShaderMaterial }) {
   const geometry = React.useMemo(() => {
     const rounded = buildRoundedRoutePoints(points);
@@ -50,6 +52,7 @@ function RouteTube({ points, material }: { points: THREE.Vector3[]; material: TH
   return <mesh geometry={geometry} material={material} renderOrder={23} />;
 }
 
+// Главный canvas-компонент плана этажа с интерактивом и оверлеями.
 export function FloorPlanCanvas({
   rooms,
   roomGraph = null,
@@ -190,7 +193,7 @@ export function FloorPlanCanvas({
     const minX = b.minX - PAN_BOUNDS_PADDING_X;
     const maxX = b.maxX + PAN_BOUNDS_PADDING_X;
 
-    // World Z is -polygonY
+    // В мировой системе координат ось Z инвертирована относительно polygonY.
     const minZ = -(b.maxY + PAN_BOUNDS_PADDING_Z);
     const maxZ = -(b.minY - PAN_BOUNDS_PADDING_Z);
 
@@ -226,7 +229,7 @@ export function FloorPlanCanvas({
   const [isDragging, setIsDragging] = React.useState(false);
 
   const suppressMapTapFromOverlay = React.useCallback(() => {
-    // Prevent DOM overlays from triggering accidental room pick beneath.
+    // Не даем DOM-оверлеям случайно активировать выбор комнаты под ними.
     clickCandidateRef.current = null;
     suppressMouseTapUntilRef.current = performance.now() + 420;
   }, []);
@@ -408,7 +411,7 @@ export function FloorPlanCanvas({
   }, [renderItems, selectedRoomKey]);
 
   const nullRaycast = React.useCallback(() => {
-    // no-op
+    // Пустой raycast для неинтерактивных мешей.
   }, []);
 
   return (
