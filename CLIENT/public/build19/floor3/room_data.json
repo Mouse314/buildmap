@@ -15156,7 +15156,6 @@
     "key": "bl:392",
     "blenderID": 392,
     "roomID": 100,
-    "description": "Верхняя часть бассейна",
     "areClosed": false,
     "areaM2": 4.11,
     "vertexIndices": [
@@ -15185,6 +15184,7 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "стена"
   }
 ]

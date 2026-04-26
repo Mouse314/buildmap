@@ -257,6 +257,9 @@
   flex-direction: column;
   color: #111;
 }
+.appRoot[data-theme='dark'] .roomModal {
+  color: #f0f5ff;
+}
 
 .roomModalAdmin {
   width: clamp(340px, 54vw, 620px);

@@ -6,6 +6,7 @@ export type RoomPolygon = {
   roomNo?: string;
   category?: string;
   description?: string;
+  areaM2?: number;
   points: Array<{ x: number; y: number }>;
 };
 
@@ -518,6 +519,7 @@ export function roomsToPolygons(rooms: Room[]): RoomPolygon[] {
     roomNo: room.roomNo,
     category: room.category,
     description: room.description,
+    areaM2: room.areaM2,
     points: room.points,
   }));
 }

@@ -205,6 +205,58 @@ function edgePairKey(floorId: string, from: string, to: string): string {
 
 const CORRIDOR_ROOM_ID = 1
 
+type QueueItem = { nodeId: string; distance: number }
+
+class MinDistanceHeap {
+  private readonly data: QueueItem[] = []
+
+  get size(): number {
+    return this.data.length
+  }
+
+  push(item: QueueItem): void {
+    const data = this.data
+    data.push(item)
+
+    let idx = data.length - 1
+    while (idx > 0) {
+      const parent = (idx - 1) >> 1
+      if (data[parent].distance <= item.distance) break
+      data[idx] = data[parent]
+      idx = parent
+    }
+    data[idx] = item
+  }
+
+  pop(): QueueItem | null {
+    const data = this.data
+    if (data.length === 0) return null
+
+    const top = data[0]
+    const last = data.pop()!
+    if (data.length === 0) return top
+
+    let idx = 0
+    while (true) {
+      const left = idx * 2 + 1
+      const right = left + 1
+      if (left >= data.length) break
+
+      let bestChild = left
+      if (right < data.length && data[right].distance < data[left].distance) {
+        bestChild = right
+      }
+
+      if (data[bestChild].distance >= last.distance) break
+      data[idx] = data[bestChild]
+      idx = bestChild
+    }
+
+    data[idx] = last
+    return top
+  }
+}
+
 export function computeRoute(args: {
   buildId: string
   floorsData: LoadedFloorData[]
@@ -429,38 +481,40 @@ export function computeRoute(args: {
   const targetNode = nodeById.get(targetNodeId)
 
   const runShortestPath = (startNodeId: string): { total: number; path: string[] } | null => {
+    if (!nodeById.has(startNodeId) || !nodeById.has(targetNodeId)) return null
+
     const dist = new Map<string, number>()
     const prev = new Map<string, string | null>()
-    const queue = new Set<string>()
+    const visited = new Set<string>()
+    const queue = new MinDistanceHeap()
 
-    for (const id of nodeById.keys()) {
-      dist.set(id, Number.POSITIVE_INFINITY)
-      prev.set(id, null)
-      queue.add(id)
-    }
     dist.set(startNodeId, 0)
+    prev.set(startNodeId, null)
+    queue.push({ nodeId: startNodeId, distance: 0 })
 
     while (queue.size > 0) {
-      let current: string | null = null
-      let best = Number.POSITIVE_INFINITY
-      for (const id of queue) {
-        const d = dist.get(id) ?? Number.POSITIVE_INFINITY
-        if (d < best) {
-          best = d
-          current = id
-        }
-      }
-      if (!current || !Number.isFinite(best)) break
-      queue.delete(current)
+      const currentItem = queue.pop()
+      if (!currentItem) break
+
+      const current = currentItem.nodeId
+      if (visited.has(current)) continue
+
+      const best = dist.get(current)
+      if (best == null || !Number.isFinite(best)) continue
+      if (currentItem.distance > best) continue
+
+      visited.add(current)
       if (current === targetNodeId) break
 
       const neighbors = adjacency.get(current) ?? []
       for (const edge of neighbors) {
-        if (!queue.has(edge.to)) continue
+        if (visited.has(edge.to)) continue
+
         const alt = best + edge.weight
         if (alt < (dist.get(edge.to) ?? Number.POSITIVE_INFINITY)) {
           dist.set(edge.to, alt)
           prev.set(edge.to, current)
+          queue.push({ nodeId: edge.to, distance: alt })
         }
       }
     }

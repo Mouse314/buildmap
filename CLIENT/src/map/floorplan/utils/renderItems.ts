@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { Room } from '../../rooms/utils/Room';
 import type { RoomPolygon } from '../../rooms/utils/roomData';
 import { makePolygonGeometry } from '../../canvas/geometry';
@@ -15,15 +16,51 @@ export type RenderItem = {
   interactive: boolean;
 };
 
+export function buildMergedWallGeometry(
+  polygons: RoomPolygon[],
+  opts: { wallExtrudeEnabled?: boolean } = {},
+): THREE.BufferGeometry | null {
+  const wallExtrudeEnabled = opts.wallExtrudeEnabled ?? true;
+  const wallGeometries: THREE.BufferGeometry[] = [];
+
+  for (const polygon of polygons) {
+    if (polygon.roomID !== WALL_ROOM_ID) continue;
+
+    const geometry = makePolygonGeometry(polygon.points, {
+      extrudeDepth: wallExtrudeEnabled ? WALL_EXTRUDE_DEPTH : 0,
+    });
+    if (!geometry) continue;
+    wallGeometries.push(geometry);
+  }
+
+  if (wallGeometries.length === 0) return null;
+  if (wallGeometries.length === 1) return wallGeometries[0];
+
+  const merged = mergeGeometries(wallGeometries, false);
+  for (const geometry of wallGeometries) {
+    geometry.dispose();
+  }
+
+  if (!merged) return null;
+  merged.computeVertexNormals();
+  return merged;
+}
+
 export function buildRenderItems(
   polygons: RoomPolygon[],
   rooms: Room[],
-  opts: { wallExtrudeEnabled?: boolean; allowSmallInteractive?: boolean; allowAllInteractive?: boolean } = {},
+  opts: {
+    wallExtrudeEnabled?: boolean;
+    allowSmallInteractive?: boolean;
+    allowAllInteractive?: boolean;
+    includeWalls?: boolean;
+  } = {},
 ): RenderItem[] {
   const items: RenderItem[] = [];
   const wallExtrudeEnabled = opts.wallExtrudeEnabled ?? true;
   const allowSmallInteractive = opts.allowSmallInteractive ?? false;
   const allowAllInteractive = opts.allowAllInteractive ?? false;
+  const includeWalls = opts.includeWalls ?? true;
 
   for (let idx = 0; idx < polygons.length; idx++) {
     const poly = polygons[idx];
@@ -31,6 +68,8 @@ export function buildRenderItems(
     if (HIDDEN_ROOM_IDS.has(poly.roomID)) continue;
 
     const isWall = poly.roomID === WALL_ROOM_ID;
+    if (isWall && !includeWalls) continue;
+
     const geom = makePolygonGeometry(poly.points, {
       extrudeDepth: isWall && wallExtrudeEnabled ? WALL_EXTRUDE_DEPTH : 0,
     });

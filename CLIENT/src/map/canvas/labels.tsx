@@ -3,6 +3,8 @@ import { Text } from '@react-three/drei';
 import * as React from 'react';
 import * as THREE from 'three';
 import type { RoomPolygon } from '../rooms/utils/roomData';
+import { IMPORTANT_ROOM_IDS, getCategoryByRoomId } from '../rooms/utils/roomCategories';
+import { isInteractiveRoomArea } from '../floorplan/utils/interactivity';
 import { LABEL_TEXT_Y, TITLE_LABEL_Y } from '../mapRenderConstants';
 
 export type TitleAnchor = { x: number; y: number };
@@ -94,12 +96,19 @@ function RoomLabel({
   const centroid = React.useMemo(() => polygonCentroid(polygon.points), [polygon.points]);
   const roomID = polygon.roomID;
   const roomNo = (polygon.roomNo ?? '').trim();
+  const category = ((polygon.category ?? '').trim() || (getCategoryByRoomId(roomID) ?? '').trim());
   const rawDescription = (polygon.description ?? '').trim();
   const isStair = roomID === 9;
+  const areaInteractive = isInteractiveRoomArea(polygon.areaM2);
   const description = isStair ? '' : rawDescription;
+  const importantCategoryFallback = !isStair && areaInteractive && rawDescription.length === 0 && IMPORTANT_ROOM_IDS.has(roomID)
+    ? category
+    : '';
+  const secondaryLabel = description.length > 0 ? description : importantCategoryFallback;
+  const isSecondaryCategoryFallback = description.length === 0 && importantCategoryFallback.length > 0;
   const wrappedDescription = React.useMemo(
-    () => wrapTextByWords(description, DESCRIPTION_WRAP_CHARS, DESCRIPTION_MAX_LINES),
-    [description],
+    () => wrapTextByWords(secondaryLabel, DESCRIPTION_WRAP_CHARS, DESCRIPTION_MAX_LINES),
+    [secondaryLabel],
   );
 
   if (roomID === 200) {
@@ -129,7 +138,8 @@ function RoomLabel({
   const effectiveShowDescription = !isStair && showDescription;
 
   if (roomNo.length === 0) {
-    if (!effectiveShowDescription || wrappedDescription.length === 0) return null;
+    if (!isSecondaryCategoryFallback && (!effectiveShowDescription || wrappedDescription.length === 0)) return null;
+    if (isSecondaryCategoryFallback && wrappedDescription.length === 0) return null;
     return (
       <Text
         position={[centroid.x, labelY, -centroid.y]}
@@ -148,7 +158,9 @@ function RoomLabel({
     );
   }
 
-  if (effectiveShowDescription && wrappedDescription.length > 0) {
+  const showSecondaryLabel = wrappedDescription.length > 0 && (effectiveShowDescription || isSecondaryCategoryFallback);
+
+  if (showSecondaryLabel) {
     return (
       <group>
         <Text

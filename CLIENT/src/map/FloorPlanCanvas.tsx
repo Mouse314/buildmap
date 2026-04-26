@@ -18,17 +18,26 @@ import { ShadowConfigurator } from './floorplan/components/ShadowConfigurator';
 import { SceneEffects } from './floorplan/components/SceneEffects';
 import { SceneLights } from './floorplan/components/SceneLights';
 import { useSearchAutoFit } from './floorplan/hooks/useSearchAutoFit';
-import { buildRenderItems } from './floorplan/utils/renderItems';
+import { buildMergedWallGeometry, buildRenderItems } from './floorplan/utils/renderItems';
 import { getSceneColors } from './floorplan/utils/sceneColors';
 import { isInteractiveRoomArea } from './floorplan/utils/interactivity';
 import { HIDDEN_ROOM_IDS, PAN_BOUNDS_PADDING_X, PAN_BOUNDS_PADDING_Z, WALL_ROOM_ID } from './floorplan/config/constants';
+import { getRoomFillColor } from './rooms/utils/roomPalette';
 import { buildRoundedRoutePoints, buildRouteJumpGroups } from '../navigation/mapRouteUi';
 import { HudButton } from '../interface/ui/hud';
 
 // Обновляет время в шейдере маршрута для анимации потока.
 function RouteShaderTicker({ material }: { material: THREE.ShaderMaterial }) {
+  const materialRef = React.useRef<THREE.ShaderMaterial | null>(null);
+
+  React.useEffect(() => {
+    materialRef.current = material;
+  }, [material]);
+
   useFrame((_, delta) => {
-    material.uniforms.uTime.value += delta;
+    const shader = materialRef.current;
+    if (!shader) return;
+    shader.uniforms.uTime.value += delta;
   });
   return null;
 }
@@ -252,9 +261,34 @@ export function FloorPlanCanvas({
       wallExtrudeEnabled,
       allowSmallInteractive: isAdminMode,
       allowAllInteractive: isAdminMode,
+      includeWalls: false,
     }),
     [isAdminMode, polygons, rooms, wallExtrudeEnabled],
   );
+
+  const wallGeometry = React.useMemo(
+    () => buildMergedWallGeometry(polygons, { wallExtrudeEnabled }),
+    [polygons, wallExtrudeEnabled],
+  );
+
+  React.useEffect(() => {
+    return () => {
+      wallGeometry?.dispose();
+    };
+  }, [wallGeometry]);
+
+  const wallFillColor = React.useMemo(() => {
+    if (theme === 'dark') return '#212630';
+    return getRoomFillColor(WALL_ROOM_ID);
+  }, [theme]);
+
+  const roomByKey = React.useMemo(() => {
+    const map = new Map<string, Room>();
+    for (const room of rooms) {
+      map.set(room.key, room);
+    }
+    return map;
+  }, [rooms]);
 
   const roomKeysSet = React.useMemo(() => {
     const set = new Set<string>();
@@ -406,9 +440,9 @@ export function FloorPlanCanvas({
 
   const selectedItem = React.useMemo(() => {
     if (selectedRoomKey == null) return null;
-    const it = renderItems.find((x) => x.key === selectedRoomKey) ?? null;
+    const it = renderItemByKey.get(selectedRoomKey) ?? null;
     return it && it.interactive ? it : null;
-  }, [renderItems, selectedRoomKey]);
+  }, [renderItemByKey, selectedRoomKey]);
 
   const nullRaycast = React.useCallback(() => {
     // Пустой raycast для неинтерактивных мешей.
@@ -533,18 +567,34 @@ export function FloorPlanCanvas({
       {import.meta.env.DEV && <Stats showPanel={0} className="stats" />}
 
       <group>
+        {wallGeometry ? (
+          <mesh
+            geometry={wallGeometry}
+            rotation={[-Math.PI / 2, 0, 0]}
+            castShadow={enableNightLampShadows}
+            receiveShadow={enableNightLampShadows}
+            raycast={nullRaycast}
+          >
+            <meshPhongMaterial
+              color={wallFillColor}
+              transparent
+              opacity={1}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        ) : null}
+
         {renderItems.map((item) => {
           const isSelected = selectedRoomKey === item.key;
           const isHovered = hoveredPolyKey === item.key;
           const isMatched = matchedKeys ? matchedKeys.has(item.key) : true;
-          const isWall = item.polygon.roomID === WALL_ROOM_ID;
           const isLabel = item.polygon.roomID === 200;
 
-          const shouldDim = matchedKeys != null && !isMatched && !isSelected && !isHovered && !isWall && !isLabel;
+          const shouldDim = matchedKeys != null && !isMatched && !isSelected && !isHovered && !isLabel;
           const heatCount = scheduleHeatByRoomKey?.[item.key] ?? 0;
           const heatMaxSafe = Math.max(1, scheduleHeatMax);
           const fillColor = (() => {
-            if (scheduleHeatEnabled && !isWall && !isLabel) {
+            if (scheduleHeatEnabled && !isLabel) {
               const cool = new THREE.Color('#eef1f6');
               if (heatCount <= 0) return cool.getStyle();
               const hot = new THREE.Color('#cf2d2d');
@@ -553,12 +603,11 @@ export function FloorPlanCanvas({
               return cool.lerp(hot, eased).getStyle();
             }
 
-            if (isWall && theme === 'dark') return '#212630';
             if (shouldDim) return colors.dimFill;
             return item.color;
           })();
 
-          const fillOpacity = scheduleHeatEnabled && !isWall && !isLabel
+          const fillOpacity = scheduleHeatEnabled && !isLabel
             ? 0.96
             : (shouldDim ? 0.6 : 1.0);
 
@@ -567,8 +616,8 @@ export function FloorPlanCanvas({
               <mesh
                 geometry={item.geometry}
                 rotation={[-Math.PI / 2, 0, 0]}
-                castShadow={enableNightLampShadows && isWall}
-                receiveShadow={enableNightLampShadows && !isWall}
+                castShadow={false}
+                receiveShadow={enableNightLampShadows}
                 raycast={!isDragging && item.interactive ? THREE.Mesh.prototype.raycast : nullRaycast}
                 onPointerDown={
                   item.interactive
@@ -621,7 +670,7 @@ export function FloorPlanCanvas({
                         if (hoveredPolyKeyRef.current === item.key) return;
                         setHoveredPolyKey(item.key);
 
-                        const room = rooms.find((r) => r.key === item.key);
+                        const room = roomByKey.get(item.key);
                         if (room) {
                           onHoverRoom?.({ room, clientX: e.nativeEvent.clientX, clientY: e.nativeEvent.clientY });
                         }

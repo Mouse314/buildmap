@@ -26,6 +26,8 @@ const ROOM_CATEGORIES: Partial<Record<number, string>> = {
   301: 'ниже',
 };
 
+export const IMPORTANT_ROOM_IDS = new Set<number>([5, 7, 11, 16, 20, 21]);
+
 export function getCategoryByRoomId(roomID: number): string | undefined {
   const value = ROOM_CATEGORIES[roomID];
   if (typeof value !== 'string') return undefined;

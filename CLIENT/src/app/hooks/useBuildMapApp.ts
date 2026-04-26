@@ -263,7 +263,7 @@ export function useBuildMapApp() {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null)
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
-  const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('min')
+  const [graphicsPreset, setGraphicsPreset] = React.useState<GraphicsPresetId>('medium')
   const [graphicsOpen, setGraphicsOpen] = React.useState(true)
   const [isGraphicsPresetsModalOpen, setIsGraphicsPresetsModalOpen] = React.useState(false)
   const [graphicsPresetsById, setGraphicsPresetsById] = React.useState<GraphicsPresetsById>(() => getGraphicsPresetsById())

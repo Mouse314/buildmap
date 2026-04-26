@@ -55,7 +55,7 @@ export type GraphicsPresetsFile = {
 export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
   {
     id: 'min',
-    label: 'Сбалансированные',
+    label: 'Низкие',
     title: 'Максимальная производительность',
     dpr: { mode: 'fixed', value: 1 },
     shadowsEnabled: false,
@@ -70,7 +70,7 @@ export const GRAPHICS_PRESETS: readonly GraphicsPresetConfig[] = [
   },
   {
     id: 'medium',
-    label: 'Выше среднего',
+    label: 'Средние',
     title: 'Улучшенное качество',
     dpr: { mode: 'adaptive', baseMax: 1.5, declineTo: 1.0 },
     shadowsEnabled: false,
