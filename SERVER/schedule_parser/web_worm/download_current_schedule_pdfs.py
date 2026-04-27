@@ -4,7 +4,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -88,6 +88,11 @@ def parse_cli_date(raw: str) -> date:
         raise argparse.ArgumentTypeError(
             "Invalid --date format. Use YYYY-MM-DD or DD.MM.YYYY"
         ) from exc
+
+
+def default_target_date() -> date:
+    # Download schedule for the next calendar day by default.
+    return date.today() + timedelta(days=1)
 
 
 def extract_interval(href: str, text_sources: list[str]) -> tuple[date, date] | None:
@@ -265,8 +270,8 @@ def build_arg_parser(default_output_dir: Path) -> argparse.ArgumentParser:
     parser.add_argument(
         "--date",
         type=parse_cli_date,
-        default=date.today(),
-        help="Target date: YYYY-MM-DD or DD.MM.YYYY (default: today)",
+        default=default_target_date(),
+        help="Target date: YYYY-MM-DD or DD.MM.YYYY (default: next day)",
     )
     parser.add_argument(
         "--output-dir",

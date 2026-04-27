@@ -8,6 +8,7 @@ type ScheduleStatsSummary = {
   buildings: StatsRow[]
   teachers: StatsRow[]
   groups: StatsRow[]
+  classrooms: StatsRow[]
 }
 
 type ScheduleStatsModalProps = {
@@ -183,6 +184,11 @@ export function ScheduleStatsModal({
           title="Топ-10 групп"
           rows={summary.groups}
           emptyText="Нет данных по группам"
+        />
+        <LeaderboardSection
+          title="Топ-10 аудиторий"
+          rows={summary.classrooms}
+          emptyText="Нет данных по аудиториям"
         />
       </div>
     </HudModal>

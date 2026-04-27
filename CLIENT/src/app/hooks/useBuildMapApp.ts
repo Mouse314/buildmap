@@ -141,6 +141,34 @@ function parseIsoDateOnly(value: string): Date | null {
   return date
 }
 
+const RU_WEEKDAYS = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье'] as const
+
+function weekdayFromIsoDate(value: string): string | null {
+  const date = parseIsoDateOnly(value)
+  if (!date) return null
+
+  const jsDay = date.getDay()
+  const weekdayIndex = jsDay === 0 ? 6 : jsDay - 1
+  return RU_WEEKDAYS[weekdayIndex] ?? null
+}
+
+function resolveScheduleRowDateIsoToken(row: { dateIso: string | null; date: string }): string {
+  const directIso = String(row.dateIso ?? '').trim()
+  if (directIso.length > 0) return directIso
+
+  const parsedIso = parseScheduleBatchDateToIso(row.date)
+  if (parsedIso.length > 0) return parsedIso
+
+  return row.date.trim()
+}
+
+function resolveScheduleRowWeekday(row: { dateIso: string | null; date: string; weekday: string }): string {
+  const isoToken = resolveScheduleRowDateIsoToken(row)
+  const dateWeekday = weekdayFromIsoDate(isoToken)
+  if (dateWeekday) return dateWeekday
+  return row.weekday.trim()
+}
+
 function getTodayIso(): string {
   return toIsoDateLocal(new Date())
 }
@@ -188,6 +216,49 @@ function uniqJoin(values: Array<string | null | undefined>, delimiter = ' / '): 
   return ordered.join(delimiter)
 }
 
+function uniqNonEmpty(values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>()
+  const ordered: string[] = []
+
+  for (const value of values) {
+    const normalized = String(value ?? '').trim()
+    if (normalized.length === 0) continue
+    const key = caseFold(normalized)
+    if (seen.has(key)) continue
+    seen.add(key)
+    ordered.push(normalized)
+  }
+
+  return ordered
+}
+
+function dominantTextValue(values: Array<string | null | undefined>): string {
+  const counts = new Map<string, { text: string; count: number; firstIndex: number }>()
+
+  values.forEach((value, index) => {
+    const normalized = String(value ?? '').trim()
+    if (normalized.length === 0) return
+
+    const key = caseFold(normalized)
+    const current = counts.get(key)
+    if (!current) {
+      counts.set(key, { text: normalized, count: 1, firstIndex: index })
+      return
+    }
+
+    current.count += 1
+  })
+
+  let best: { text: string; count: number; firstIndex: number } | null = null
+  for (const item of counts.values()) {
+    if (!best || item.count > best.count || (item.count === best.count && item.firstIndex < best.firstIndex)) {
+      best = item
+    }
+  }
+
+  return best?.text ?? ''
+}
+
 function mapCounterToBucket(counter: Map<string, number>): Array<{ label: string; count: number }> {
   return Array.from(counter.entries())
     .map(([label, count]) => ({ label, count }))
@@ -200,6 +271,18 @@ function mapCounterToBucket(counter: Map<string, number>): Array<{ label: string
 function incrementCounter(counter: Map<string, number>, value: string | null | undefined, fallbackLabel: string): void {
   const label = String(value ?? '').trim() || fallbackLabel
   counter.set(label, (counter.get(label) ?? 0) + 1)
+}
+
+function buildScheduleRowSlotToken(row: { dateIso: string | null; date: string; time: string }): string {
+  const dateToken = resolveScheduleRowDateIsoToken(row)
+  const timeToken = row.time.trim()
+  return `${dateToken}\u0001${timeToken}`
+}
+
+function buildScheduleClassroomIdentity(cabinet: string): string {
+  const target = parseCabinetTarget(cabinet)
+  if (target) return `${target.building}-${target.roomToken}`
+  return normalizeScheduleRoomToken(cabinet)
 }
 
 // Главный хук состояния приложения карты корпусов.
@@ -520,21 +603,69 @@ export function useBuildMapApp() {
     const buildingCounter = new Map<string, number>()
     const teacherCounter = new Map<string, number>()
     const groupCounter = new Map<string, number>()
+    const classroomCounter = new Map<string, number>()
+
+    const seenTotalLessons = new Set<string>()
+    const seenBuildings = new Set<string>()
+    const seenTeachers = new Set<string>()
+    const seenGroups = new Set<string>()
+    const seenClassrooms = new Set<string>()
 
     for (const row of scheduleRowsByPeriodFiltered) {
-      const building = parseCabinetTarget(row.cabinet)?.building ?? ''
-      const group = scheduleGroupLabelFromSourceFile(row.sourceFile)
+      const slotToken = buildScheduleRowSlotToken(row)
 
-      incrementCounter(buildingCounter, building, 'Не указан')
-      incrementCounter(teacherCounter, row.teacher, 'Не указан')
-      incrementCounter(groupCounter, group, 'Не указана')
+      const cabinetLabel = row.cabinet.trim()
+      const classroomLabel = cabinetLabel.length > 0 ? cabinetLabel : 'Не указана'
+      const classroomIdentity = buildScheduleClassroomIdentity(cabinetLabel)
+
+      const fallbackEventToken = [
+        slotToken,
+        caseFold(row.teacher),
+        caseFold(row.discipline),
+        caseFold(row.subgroup),
+      ].join('\u0001')
+
+      const lessonEventToken = classroomIdentity.length > 0
+        ? `room:\u0001${classroomIdentity}\u0001${slotToken}`
+        : `fallback:\u0001${fallbackEventToken}`
+
+      seenTotalLessons.add(lessonEventToken)
+
+      const building = parseCabinetTarget(cabinetLabel)?.building ?? ''
+      const buildingLabel = building.length > 0 ? building : 'Не указан'
+      const buildingKey = `${caseFold(buildingLabel)}\u0001${lessonEventToken}`
+      if (!seenBuildings.has(buildingKey)) {
+        seenBuildings.add(buildingKey)
+        incrementCounter(buildingCounter, buildingLabel, 'Не указан')
+      }
+
+      const teacherLabel = row.teacher.trim()
+      const teacherKey = `${caseFold(teacherLabel || 'Не указан')}\u0001${slotToken}`
+      if (!seenTeachers.has(teacherKey)) {
+        seenTeachers.add(teacherKey)
+        incrementCounter(teacherCounter, teacherLabel, 'Не указан')
+      }
+
+      const groupLabel = scheduleGroupLabelFromSourceFile(row.sourceFile)
+      const groupKey = `${caseFold(groupLabel || 'Не указана')}\u0001${slotToken}`
+      if (!seenGroups.has(groupKey)) {
+        seenGroups.add(groupKey)
+        incrementCounter(groupCounter, groupLabel, 'Не указана')
+      }
+
+      const classroomKey = `${caseFold(classroomLabel)}\u0001${lessonEventToken}`
+      if (!seenClassrooms.has(classroomKey)) {
+        seenClassrooms.add(classroomKey)
+        incrementCounter(classroomCounter, classroomLabel, 'Не указана')
+      }
     }
 
     return {
-      totalLessons: scheduleRowsByPeriodFiltered.length,
+      totalLessons: seenTotalLessons.size,
       buildings: mapCounterToBucket(buildingCounter),
       teachers: mapCounterToBucket(teacherCounter),
       groups: mapCounterToBucket(groupCounter),
+      classrooms: mapCounterToBucket(classroomCounter),
     }
   }, [scheduleRowsByPeriodFiltered])
 
@@ -549,10 +680,11 @@ export function useBuildMapApp() {
       if (!knownScheduleBuildNumbers.has(target.building)) continue
       if (target.building !== selectedBuildNumber) continue
 
+      const rowDateIsoToken = resolveScheduleRowDateIsoToken(row)
+
       const dedupKey = [
         scheduleGroupLabelFromSourceFile(row.sourceFile),
-        row.date,
-        row.weekday,
+        rowDateIsoToken,
         row.time,
         row.subgroup,
         row.discipline,
@@ -575,7 +707,7 @@ export function useBuildMapApp() {
     for (const item of scheduleRowsForSelectedBuild) {
       const key = roomTokenToKey.get(item.roomToken)
       if (!key) continue
-      const slotDate = item.row.dateIso ?? item.row.date
+      const slotDate = resolveScheduleRowDateIsoToken(item.row)
       const slotKey = `${slotDate}\u0001${item.row.time}`
       const slots = slotsByRoom.get(key) ?? new Set<string>()
       slots.add(slotKey)
@@ -617,7 +749,7 @@ export function useBuildMapApp() {
       const roomKey = roomTokenToKey.get(item.roomToken)
       if (!roomKey) continue
 
-      const slotDate = item.row.dateIso ?? item.row.date
+      const slotDate = resolveScheduleRowDateIsoToken(item.row)
       const slotKey = `${slotDate}\u0001${item.row.time}`
       const bySlot = groupedByRoomAndSlot.get(roomKey) ?? new Map()
       const slotRows = bySlot.get(slotKey) ?? []
@@ -644,21 +776,20 @@ export function useBuildMapApp() {
         if (slotRows.length === 0) continue
 
         const first = slotRows[0]
-        const groups = slotRows
-          .map((row) => scheduleGroupLabelFromSourceFile(row.sourceFile))
-          .filter((value) => value.length > 0)
+        const firstDateIso = resolveScheduleRowDateIsoToken(first)
+        const groups = uniqNonEmpty(slotRows.map((row) => scheduleGroupLabelFromSourceFile(row.sourceFile)))
 
         lessons.push({
           groups,
           date: first.date,
-          weekday: first.weekday,
+          weekday: resolveScheduleRowWeekday(first),
           time: first.time,
           subgroup: uniqJoin(slotRows.map((row) => row.subgroup)),
-          discipline: uniqJoin(slotRows.map((row) => row.discipline)),
-          lessonType: uniqJoin(slotRows.map((row) => row.lessonType)),
-          teacher: uniqJoin(slotRows.map((row) => row.teacher)),
-          cabinet: uniqJoin(slotRows.map((row) => row.cabinet)),
-          dateIso: first.dateIso ?? '',
+          discipline: dominantTextValue(slotRows.map((row) => row.discipline)),
+          lessonType: dominantTextValue(slotRows.map((row) => row.lessonType)),
+          teacher: dominantTextValue(slotRows.map((row) => row.teacher)),
+          cabinet: dominantTextValue(slotRows.map((row) => row.cabinet)),
+          dateIso: firstDateIso,
         })
       }
 

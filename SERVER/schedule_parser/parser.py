@@ -2,7 +2,7 @@ import argparse
 import re
 import shutil
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 try:
@@ -50,6 +50,15 @@ DAYS = [
     "суббота",
     "воскресенье",
 ]
+WEEKDAY_BY_INDEX = {
+    0: "понедельник",
+    1: "вторник",
+    2: "среда",
+    3: "четверг",
+    4: "пятница",
+    5: "суббота",
+    6: "воскресенье",
+}
 
 
 def parse_cli_date(raw):
@@ -70,6 +79,11 @@ def parse_cli_date(raw):
     raise argparse.ArgumentTypeError("Некорректный формат --date. Используйте YYYY-MM-DD или DD.MM.YYYY")
 
 
+def default_target_date() -> date:
+    # По умолчанию загружаем расписание на следующий календарный день.
+    return date.today() + timedelta(days=1)
+
+
 def build_arg_parser(default_pdf_dir: Path, default_output_dir: Path):
     parser = argparse.ArgumentParser(
         description=(
@@ -79,8 +93,8 @@ def build_arg_parser(default_pdf_dir: Path, default_output_dir: Path):
     parser.add_argument(
         "--date",
         type=parse_cli_date,
-        default=date.today(),
-        help="Дата для выбора актуальных PDF: YYYY-MM-DD или DD.MM.YYYY (по умолчанию сегодня)",
+        default=default_target_date(),
+        help="Дата для выбора актуальных PDF: YYYY-MM-DD или DD.MM.YYYY (по умолчанию следующий день)",
     )
     parser.add_argument(
         "--pdf-dir",
@@ -252,16 +266,7 @@ def weekday_from_date_ru(date_str):
     except ValueError:
         return None
 
-    names = [
-        "понедельник",
-        "вторник",
-        "среда",
-        "четверг",
-        "пятница",
-        "суббота",
-        "воскресенье",
-    ]
-    return names[dt.weekday()]
+    return WEEKDAY_BY_INDEX.get(dt.weekday())
 
 
 def normalize_interval(text):
@@ -521,17 +526,7 @@ def postprocess_schedule_df(df):
     cleaned["Дата"] = date_text.fillna("")
 
     parsed_dates = pd.to_datetime(cleaned["Дата"], format="%d.%m.%y", errors="coerce")
-    weekday_names = parsed_dates.dt.dayofweek.map(
-        {
-            0: "понедельник",
-            1: "вторник",
-            2: "среда",
-            3: "четверг",
-            4: "пятница",
-            5: "суббота",
-            6: "воскресенье",
-        }
-    )
+    weekday_names = parsed_dates.dt.dayofweek.map(WEEKDAY_BY_INDEX)
 
     day_text = cleaned["День недели"].fillna("").astype(str).str.strip().str.lower()
     day_text = day_text.replace({"": pd.NA, "nan": pd.NA, "none": pd.NA})
@@ -682,6 +677,15 @@ def postprocess_schedule_df(df):
         if 2 <= day_diff <= 3:
             corrected_monday = tuesday_dt - pd.Timedelta(days=1)
             cleaned.at[idx, "Дата"] = corrected_monday.strftime("%d.%m.%y")
+
+    # Жестко синхронизируем день недели с датой:
+    # это убирает артефакты вида "второй понедельник" для одного календарного дня.
+    final_parsed_dates = pd.to_datetime(cleaned["Дата"], format="%d.%m.%y", errors="coerce")
+    final_weekday_names = final_parsed_dates.dt.dayofweek.map(WEEKDAY_BY_INDEX)
+    final_day_text = cleaned["День недели"].fillna("").astype(str).str.strip().str.lower()
+    valid_date_mask = final_parsed_dates.notna()
+    final_day_text.loc[valid_date_mask] = final_weekday_names.loc[valid_date_mask]
+    cleaned["День недели"] = final_day_text
 
     return cleaned.reset_index(drop=True)
 

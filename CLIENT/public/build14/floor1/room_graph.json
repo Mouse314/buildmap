@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-26T11:41:07.517Z",
+  "generatedAt": "2026-04-27T13:08:13.367Z",
   "nodes": [
     {
       "key": "bl:13",
@@ -748,7 +748,7 @@
     },
     {
       "key": "bl:258",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": null,
       "kind": "room",
       "x": -22.53,
@@ -756,7 +756,7 @@
     },
     {
       "key": "bl:260",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": null,
       "kind": "room",
       "x": -21.043,
@@ -780,7 +780,7 @@
     },
     {
       "key": "bl:264",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": "142",
       "kind": "room",
       "x": -24.424,
@@ -852,7 +852,7 @@
     },
     {
       "key": "bl:279",
-      "roomID": 8,
+      "roomID": 15,
       "roomNo": "125",
       "kind": "room",
       "x": -28.034,
@@ -900,7 +900,7 @@
     },
     {
       "key": "bl:298",
-      "roomID": 16,
+      "roomID": 17,
       "roomNo": "128",
       "kind": "room",
       "x": -39.959,
@@ -1060,7 +1060,7 @@
     },
     {
       "key": "bl:341",
-      "roomID": 8,
+      "roomID": 18,
       "roomNo": "133",
       "kind": "room",
       "x": -39.621,
@@ -1228,7 +1228,7 @@
     },
     {
       "key": "bl:386",
-      "roomID": 8,
+      "roomID": 17,
       "roomNo": "137",
       "kind": "room",
       "x": -20.68,
@@ -1572,7 +1572,7 @@
     },
     {
       "key": "bl:484",
-      "roomID": 8,
+      "roomID": 15,
       "roomNo": "103",
       "kind": "room",
       "x": 26.028,
@@ -1580,7 +1580,7 @@
     },
     {
       "key": "bl:485",
-      "roomID": 2,
+      "roomID": 14,
       "roomNo": null,
       "kind": "room",
       "x": 39.611,
@@ -1612,7 +1612,7 @@
     },
     {
       "key": "bl:493",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": "105а",
       "kind": "room",
       "x": 40.856,
@@ -1660,7 +1660,7 @@
     },
     {
       "key": "bl:507",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": "111а",
       "kind": "room",
       "x": 44.918,
@@ -1764,7 +1764,7 @@
     },
     {
       "key": "bl:527",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": null,
       "kind": "room",
       "x": 41.025,
@@ -1772,7 +1772,7 @@
     },
     {
       "key": "bl:528",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": "112",
       "kind": "room",
       "x": 40.617,
@@ -1804,7 +1804,7 @@
     },
     {
       "key": "bl:537",
-      "roomID": 8,
+      "roomID": 14,
       "roomNo": "111б",
       "kind": "room",
       "x": 49.326,
@@ -1956,16 +1956,16 @@
     },
     {
       "key": "bl:583",
-      "roomID": 15,
-      "roomNo": "107",
+      "roomID": 14,
+      "roomNo": "107б",
       "kind": "room",
       "x": 54.101,
       "y": -21.558
     },
     {
       "key": "bl:586",
-      "roomID": 15,
-      "roomNo": "107/1",
+      "roomID": 14,
+      "roomNo": "107",
       "kind": "room",
       "x": 57.931,
       "y": -21.554

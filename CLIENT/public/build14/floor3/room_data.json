@@ -6855,9 +6855,9 @@
   {
     "key": "bl:198",
     "blenderID": 198,
-    "roomID": 18,
+    "roomID": 8,
     "roomNo": "329",
-    "description": "Компьютерный зал",
+    "description": "аудитория",
     "areClosed": false,
     "areaM2": 125.9,
     "vertexIndices": [
@@ -6916,7 +6916,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:199",
@@ -8901,8 +8902,9 @@
   {
     "key": "bl:241",
     "blenderID": 241,
-    "roomID": 8,
+    "roomID": 15,
     "roomNo": "321",
+    "description": "Студклуб",
     "areClosed": false,
     "areaM2": 14.96,
     "vertexIndices": [
@@ -8956,7 +8958,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Администрация"
   },
   {
     "key": "bl:242",
@@ -13267,6 +13270,7 @@
     "blenderID": 354,
     "roomID": 17,
     "roomNo": "330",
+    "description": "Лаборатория электромагнетизма",
     "areClosed": false,
     "areaM2": 63.35,
     "vertexIndices": [
@@ -13305,7 +13309,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:355",
@@ -13355,7 +13360,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "техническое помещение"
   },
   {
     "key": "bl:356",
@@ -17356,9 +17362,9 @@
   {
     "key": "bl:471",
     "blenderID": 471,
-    "roomID": 8,
+    "roomID": 14,
     "roomNo": "313",
-    "description": "аудитория",
+    "description": "Кафедра фундаментальной математики",
     "areClosed": false,
     "areaM2": 52.01,
     "vertexIndices": [
@@ -17407,7 +17413,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Кафедра"
   },
   {
     "key": "bl:472",
@@ -17519,8 +17526,9 @@
   {
     "key": "bl:474",
     "blenderID": 474,
-    "roomID": 8,
+    "roomID": 14,
     "roomNo": "310",
+    "description": "Зав.кафедры русского языка, культуры речи и методики обучения",
     "areClosed": false,
     "areaM2": 23.23,
     "vertexIndices": [
@@ -17559,7 +17567,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Кафедра"
   },
   {
     "key": "bl:475",
@@ -17671,8 +17680,9 @@
   {
     "key": "bl:477",
     "blenderID": 477,
-    "roomID": 8,
+    "roomID": 14,
     "roomNo": "307",
+    "description": "Кафедра журналистики и интегрированных коммуникаций",
     "areClosed": false,
     "areaM2": 19.7,
     "vertexIndices": [
@@ -17726,7 +17736,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Кафедра"
   },
   {
     "key": "bl:478",
@@ -22498,6 +22509,7 @@
     "blenderID": 606,
     "roomID": 17,
     "roomNo": "336",
+    "description": "Лаборатория физического эксперимента",
     "areClosed": false,
     "areaM2": 71.15,
     "vertexIndices": [
@@ -22556,7 +22568,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:607",
@@ -22717,7 +22730,7 @@
     "blenderID": 609,
     "roomID": 8,
     "roomNo": "338",
-    "description": "аудитория",
+    "description": "Лекционная аудитория",
     "areClosed": false,
     "areaM2": 99.75,
     "vertexIndices": [
@@ -22856,7 +22869,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:610",
@@ -23008,7 +23022,7 @@
   {
     "key": "bl:613",
     "blenderID": 613,
-    "roomID": 17,
+    "roomID": 18,
     "roomNo": "301",
     "areClosed": false,
     "areaM2": 61.78,
@@ -23043,7 +23057,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Компьютерный класс"
   },
   {
     "key": "bl:614",
@@ -23090,6 +23105,7 @@
     "blenderID": 615,
     "roomID": 17,
     "roomNo": "303",
+    "description": "Лаборатория молекулярной физики",
     "areClosed": false,
     "areaM2": 52.13,
     "vertexIndices": [
@@ -23128,13 +23144,15 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:616",
     "blenderID": 616,
     "roomID": 17,
     "roomNo": "304",
+    "description": "Лаборатория механики",
     "areClosed": false,
     "areaM2": 48.68,
     "vertexIndices": [
@@ -23183,7 +23201,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:617",

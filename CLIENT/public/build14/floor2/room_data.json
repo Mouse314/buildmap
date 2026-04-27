@@ -8796,6 +8796,7 @@
     "blenderID": 247,
     "roomID": 17,
     "roomNo": "246",
+    "description": "Лаборатория оптики",
     "areClosed": false,
     "areaM2": 85.34,
     "vertexIndices": [
@@ -8849,13 +8850,15 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:248",
     "blenderID": 248,
     "roomID": 17,
     "roomNo": "247",
+    "description": "Лаборатория методики обучения физики",
     "areClosed": false,
     "areaM2": 92.41,
     "vertexIndices": [
@@ -8909,7 +8912,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:249",
@@ -9086,6 +9090,7 @@
     "blenderID": 254,
     "roomID": 17,
     "roomNo": "240",
+    "description": "Лаборатория электричества",
     "areClosed": false,
     "areaM2": 99.03,
     "vertexIndices": [
@@ -9149,7 +9154,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:255",
@@ -10017,6 +10023,7 @@
     "blenderID": 279,
     "roomID": 17,
     "roomNo": "239",
+    "description": "Лаборатория молекулярной физики и термодинамики",
     "areClosed": false,
     "areaM2": 58.15,
     "vertexIndices": [
@@ -10055,13 +10062,15 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:280",
     "blenderID": 280,
     "roomID": 17,
     "roomNo": "238",
+    "description": "Лаборатория механики",
     "areClosed": false,
     "areaM2": 82.99,
     "vertexIndices": [
@@ -10120,7 +10129,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Лаборатория"
   },
   {
     "key": "bl:281",
@@ -16811,8 +16821,9 @@
   {
     "key": "bl:456",
     "blenderID": 456,
-    "roomID": 8,
+    "roomID": 15,
     "roomNo": "205",
+    "description": "Декан факультета истории, политических наук и культурологии",
     "areClosed": false,
     "areaM2": 19.07,
     "vertexIndices": [
@@ -16906,7 +16917,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "Администрация"
   },
   {
     "key": "bl:457",
@@ -30556,7 +30568,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:796",
@@ -30636,7 +30649,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:797",
@@ -30748,7 +30762,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "кабинет"
   },
   {
     "key": "bl:800",

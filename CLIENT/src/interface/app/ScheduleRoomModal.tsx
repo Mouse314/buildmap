@@ -42,7 +42,7 @@ export function ScheduleRoomModal({
     }> = []
 
     for (const lesson of normalizedLessons) {
-      const dayKey = `${lesson.date}\u0001${lesson.weekday}`
+      const dayKey = lesson.date
       const prev = blocks[blocks.length - 1]
 
       if (!prev || prev.dayKey !== dayKey) {

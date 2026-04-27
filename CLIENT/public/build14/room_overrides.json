@@ -1,7 +1,7 @@
 {
   "version": 1,
   "buildId": "build14",
-  "updatedAt": "2026-04-13T11:13:10.346Z",
+  "updatedAt": "2026-04-27T12:28:40.526Z",
   "floors": {
     "floor1": {
       "bl:524": {
@@ -94,9 +94,9 @@
         "floor": null
       },
       "bl:586": {
-        "roomID": 15,
-        "roomNo": "107/1",
-        "category": "Администрация",
+        "roomID": 14,
+        "roomNo": "107",
+        "category": "Кафедра",
         "description": null,
         "areClosed": false,
         "areaM2": 20.98,
@@ -201,8 +201,198 @@
         "areClosed": false,
         "areaM2": 47.89,
         "build": null,
+        "floor": null
+      },
+      "bl:229": {
+        "roomID": 17,
+        "roomNo": "145",
+        "category": "Лаборатория",
+        "description": "Лаборатория товароведения и экспертизы продовольственных товаров",
+        "areClosed": false,
+        "areaM2": 29.59,
+        "build": null,
+        "floor": null
+      },
+      "bl:271": {
+        "roomID": 15,
+        "roomNo": "124",
+        "category": "Администрация",
+        "description": "Зав.кафедры туризма и управления персоналом",
+        "areClosed": false,
+        "areaM2": 18.49,
+        "build": null,
+        "floor": null
+      },
+      "bl:264": {
+        "roomID": 14,
+        "roomNo": "142",
+        "category": "Кафедра",
+        "description": "Кафедра туризма и управления персоналом",
+        "areClosed": false,
+        "areaM2": 19.17,
+        "build": null,
+        "floor": null
+      },
+      "bl:258": {
+        "roomID": 14,
+        "roomNo": null,
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.22,
+        "build": null,
+        "floor": null
+      },
+      "bl:260": {
+        "roomID": 14,
+        "roomNo": null,
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 15.07,
+        "build": null,
+        "floor": null
+      },
+      "bl:279": {
+        "roomID": 15,
+        "roomNo": "125",
+        "category": "Администрация",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 21.34,
+        "build": null,
+        "floor": null
+      },
+      "bl:298": {
+        "roomID": 17,
+        "roomNo": "128",
+        "category": "Лаборатория",
+        "description": "Научно-исследовательская археологическая лаборатория",
+        "areClosed": false,
+        "areaM2": 50.47,
+        "build": null,
+        "floor": null
+      },
+      "bl:386": {
+        "roomID": 17,
+        "roomNo": "137",
+        "category": "Лаборатория",
+        "description": "Лаборатория интеллектуальных систем",
+        "areClosed": false,
+        "areaM2": 25.47,
+        "build": null,
+        "floor": null
+      },
+      "bl:341": {
+        "roomID": 18,
+        "roomNo": "133",
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 37.82,
+        "build": null,
+        "floor": null
+      },
+      "bl:330": {
+        "roomID": 15,
+        "roomNo": "132",
+        "category": "Администрация",
+        "description": "Центр технической поддержки",
+        "areClosed": false,
+        "areaM2": 19.24,
+        "build": null,
+        "floor": null
+      },
+      "bl:484": {
+        "roomID": 15,
+        "roomNo": "103",
+        "category": "Администрация",
+        "description": "Зам. декана факультета менеджмента и сервиса",
+        "areClosed": false,
+        "areaM2": 23.48,
+        "build": null,
+        "floor": null
+      },
+      "bl:493": {
+        "roomID": 14,
+        "roomNo": "105а",
+        "category": "Кафедра",
+        "description": "Кафедра иностранных языков неязыковых специальностей",
+        "areClosed": false,
+        "areaM2": 8.18,
+        "build": null,
+        "floor": null
+      },
+      "bl:485": {
+        "roomID": 14,
+        "roomNo": null,
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.16,
+        "build": null,
+        "floor": null
+      },
+      "bl:583": {
+        "roomID": 14,
+        "roomNo": "107б",
+        "category": "Кафедра",
+        "description": "Кафедра государственного и муниципального управления",
+        "areClosed": false,
+        "areaM2": 21.09,
+        "build": null,
         "floor": null,
-        "updatedAt": "2026-04-13T11:13:10.346Z"
+        "updatedAt": "2026-04-27T12:28:40.526Z"
+      },
+      "bl:592": {
+        "roomID": 15,
+        "roomNo": "107а",
+        "category": "Администрация",
+        "description": "Кабинет психологической поддержки",
+        "areClosed": false,
+        "areaM2": 13.05,
+        "build": null,
+        "floor": null
+      },
+      "bl:528": {
+        "roomID": 14,
+        "roomNo": "112",
+        "category": "Кафедра",
+        "description": "Зав. кафедры менеджмента и маркетинга",
+        "areClosed": false,
+        "areaM2": 20.74,
+        "build": null,
+        "floor": null
+      },
+      "bl:527": {
+        "roomID": 14,
+        "roomNo": null,
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.16,
+        "build": null,
+        "floor": null
+      },
+      "bl:537": {
+        "roomID": 14,
+        "roomNo": "111б",
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 28.86,
+        "build": null,
+        "floor": null
+      },
+      "bl:507": {
+        "roomID": 14,
+        "roomNo": "111а",
+        "category": "Кафедра",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 22.31,
+        "build": null,
+        "floor": null
       }
     },
     "floor3": {
@@ -253,6 +443,126 @@
         "areaM2": 8.76,
         "build": null,
         "floor": null
+      },
+      "bl:615": {
+        "roomID": 17,
+        "roomNo": "303",
+        "category": "Лаборатория",
+        "description": "Лаборатория молекулярной физики",
+        "areClosed": false,
+        "areaM2": 52.13,
+        "build": null,
+        "floor": null
+      },
+      "bl:616": {
+        "roomID": 17,
+        "roomNo": "304",
+        "category": "Лаборатория",
+        "description": "Лаборатория механики",
+        "areClosed": false,
+        "areaM2": 48.68,
+        "build": null,
+        "floor": null
+      },
+      "bl:613": {
+        "roomID": 18,
+        "roomNo": "301",
+        "category": "Компьютерный класс",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 61.78,
+        "build": null,
+        "floor": null
+      },
+      "bl:609": {
+        "roomID": 8,
+        "roomNo": "338",
+        "category": "кабинет",
+        "description": "Лекционная аудитория",
+        "areClosed": false,
+        "areaM2": 99.75,
+        "build": null,
+        "floor": null
+      },
+      "bl:606": {
+        "roomID": 17,
+        "roomNo": "336",
+        "category": "Лаборатория",
+        "description": "Лаборатория физического эксперимента",
+        "areClosed": false,
+        "areaM2": 71.15,
+        "build": null,
+        "floor": null
+      },
+      "bl:355": {
+        "roomID": 2,
+        "roomNo": "331а",
+        "category": "техническое помещение",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 3.78,
+        "build": null,
+        "floor": null
+      },
+      "bl:354": {
+        "roomID": 17,
+        "roomNo": "330",
+        "category": "Лаборатория",
+        "description": "Лаборатория электромагнетизма",
+        "areClosed": false,
+        "areaM2": 63.35,
+        "build": null,
+        "floor": null
+      },
+      "bl:198": {
+        "roomID": 8,
+        "roomNo": "329",
+        "category": "кабинет",
+        "description": "аудитория",
+        "areClosed": false,
+        "areaM2": 125.9,
+        "build": null,
+        "floor": null
+      },
+      "bl:477": {
+        "roomID": 14,
+        "roomNo": "307",
+        "category": "Кафедра",
+        "description": "Кафедра журналистики и интегрированных коммуникаций",
+        "areClosed": false,
+        "areaM2": 19.7,
+        "build": null,
+        "floor": null
+      },
+      "bl:474": {
+        "roomID": 14,
+        "roomNo": "310",
+        "category": "Кафедра",
+        "description": "Зав.кафедры русского языка, культуры речи и методики обучения",
+        "areClosed": false,
+        "areaM2": 23.23,
+        "build": null,
+        "floor": null
+      },
+      "bl:471": {
+        "roomID": 14,
+        "roomNo": "313",
+        "category": "Кафедра",
+        "description": "Кафедра фундаментальной математики",
+        "areClosed": false,
+        "areaM2": 52.01,
+        "build": null,
+        "floor": null
+      },
+      "bl:241": {
+        "roomID": 15,
+        "roomNo": "321",
+        "category": "Администрация",
+        "description": "Студклуб",
+        "areClosed": false,
+        "areaM2": 14.96,
+        "build": null,
+        "floor": null
       }
     },
     "floor2": {
@@ -263,6 +573,96 @@
         "description": null,
         "areClosed": true,
         "areaM2": 9.28,
+        "build": null,
+        "floor": null
+      },
+      "bl:456": {
+        "roomID": 15,
+        "roomNo": "205",
+        "category": "Администрация",
+        "description": "Декан факультета истории, политических наук и культурологии",
+        "areClosed": false,
+        "areaM2": 19.07,
+        "build": null,
+        "floor": null
+      },
+      "bl:280": {
+        "roomID": 17,
+        "roomNo": "238",
+        "category": "Лаборатория",
+        "description": "Лаборатория механики",
+        "areClosed": false,
+        "areaM2": 82.99,
+        "build": null,
+        "floor": null
+      },
+      "bl:279": {
+        "roomID": 17,
+        "roomNo": "239",
+        "category": "Лаборатория",
+        "description": "Лаборатория молекулярной физики и термодинамики",
+        "areClosed": false,
+        "areaM2": 58.15,
+        "build": null,
+        "floor": null
+      },
+      "bl:254": {
+        "roomID": 17,
+        "roomNo": "240",
+        "category": "Лаборатория",
+        "description": "Лаборатория электричества",
+        "areClosed": false,
+        "areaM2": 99.03,
+        "build": null,
+        "floor": null
+      },
+      "bl:247": {
+        "roomID": 17,
+        "roomNo": "246",
+        "category": "Лаборатория",
+        "description": "Лаборатория оптики",
+        "areClosed": false,
+        "areaM2": 85.34,
+        "build": null,
+        "floor": null
+      },
+      "bl:248": {
+        "roomID": 17,
+        "roomNo": "247",
+        "category": "Лаборатория",
+        "description": "Лаборатория методики обучения физики",
+        "areClosed": false,
+        "areaM2": 92.41,
+        "build": null,
+        "floor": null
+      },
+      "bl:796": {
+        "roomID": 8,
+        "roomNo": "214а",
+        "category": "кабинет",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 35.73,
+        "build": null,
+        "floor": null
+      },
+      "bl:795": {
+        "roomID": 8,
+        "roomNo": null,
+        "category": "кабинет",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 0.16,
+        "build": null,
+        "floor": null
+      },
+      "bl:799": {
+        "roomID": 8,
+        "roomNo": null,
+        "category": "кабинет",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 8.86,
         "build": null,
         "floor": null
       }
