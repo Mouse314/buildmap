@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-27T13:08:13.819Z",
+  "generatedAt": "2026-05-04T16:31:05.702Z",
   "stats": {
     "totalRows": 85,
-    "mappedRows": 32,
-    "unmappedRows": 53
+    "mappedRows": 34,
+    "unmappedRows": 51
   },
   "institutes": [
     {
@@ -53,7 +53,12 @@
             "roomDigits": "118",
             "isDigitsOnlyRoomNo": true
           },
-          "location": null,
+          "location": {
+            "buildId": "build1",
+            "floorId": "floor1",
+            "roomKey": "bl:821",
+            "roomNo": "118"
+          },
           "children": []
         },
         {
@@ -576,7 +581,12 @@
                 "roomDigits": "103",
                 "isDigitsOnlyRoomNo": true
               },
-              "location": null,
+              "location": {
+                "buildId": "build1",
+                "floorId": "floor1",
+                "roomKey": "bl:954",
+                "roomNo": "103"
+              },
               "children": []
             }
           ]

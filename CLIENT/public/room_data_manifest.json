@@ -1,6 +1,12 @@
 {
   "builds": [
     {
+      "id": "build1",
+      "floors": [
+        "floor1"
+      ]
+    },
+    {
       "id": "build13",
       "floors": [
         "floor0",
