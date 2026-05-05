@@ -3,7 +3,9 @@
     {
       "id": "build1",
       "floors": [
-        "floor1"
+        "floor1",
+        "floor2",
+        "floor3"
       ]
     },
     {
