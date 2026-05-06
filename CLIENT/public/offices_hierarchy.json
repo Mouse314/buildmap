@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-05T16:46:09.606Z",
+  "generatedAt": "2026-05-06T15:30:21.815Z",
   "stats": {
     "totalRows": 85,
-    "mappedRows": 34,
-    "unmappedRows": 51
+    "mappedRows": 42,
+    "unmappedRows": 43
   },
   "institutes": [
     {
@@ -20,7 +20,12 @@
         "roomDigits": "500",
         "isDigitsOnlyRoomNo": true
       },
-      "location": null,
+      "location": {
+        "buildId": "build1",
+        "floorId": "floor5",
+        "roomKey": "bl:611",
+        "roomNo": "500"
+      },
       "children": [
         {
           "id": "office-2",
@@ -36,7 +41,12 @@
             "roomDigits": "416",
             "isDigitsOnlyRoomNo": false
           },
-          "location": null,
+          "location": {
+            "buildId": "build1",
+            "floorId": "floor4",
+            "roomKey": "bl:679",
+            "roomNo": "416а"
+          },
           "children": []
         },
         {
@@ -103,7 +113,12 @@
             "roomDigits": "521",
             "isDigitsOnlyRoomNo": false
           },
-          "location": null,
+          "location": {
+            "buildId": "build1",
+            "floorId": "floor5",
+            "roomKey": "bl:559",
+            "roomNo": "521а"
+          },
           "children": []
         },
         {
@@ -120,7 +135,12 @@
             "roomDigits": "506",
             "isDigitsOnlyRoomNo": true
           },
-          "location": null,
+          "location": {
+            "buildId": "build1",
+            "floorId": "floor5",
+            "roomKey": "bl:626",
+            "roomNo": "506"
+          },
           "children": []
         },
         {
@@ -137,7 +157,12 @@
             "roomDigits": "425",
             "isDigitsOnlyRoomNo": true
           },
-          "location": null,
+          "location": {
+            "buildId": "build1",
+            "floorId": "floor4",
+            "roomKey": "bl:635",
+            "roomNo": "425"
+          },
           "children": []
         },
         {
@@ -256,7 +281,12 @@
                 "roomDigits": "412",
                 "isDigitsOnlyRoomNo": true
               },
-              "location": null,
+              "location": {
+                "buildId": "build1",
+                "floorId": "floor4",
+                "roomKey": "bl:705",
+                "roomNo": "412"
+              },
               "children": []
             },
             {
@@ -393,7 +423,12 @@
                 "roomDigits": "605",
                 "isDigitsOnlyRoomNo": true
               },
-              "location": null,
+              "location": {
+                "buildId": "build1",
+                "floorId": "floor6",
+                "roomKey": "bl:128",
+                "roomNo": "605"
+              },
               "children": []
             },
             {
@@ -410,7 +445,12 @@
                 "roomDigits": "418",
                 "isDigitsOnlyRoomNo": true
               },
-              "location": null,
+              "location": {
+                "buildId": "build1",
+                "floorId": "floor4",
+                "roomKey": "bl:673",
+                "roomNo": "418"
+              },
               "children": []
             },
             {

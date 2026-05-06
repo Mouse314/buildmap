@@ -1,6 +1,20 @@
 {
   "version": 1,
   "buildId": "build1",
-  "updatedAt": "",
-  "floors": {}
+  "updatedAt": "2026-05-06T13:46:03.494Z",
+  "floors": {
+    "floor4": {
+      "bl:753": {
+        "roomID": 2,
+        "roomNo": null,
+        "category": "техническое помещение",
+        "description": null,
+        "areClosed": true,
+        "areaM2": 3.88,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-05-06T13:46:03.494Z"
+      }
+    }
+  }
 }
