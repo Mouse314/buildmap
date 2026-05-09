@@ -2,6 +2,7 @@ import * as React from 'react';
 import { GlassDropdown } from '../GlassDropdown';
 import { listGraphicsPresets, type GraphicsPresetId } from '../../map/graphicsPresets';
 import { HudButton, HudModal } from '../ui/hud';
+import { publicAssetUrl } from '../../map/rooms/utils/roomData';
 
 type SearchIndexedRoom = {
     key: string;
@@ -15,6 +16,7 @@ type SearchIndexedRoom = {
 type TopBarProps = {
     selectedBuild: string;
     buildOptions: string[];
+    buildOptionsMeta: Array<{ id: string; hasFloors: boolean }>;
     buildLabel: (id: string) => string;
     onBuildChange: (next: string) => void;
 
@@ -51,11 +53,13 @@ type TopBarProps = {
     isLocationTracking: boolean;
     onLocateUser: () => void;
     locationStatusText: string | null;
+    onOpenBugReport: (context: string) => void;
 };
 
 export function TopBar({
     selectedBuild,
     buildOptions,
+    buildOptionsMeta,
     buildLabel,
     onBuildChange,
     selectedCategory,
@@ -81,13 +85,28 @@ export function TopBar({
     isLocationTracking,
     onLocateUser,
     locationStatusText,
+    onOpenBugReport,
 }: TopBarProps) {
     const [searchOpen, setSearchOpen] = React.useState(false);
     const [mobileControlsOpen, setMobileControlsOpen] = React.useState(false);
-    const [bugReportOpen, setBugReportOpen] = React.useState(false);
-    const [bugReportText, setBugReportText] = React.useState('');
+    const [missingBuildOpen, setMissingBuildOpen] = React.useState(false);
+    const [missingBuildLabel, setMissingBuildLabel] = React.useState('');
+    const [buildInfoOpen, setBuildInfoOpen] = React.useState(false);
+    const [buildInfoImageError, setBuildInfoImageError] = React.useState(false);
     const graphicsPresets = listGraphicsPresets();
     const searchWrapRef = React.useRef<HTMLDivElement | null>(null);
+    const buildInfoImageSrc = publicAssetUrl(`${selectedBuild}/image.png`);
+
+    const buildOptionsSorted = React.useMemo(() => {
+        const metaById = new Map(buildOptionsMeta.map((item) => [item.id, item.hasFloors]));
+        return [...buildOptions].sort((left, right) => {
+            const leftDrawn = metaById.get(left) ?? true;
+            const rightDrawn = metaById.get(right) ?? true;
+            if (leftDrawn !== rightDrawn) return leftDrawn ? -1 : 1;
+            return buildLabel(left).localeCompare(buildLabel(right), 'ru-RU');
+        });
+    }, [buildLabel, buildOptions, buildOptionsMeta]);
+
     function formatSearchPrimary(item: SearchIndexedRoom): string {
         const roomPart = item.roomNo.length > 0 ? `№ ${item.roomNo}` : 'Без номера';
         const details = item.description.length > 0 ? item.description : item.category;
@@ -118,6 +137,11 @@ export function TopBar({
         };
     }, []);
 
+    React.useEffect(() => {
+        if (!buildInfoOpen) return;
+        setBuildInfoImageError(false);
+    }, [buildInfoOpen, selectedBuild]);
+
     const hasCurrent = smartSearchData.currentBuildMatches.length > 0;
     const hasOther = smartSearchData.otherBuildMatches.length > 0;
     const hasCategories = smartSearchData.categoryMatches.length > 0;
@@ -125,31 +149,43 @@ export function TopBar({
 
     const groupsCount = Number(hasCurrent) + Number(hasOther) + Number(hasCategories);
 
-    const submitBugReport = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const message = bugReportText.trim();
-        if (message.length === 0) return;
-
-        const selectedCategoryLabel = selectedCategory === '__all__' ? 'Не выбрано' : selectedCategory;
-        const subject = encodeURIComponent('Сообщение об ошибке BuildMap');
-        const body = encodeURIComponent(
-            `Описание проблемы:\n${message}\n\nКонтекст:\nКорпус: ${buildLabel(selectedBuild)}\nКатегория: ${selectedCategoryLabel}`,
-        );
-
-        window.location.href = `mailto:andryuhich2009@gmail.com?subject=${subject}&body=${body}`;
-        setBugReportOpen(false);
-        setBugReportText('');
-    };
-
     return (
         <>
             <div className="topBar">
-                <GlassDropdown className='buildSelector topDesktopOnly'
-                    value={selectedBuild}
-                    onChange={onBuildChange}
-                    buttonClassName="topSelect"
-                    options={buildOptions.map((b) => ({ value: b, label: buildLabel(b) }))}
-                />
+                <div className="buildSelectorGroup topDesktopOnly">
+                    <GlassDropdown className="buildSelector"
+                        value={selectedBuild}
+                        onChange={onBuildChange}
+                        buttonClassName="topSelect"
+                        options={buildOptionsSorted.map((b) => {
+                            const hasFloors = buildOptionsMeta.find((item) => item.id === b)?.hasFloors ?? true;
+                            const label = buildLabel(b);
+                            return {
+                                value: b,
+                                label,
+                                context: hasFloors ? undefined : 'нет этажей',
+                                inactive: !hasFloors,
+                                onSelect: hasFloors
+                                    ? undefined
+                                    : () => {
+                                        setMissingBuildLabel(label);
+                                        setMissingBuildOpen(true);
+                                    },
+                            };
+                        })}
+                    />
+
+                    <HudButton
+                        title="Информация о корпусе"
+                        data={{ action: 'open-build-info' }}
+                        className="buildInfoButton"
+                        aria-label="Информация о корпусе"
+                        hint="Информация о корпусе"
+                        onClick={() => setBuildInfoOpen(true)}
+                    >
+                        i
+                    </HudButton>
+                </div>
 
             <div
                 className="topSelectAccentWrap"
@@ -318,7 +354,7 @@ export function TopBar({
                     title="Сообщить об ошибке"
                     data={{ action: 'open-bug-report' }}
                     className="topButton topDesktopOnly"
-                    onClick={() => setBugReportOpen(true)}
+                    onClick={() => onOpenBugReport(`Корпус: ${buildLabel(selectedBuild)}\nКатегория: ${selectedCategory === '__all__' ? 'Не выбрано' : selectedCategory}`)}
                 >
                     Сообщить об ошибке
                 </HudButton>
@@ -355,12 +391,39 @@ export function TopBar({
 
                         <div className="mobileControlsBody">
                             <div className="mobileControlsRow">
-                                <GlassDropdown
-                                    value={selectedBuild}
-                                    onChange={onBuildChange}
-                                    buttonClassName="topSelect"
-                                    options={buildOptions.map((b) => ({ value: b, label: buildLabel(b) }))}
-                                />
+                                <div className="buildSelectorGroup">
+                                    <GlassDropdown
+                                        value={selectedBuild}
+                                        onChange={onBuildChange}
+                                        buttonClassName="topSelect"
+                                        options={buildOptionsSorted.map((b) => {
+                                            const hasFloors = buildOptionsMeta.find((item) => item.id === b)?.hasFloors ?? true;
+                                            const label = buildLabel(b);
+                                            return {
+                                                value: b,
+                                                label,
+                                                context: hasFloors ? undefined : 'нет этажей',
+                                                inactive: !hasFloors,
+                                                onSelect: hasFloors
+                                                    ? undefined
+                                                    : () => {
+                                                        setMissingBuildLabel(label);
+                                                        setMissingBuildOpen(true);
+                                                    },
+                                            };
+                                        })}
+                                    />
+                                    <HudButton
+                                        title="Информация о корпусе"
+                                        data={{ action: 'open-build-info-mobile' }}
+                                        className="buildInfoButton"
+                                        aria-label="Информация о корпусе"
+                                        hint="Информация о корпусе"
+                                        onClick={() => setBuildInfoOpen(true)}
+                                    >
+                                        i
+                                    </HudButton>
+                                </div>
                             </div>
 
                             <div className="mobileControlsRow">
@@ -463,7 +526,7 @@ export function TopBar({
                                     className="topButton"
                                     onClick={() => {
                                         setMobileControlsOpen(false);
-                                        setBugReportOpen(true);
+                                        onOpenBugReport(`Корпус: ${buildLabel(selectedBuild)}\nКатегория: ${selectedCategory === '__all__' ? 'Не выбрано' : selectedCategory}`);
                                     }}
                                 >
                                     Сообщить об ошибке
@@ -475,43 +538,59 @@ export function TopBar({
             ) : null}
 
             <HudModal
-                isOpen={bugReportOpen}
+                isOpen={missingBuildOpen}
                 onClose={() => {
-                    setBugReportOpen(false);
-                    setBugReportText('');
+                    setMissingBuildOpen(false);
+                    setMissingBuildLabel('');
                 }}
-                title="Сообщение об ошибке"
-                overlayClassName="bugReportOverlay"
-                surfaceClassName="bugReportModal"
+                title="Корпус ещё не смоделирован"
+                overlayClassName="missingBuildOverlay"
+                surfaceClassName="missingBuildModal"
+                closeButtonClassName="missingBuildCloseButton"
                 titleClassName="bugReportTitle"
                 bodyClassName="bugReportBody"
             >
-                    <form className="bugReportForm" onSubmit={submitBugReport}>
-                        <textarea
-                            className="bugReportInput"
-                            value={bugReportText}
-                            onChange={(event) => setBugReportText(event.target.value)}
-                            placeholder="Опишите проблему"
-                            required
-                            autoFocus
+                <div className="bugReportIntro">
+                    К сожалению, данный корпус ещё не смоделирован ({missingBuildLabel}).
+                </div>
+                <div className="bugReportActions">
+                    <HudButton
+                        title="Понятно"
+                        data={{ action: 'close-missing-build-modal' }}
+                        className="topButton bugReportButton"
+                        onClick={() => {
+                            setMissingBuildOpen(false);
+                            setMissingBuildLabel('');
+                        }}
+                    >
+                        Понятно
+                    </HudButton>
+                </div>
+            </HudModal>
+
+            <HudModal
+                isOpen={buildInfoOpen}
+                onClose={() => setBuildInfoOpen(false)}
+                title={buildLabel(selectedBuild)}
+                overlayClassName="buildInfoOverlay"
+                surfaceClassName="buildInfoModal"
+                titleClassName="buildInfoTitle"
+                bodyClassName="buildInfoBody"
+            >
+                <div className="buildInfoImageWrap">
+                    {buildInfoImageError ? (
+                        <div className="buildInfoImageFallback">Изображение корпуса не найдено</div>
+                    ) : (
+                        <img
+                            className="buildInfoImage"
+                            src={buildInfoImageSrc}
+                            alt={`Изображение корпуса ${buildLabel(selectedBuild)}`}
+                            loading="lazy"
+                            decoding="async"
+                            onError={() => setBuildInfoImageError(true)}
                         />
-                        <div className="bugReportActions">
-                            <HudButton
-                                title="Отмена"
-                                data={{ action: 'cancel-bug-report' }}
-                                className="topButton bugReportButton"
-                                onClick={() => {
-                                    setBugReportOpen(false);
-                                    setBugReportText('');
-                                }}
-                            >
-                                Отмена
-                            </HudButton>
-                            <HudButton title="Отправить" data={{ action: 'submit-bug-report' }} className="topButton bugReportButton" type="submit">
-                                Отправить
-                            </HudButton>
-                        </div>
-                    </form>
+                    )}
+                </div>
             </HudModal>
         </>
     );

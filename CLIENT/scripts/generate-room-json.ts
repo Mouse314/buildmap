@@ -319,6 +319,14 @@ async function main() {
   let totalRooms = 0;
   let fileCount = 0;
 
+  const rootEntries = await fs.readdir(publicDir, { withFileTypes: true });
+  for (const entry of rootEntries) {
+    if (!entry.isDirectory() || !entry.name.startsWith('build')) continue;
+    if (!buildToFloors.has(entry.name)) {
+      buildToFloors.set(entry.name, new Set<string>());
+    }
+  }
+
   for await (const file of walk(publicDir)) {
     if (path.basename(file) !== 'room_data.csv') continue;
 

@@ -343,27 +343,34 @@ export function mapGeoPointToOverlay(
 export async function buildGeoDraftByBuild(manifestBuilds: Array<{ id: string; floors: string[] }>): Promise<Record<string, BuildGeoDraft>> {
   const list = await Promise.all(
     manifestBuilds.map(async (build) => {
-      const floor1Id = build.floors.find((f) => /floor1/i.test(f)) ?? build.floors[0] ?? 'floor1'
-      const [floorRooms, savedFileData] = await Promise.all([
-        loadRoomsFromPublic({ buildId: build.id, floorId: floor1Id }),
-        loadGeoAnchorsFileFromPublic(build.id, floor1Id),
-      ])
-      const allPolygons = roomsToPolygons(floorRooms)
-      const wallBasedPolygons = allPolygons.filter((poly) => poly.roomID !== 200)
-      const bounds = computeBounds(wallBasedPolygons.length > 0 ? wallBasedPolygons : allPolygons)
-      const snappedCorners = buildSnappedCorners(bounds, wallBasedPolygons.length > 0 ? wallBasedPolygons : allPolygons)
-      return {
-        buildId: build.id,
-        floorId: floor1Id,
-        bounds,
-        snappedCorners,
-        savedFileData,
+      const floor1Id = build.floors.find((f) => /floor1/i.test(f)) ?? build.floors[0]
+      if (!floor1Id) return null
+
+      try {
+        const [floorRooms, savedFileData] = await Promise.all([
+          loadRoomsFromPublic({ buildId: build.id, floorId: floor1Id }),
+          loadGeoAnchorsFileFromPublic(build.id, floor1Id),
+        ])
+        const allPolygons = roomsToPolygons(floorRooms)
+        const wallBasedPolygons = allPolygons.filter((poly) => poly.roomID !== 200)
+        const bounds = computeBounds(wallBasedPolygons.length > 0 ? wallBasedPolygons : allPolygons)
+        const snappedCorners = buildSnappedCorners(bounds, wallBasedPolygons.length > 0 ? wallBasedPolygons : allPolygons)
+        return {
+          buildId: build.id,
+          floorId: floor1Id,
+          bounds,
+          snappedCorners,
+          savedFileData,
+        }
+      } catch {
+        return null
       }
     }),
   )
 
   const next: Record<string, BuildGeoDraft> = {}
   for (const item of list) {
+    if (!item) continue
     const defaults = makeDefaultGeoCorners(item.bounds, item.snappedCorners)
     for (const id of PLAN_CORNER_IDS) {
       const savedCorner = item.savedFileData[id]

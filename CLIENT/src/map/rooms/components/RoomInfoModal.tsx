@@ -91,6 +91,10 @@ export function RoomInfoModal({
   anchor,
   onClose,
   onBuildRoute,
+  onShowSchedule,
+  selectedBuild,
+  selectedFloor,
+  onOpenBugReport,
   isAdminMode,
   onSaveRoom,
 }: {
@@ -98,6 +102,10 @@ export function RoomInfoModal({
   anchor: { x: number; y: number };
   onClose: () => void;
   onBuildRoute?: (room: Room) => void;
+  onShowSchedule?: () => void;
+  selectedBuild: string;
+  selectedFloor: string;
+  onOpenBugReport: (context: string) => void;
   isAdminMode: boolean;
   onSaveRoom?: (changes: RoomEditPayload) => Promise<void>;
 }) {
@@ -108,6 +116,18 @@ export function RoomInfoModal({
   const [draft, setDraft] = React.useState<RoomDraft>(() => toDraft(room));
   const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveError, setSaveError] = React.useState<string>('');
+
+  const reportIssue = React.useCallback(() => {
+    const context = [
+      `Комната: ${room.key}`,
+      `Корпус: ${text(room.build) || selectedBuild || '—'}`,
+      `Этаж: ${text(room.floor) || selectedFloor || '—'}`,
+      `Номер: ${roomNo || '—'}`,
+      `Категория: ${category || '—'}`,
+    ].join('\n');
+
+    onOpenBugReport(context);
+  }, [category, onOpenBugReport, room.build, room.floor, room.key, roomNo, selectedBuild, selectedFloor]);
 
   React.useEffect(() => {
     setDraft(toDraft(room));
@@ -321,10 +341,32 @@ export function RoomInfoModal({
               <HudButton
                 title="Построить маршрут"
                 data={{ action: 'build-route-from-room', roomKey: room.key }}
-                className="roomModalRouteBtn"
+                className="roomModalActionBtn roomModalRouteBtn"
                 onClick={() => onBuildRoute(room)}
               >
                 Построить маршрут
+              </HudButton>
+              {onShowSchedule ? (
+                <HudButton
+                  title="Показать расписание"
+                  data={{ action: 'show-room-schedule', roomKey: room.key }}
+                  className="roomModalActionBtn roomModalScheduleBtn"
+                  onClick={onShowSchedule}
+                >
+                  Показать расписание
+                </HudButton>
+              ) : null}
+              <HudButton
+                title="Сообщить об ошибке"
+                data={{ action: 'report-room-error', roomKey: room.key }}
+                className="roomModalActionBtn roomModalReportBtn"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  reportIssue();
+                }}
+              >
+                Сообщить об ошибке
               </HudButton>
             </div>
           ) : null}

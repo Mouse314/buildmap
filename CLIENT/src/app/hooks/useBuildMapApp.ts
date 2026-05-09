@@ -412,6 +412,13 @@ export function useBuildMapApp() {
     return builds.map((b) => b.id)
   }, [manifest])
 
+  const buildOptionsMeta = React.useMemo(() => {
+    return (manifest?.builds ?? []).map((build) => ({
+      id: build.id,
+      hasFloors: build.floors.length > 0,
+    }))
+  }, [manifest])
+
   const floorOptions = React.useMemo(() => {
     const b = (manifest?.builds ?? []).find((x) => x.id === selectedBuild)
     const floors = b?.floors ?? []
@@ -1567,6 +1574,7 @@ export function useBuildMapApp() {
     isTouchDevice,
     selectedRoom,
     buildOptions,
+    buildOptionsMeta,
     floorOptions,
     titleText,
     categoryOptions,

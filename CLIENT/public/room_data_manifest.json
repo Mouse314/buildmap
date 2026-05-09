@@ -12,6 +12,18 @@
       ]
     },
     {
+      "id": "build10",
+      "floors": []
+    },
+    {
+      "id": "build11",
+      "floors": []
+    },
+    {
+      "id": "build12",
+      "floors": []
+    },
+    {
       "id": "build13",
       "floors": [
         "floor0",
@@ -32,6 +44,10 @@
       ]
     },
     {
+      "id": "build15",
+      "floors": []
+    },
+    {
       "id": "build16",
       "floors": [
         "floor1",
@@ -41,12 +57,68 @@
       ]
     },
     {
+      "id": "build17",
+      "floors": []
+    },
+    {
+      "id": "build18",
+      "floors": []
+    },
+    {
       "id": "build19",
       "floors": [
         "floor1",
         "floor2",
         "floor3"
       ]
+    },
+    {
+      "id": "build2",
+      "floors": []
+    },
+    {
+      "id": "build20",
+      "floors": []
+    },
+    {
+      "id": "build21",
+      "floors": []
+    },
+    {
+      "id": "build22",
+      "floors": []
+    },
+    {
+      "id": "build23",
+      "floors": []
+    },
+    {
+      "id": "build3",
+      "floors": []
+    },
+    {
+      "id": "build4",
+      "floors": []
+    },
+    {
+      "id": "build5",
+      "floors": []
+    },
+    {
+      "id": "build6",
+      "floors": []
+    },
+    {
+      "id": "build7",
+      "floors": []
+    },
+    {
+      "id": "build8",
+      "floors": []
+    },
+    {
+      "id": "build9",
+      "floors": []
     }
   ]
 }

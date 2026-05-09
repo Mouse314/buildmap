@@ -4,6 +4,9 @@ import { HudButton } from './ui/hud'
 export type GlassDropdownOption = {
   value: string
   label: string
+  context?: React.ReactNode
+  inactive?: boolean
+  onSelect?: () => void
 }
 
 export function GlassDropdown({
@@ -24,6 +27,10 @@ export function GlassDropdown({
 
   const selectedLabel = React.useMemo(() => {
     return options.find((o) => o.value === value)?.label ?? ''
+  }, [options, value])
+
+  const selectedOption = React.useMemo(() => {
+    return options.find((o) => o.value === value) ?? null
   }, [options, value])
 
   React.useEffect(() => {
@@ -50,11 +57,12 @@ export function GlassDropdown({
       ref={rootRef}
       className={['glassDropdown', className].filter(Boolean).join(' ')}
       data-open={open ? 'true' : 'false'}
+      data-selected-inactive={selectedOption?.inactive ? 'true' : 'false'}
     >
       <HudButton
         title={selectedLabel}
         data={{ action: 'toggle-glass-dropdown' }}
-        className={['glassDropdownButton', buttonClassName].filter(Boolean).join(' ')}
+        className={['glassDropdownButton', selectedOption?.inactive ? 'glassDropdownButtonInactive' : null, buttonClassName].filter(Boolean).join(' ')}
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -78,12 +86,21 @@ export function GlassDropdown({
             <HudButton
               key={opt.value}
               title={opt.label}
+              context={opt.context}
               data={{ action: 'select-glass-dropdown-option', value: opt.value }}
-              className={selected ? 'glassDropdownItem glassDropdownItemSelected' : 'glassDropdownItem'}
+              className={[
+                'glassDropdownItem',
+                selected ? 'glassDropdownItemSelected' : null,
+                opt.inactive ? 'glassDropdownItemInactive' : null,
+              ].filter(Boolean).join(' ')}
               role="option"
               aria-selected={selected}
               onClick={() => {
-                onChange(opt.value)
+                if (opt.inactive && opt.onSelect) {
+                  opt.onSelect()
+                } else {
+                  onChange(opt.value)
+                }
                 setOpen(false)
               }}
             >

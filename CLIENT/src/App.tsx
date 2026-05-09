@@ -11,7 +11,7 @@ import { OfficesDirectory } from './interface/app/OfficesDirectory'
 import { ScheduleModal } from './interface/app/ScheduleModal'
 import { ScheduleRoomModal } from './interface/app/ScheduleRoomModal'
 import { ScheduleStatsModal } from './interface/app/ScheduleStatsModal'
-import { HudButton, HudPanel } from './interface/ui/hud'
+import { HudButton, HudModal, HudPanel } from './interface/ui/hud'
 import { buildLabel, floorLabel } from './app/utils/roomLabels'
 import { useBuildMapApp } from './app/hooks/useBuildMapApp'
 import gpsButtonIcon from '../assets/icon/free-icon-gps-navigation-4398552.png'
@@ -26,6 +26,9 @@ function App() {
   const [mapModeDockOpen, setMapModeDockOpen] = React.useState(true)
   const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
   const [isScheduleStatsModalOpen, setIsScheduleStatsModalOpen] = React.useState(false)
+  const [bugReportOpen, setBugReportOpen] = React.useState(false)
+  const [bugReportText, setBugReportText] = React.useState('')
+  const [bugReportContext, setBugReportContext] = React.useState('')
 
   const {
     error,
@@ -83,6 +86,7 @@ function App() {
     selectedRoomScheduleLabel,
     selectedRoomScheduleLessons,
     buildOptions,
+    buildOptionsMeta,
     floorOptions,
     titleText,
     categoryOptions,
@@ -123,6 +127,7 @@ function App() {
     onHoverRoom,
     onSaveSelectedRoomChanges,
     onBuildRouteFromRoom,
+    setMapMode,
     onCloseRoomModal,
     updateGeoCornerInput,
     clearSelectedBuildGeoInputs,
@@ -154,6 +159,29 @@ function App() {
     }
   }, [mapMode])
 
+  const openBugReport = React.useCallback((context: string) => {
+    setBugReportContext(context)
+    setBugReportOpen(true)
+  }, [])
+
+  const closeBugReport = React.useCallback(() => {
+    setBugReportOpen(false)
+    setBugReportText('')
+    setBugReportContext('')
+  }, [])
+
+  const submitBugReport = React.useCallback((event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const message = bugReportText.trim()
+    if (message.length === 0) return
+
+    const subject = encodeURIComponent('Сообщение об ошибке BuildMap')
+    const body = encodeURIComponent(`Описание проблемы:\n${message}\n\nКонтекст:\n${bugReportContext.length > 0 ? bugReportContext : '—'}`)
+
+    window.location.href = `mailto:teotet@yandex.ru?subject=${subject}&body=${body}`
+    closeBugReport()
+  }, [bugReportContext, bugReportText, closeBugReport])
+
   if (error) {
     return (
       <div className="appError">
@@ -168,6 +196,7 @@ function App() {
       <TopBar
         selectedBuild={selectedBuild}
         buildOptions={buildOptions}
+        buildOptionsMeta={buildOptionsMeta}
         buildLabel={buildLabel}
         onBuildChange={onBuildChange}
         selectedCategory={selectedCategory}
@@ -193,6 +222,7 @@ function App() {
         isLocationTracking={isLocationTracking}
         onLocateUser={locateUserOnMap}
         locationStatusText={locationStatusText}
+        onOpenBugReport={openBugReport}
       />
 
       <FloorsPanel
@@ -265,8 +295,12 @@ function App() {
           room={selectedRoom}
           anchor={modalAnchor}
           isAdminMode={isAdminMode}
+          selectedBuild={selectedBuild}
+          selectedFloor={selectedFloor}
           onSaveRoom={onSaveSelectedRoomChanges}
           onBuildRoute={onBuildRouteFromRoom}
+          onShowSchedule={() => setMapMode('schedule')}
+          onOpenBugReport={openBugReport}
           onClose={onCloseRoomModal}
         />
       ) : null}
@@ -288,6 +322,46 @@ function App() {
           ))}
         </div>
       ) : null}
+
+      <HudModal
+        isOpen={bugReportOpen}
+        onClose={closeBugReport}
+        title="Сообщение об ошибке"
+        overlayClassName="bugReportOverlay"
+        surfaceClassName="bugReportModal"
+        titleClassName="bugReportTitle"
+        bodyClassName="bugReportBody"
+      >
+        <form className="bugReportForm" onSubmit={submitBugReport}>
+          <div className="bugReportIntroText">
+            Пожалуйста, опишите, в чём заключается проблема с корпусом / помещением или их отображением на карте. Ваши замечания обязательно будут приняты к сведению в ближайших редакциях проекта
+          </div>
+          <textarea
+            className="bugReportInput"
+            value={bugReportText}
+            onChange={(event) => setBugReportText(event.target.value)}
+            placeholder="Опишите проблему"
+            required
+            autoFocus
+          />
+          <div className="bugReportOutroText">
+            Нажав кнопку "Отправить", вы будете перенаправлены в почтовый сервис, где остаётся лишь отправить письмо - и всё :)
+          </div>
+          <div className="bugReportActions">
+            <HudButton
+              title="Отмена"
+              data={{ action: 'cancel-bug-report' }}
+              className="topButton bugReportButton"
+              onClick={closeBugReport}
+            >
+              Отмена
+            </HudButton>
+            <HudButton title="Отправить" data={{ action: 'submit-bug-report' }} className="topButton bugReportButton" type="submit">
+              Отправить
+            </HudButton>
+          </div>
+        </form>
+      </HudModal>
 
       {locationStatusText ? (
         <div className="locationStatusFloating" aria-live="polite">{locationStatusText}</div>

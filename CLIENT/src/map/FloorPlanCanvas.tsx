@@ -817,7 +817,7 @@ export function FloorPlanCanvas({
 
         {userLocationOverlay ? (
           <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.64, 0]}>
-            <Html position={[userLocationOverlay.x, userLocationOverlay.y, 0]} sprite center>
+            <Html position={[userLocationOverlay.x, userLocationOverlay.y, 0]} sprite center zIndexRange={[20, 0]}>
               {userLocationOverlay.mode === 'inside' ? (
                 <div className="userLocationDot" title={userLocationOverlay.accuracyText ?? 'Текущее местоположение'}>
                   <span className="userLocationPulse" />
