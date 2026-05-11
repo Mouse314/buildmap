@@ -2,8 +2,8 @@ name: Weekly Schedule Refresh
 
 on:
   schedule:
-    # Thursday 12:00 UTC (15:00 Moscow).
-    - cron: '0 12 * * 4'
+    # Monday 12:00 UTC (15:00 Moscow).
+    - cron: '0 12 * * 1'
   workflow_dispatch:
     inputs:
       target_date:
