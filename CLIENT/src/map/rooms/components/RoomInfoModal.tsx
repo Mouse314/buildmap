@@ -4,7 +4,7 @@ import { getCategoryByRoomId } from '../utils/roomCategories';
 import { formatRoomDescription } from '../utils/stairDirection';
 import { HudAnchoredModal, HudButton } from '../../../interface/ui/hud';
 
-function text(value: string | undefined): string {
+function text(value: string | null | undefined): string {
   return (value ?? '').trim();
 }
 
@@ -182,7 +182,7 @@ export function RoomInfoModal({
       isOpen
       anchor={anchor}
       onClose={onClose}
-      title="Информация о комнате"
+      title="Информация о помещении"
       overlayClassName="roomModalOverlay"
       surfaceClassName={`roomModal ${isAdminMode ? 'roomModalAdmin' : ''}`}
       headerClassName="roomModalHeader"

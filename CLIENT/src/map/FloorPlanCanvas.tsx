@@ -26,6 +26,9 @@ import { getRoomFillColor } from './rooms/utils/roomPalette';
 import { buildRoundedRoutePoints, buildRouteJumpGroups } from '../navigation/mapRouteUi';
 import { HudButton } from '../interface/ui/hud';
 
+const MIN_DISTANCE = 10;
+const MAX_DISTANCE = 300;
+
 // Обновляет время в шейдере маршрута для анимации потока.
 function RouteShaderTicker({ material }: { material: THREE.ShaderMaterial }) {
   const materialRef = React.useRef<THREE.ShaderMaterial | null>(null);
@@ -90,6 +93,7 @@ export function FloorPlanCanvas({
   showGraphOverlay = false,
   userLocationOverlay = null,
   geoAnchorMarkers = null,
+  zoomRequest = null,
 }: {
   rooms: Room[];
   roomGraph?: RoomGraph | null;
@@ -138,6 +142,7 @@ export function FloorPlanCanvas({
     label: string;
     isFilled: boolean;
   }> | null;
+  zoomRequest?: { dir: 'in' | 'out'; token: number } | null;
 }) {
   const polygons = React.useMemo(() => roomsToPolygons(rooms), [rooms]);
   const [hoveredPolyKey, setHoveredPolyKey] = React.useState<string | null>(null);
@@ -218,6 +223,8 @@ export function FloorPlanCanvas({
     if (typeof window === 'undefined') return false;
     return window.matchMedia?.('(pointer: coarse)').matches ?? false;
   }, []);
+
+
 
   const dpr = React.useMemo(() => {
     if (preset.dpr.mode === 'fixed') return Math.min(deviceDpr, preset.dpr.value);
@@ -520,18 +527,19 @@ export function FloorPlanCanvas({
           ONE: THREE.TOUCH.PAN,
           TWO: THREE.TOUCH.DOLLY_PAN,
         }}
-        minDistance={10}
-        maxDistance={150}
+        minDistance={MIN_DISTANCE}
+        maxDistance={MAX_DISTANCE}
       />
 
       <SmoothWheelZoom
         controlsRef={controlsRef}
         isDragging={isDragging}
         dragRef={dragRef}
-        minDistance={10}
-        maxDistance={150}
+        minDistance={MIN_DISTANCE}
+        maxDistance={MAX_DISTANCE}
         wheelStrength={isTouchDevice ? 0 : 0.0014}
         smoothTime={18}
+        zoomRequest={zoomRequest}
       />
 
       <HoverHighlighter
@@ -545,7 +553,7 @@ export function FloorPlanCanvas({
             : null
         }
         glowOpacity={0.38}
-        glowBoost={9.0}
+        glowBoost={theme === 'dark' ? 6.0 : 9.0}
         renderOrder={7}
       />
 
@@ -560,7 +568,7 @@ export function FloorPlanCanvas({
             : null
         }
         glowOpacity={0.32}
-        glowBoost={8.0}
+        glowBoost={theme === 'dark' ? 7.0 : 8.0}
         renderOrder={9}
       />
 

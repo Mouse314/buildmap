@@ -335,7 +335,7 @@ export function mapGeoPointToOverlay(
       y: projection.projected.y,
       accuracyText,
     },
-    statusText: 'Текущее местоположение отображено на плане',
+    statusText: 'Текущее местоположение отображено на карте',
   }
 }
 

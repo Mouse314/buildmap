@@ -5,7 +5,7 @@ import * as THREE from 'three';
 export function HoverHighlighter({
   active,
   glowOpacity = 0.22,
-  glowBoost = 1.2,
+  glowBoost = 1.0,
   renderOrder = 9,
 }: {
   active: { key: string; geometry: THREE.BufferGeometry; color: string } | null;

@@ -29,6 +29,13 @@ function App() {
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
   const [bugReportText, setBugReportText] = React.useState('')
   const [bugReportContext, setBugReportContext] = React.useState('')
+  const zoomTokenRef = React.useRef(0)
+  const [zoomRequest, setZoomRequest] = React.useState<{ dir: 'in' | 'out'; token: number } | null>(null)
+
+  const requestMapZoom = React.useCallback((dir: 'in' | 'out') => {
+    zoomTokenRef.current += 1
+    setZoomRequest({ dir, token: zoomTokenRef.current })
+  }, [])
 
   const {
     error,
@@ -283,6 +290,7 @@ function App() {
           onSelectRoomKey={onSelectRoomKey}
           onOpenRoom={onOpenRoom}
           onHoverRoom={onHoverRoom}
+          zoomRequest={zoomRequest}
         />
       </div>
 
@@ -475,24 +483,49 @@ function App() {
         </HudButton>
       </HudPanel>
 
-      <HudButton
-        title="GPS"
-        data={{ action: 'toggle-gps' }}
-        className={isLocationTracking ? 'gpsFab gpsFabActive' : 'gpsFab'}
-        onClick={locateUserOnMap}
-        aria-label={isLocationTracking ? 'Выключить позиционирование' : 'Включить позиционирование'}
-        hint={isLocationTracking
-          ? (isLocating ? 'GPS: идёт уточнение местоположения' : 'Выключить GPS')
-          : 'Включить GPS'}
-      >
-        <img className="gpsFabIcon" src={gpsButtonIcon} alt="" aria-hidden="true" />
-      </HudButton>
+      <div className="mapFabStack">
+        <HudButton
+          title="GPS"
+          data={{ action: 'toggle-gps' }}
+          className={isLocationTracking ? 'gpsFab gpsFabActive' : 'gpsFab'}
+          onClick={locateUserOnMap}
+          aria-label={isLocationTracking ? 'Выключить позиционирование' : 'Включить позиционирование'}
+          hint={isLocationTracking
+            ? (isLocating ? 'GPS: идёт уточнение местоположения' : 'Выключить GPS')
+            : 'Включить GPS'}
+        >
+          <img className="gpsFabIcon" src={gpsButtonIcon} alt="" aria-hidden="true" />
+        </HudButton>
+
+        <div className="mapZoomFabGroup" role="group" aria-label="Масштаб карты">
+          <HudButton
+            title="Приблизить"
+            data={{ action: 'zoom-in' }}
+            className="mapZoomFab"
+            onClick={() => requestMapZoom('in')}
+            aria-label="Приблизить карту"
+            hint="Приблизить"
+          >
+            +
+          </HudButton>
+          <HudButton
+            title="Отдалить"
+            data={{ action: 'zoom-out' }}
+            className="mapZoomFab"
+            onClick={() => requestMapZoom('out')}
+            aria-label="Отдалить карту"
+            hint="Отдалить"
+          >
+            -
+          </HudButton>
+        </div>
+      </div>
 
       {mapMode === 'routes' ? (
         <div className="routeBottomCluster">
           <div className="routeInfoBlock routeInfoBlockLeft" aria-hidden>
             <div className="routeInfoText">
-              ℹ️Выберите пункты (откуда / куда), укажите нужное помещение на карте, либо воспользуйтесь поиском сверху.
+              ℹ️Откуда / Куда : укажите нужное помещение на карте, либо воспользуйтесь поиском сверху.
               Указатели на лестницах говорят о том, что нужно перейти с этажа на этаж
             </div>
           </div>
@@ -523,7 +556,7 @@ function App() {
                   onClick={onSetMainEntrance}
                   hint="Сбросить точку старта к главному входу"
                 >
-                  От главного входа
+                  От входа
                 </HudButton>
               </div>
               <div className="routeMetaLine">Откуда: {routeFrom ? routeFrom.label : 'Главный вход'}</div>

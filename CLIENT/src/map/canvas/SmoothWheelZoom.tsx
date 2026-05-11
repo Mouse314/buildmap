@@ -8,12 +8,14 @@ export function SmoothWheelZoom({
   controlsRef,
   isDragging = false,
   dragRef,
-  minZoom = 2,
-  maxZoom = 600,
+  minZoom = 1,
+  maxZoom = 1600,
   minDistance = 10,
-  maxDistance = 140,
+  maxDistance = 1400,
   wheelStrength = 0.0016,
   smoothTime = 18,
+  zoomRequest = null,
+  buttonZoomFactor = 0.85,
 }: {
   controlsRef: React.RefObject<OrbitControlsImpl | null>;
   isDragging?: boolean;
@@ -24,6 +26,8 @@ export function SmoothWheelZoom({
   maxDistance?: number;
   wheelStrength?: number;
   smoothTime?: number;
+  zoomRequest?: { dir: 'in' | 'out'; token: number } | null;
+  buttonZoomFactor?: number;
 }) {
   const { camera, gl } = useThree();
 
@@ -118,6 +122,28 @@ export function SmoothWheelZoom({
       el.removeEventListener('wheel', onWheel);
     };
   }, [camera, gl, isOrtho, maxDistance, maxZoom, minDistance, minZoom, ndc, plane, raycaster, wheelStrength, controlsRef, tmpPoint, dragRef]);
+
+  React.useEffect(() => {
+    if (!zoomRequest) return;
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    const factor = zoomRequest.dir === 'in' ? buttonZoomFactor : 1 / buttonZoomFactor;
+    lastWheelAtRef.current = performance.now();
+    cursorAnchorRef.current = null;
+
+    if (isOrtho) {
+      if (!('zoom' in camera)) return;
+      const zoomable = camera as THREE.Camera & { zoom: number };
+      const next = THREE.MathUtils.clamp(zoomable.zoom * factor, minZoom, maxZoom);
+      targetZoomRef.current = next;
+      return;
+    }
+
+    const curDist = camera.position.distanceTo(controls.target);
+    const nextDist = THREE.MathUtils.clamp(curDist * factor, minDistance, maxDistance);
+    targetDistanceRef.current = nextDist;
+  }, [zoomRequest, buttonZoomFactor, camera, controlsRef, isOrtho, maxDistance, maxZoom, minDistance, minZoom]);
 
   useFrame((_, delta) => {
     

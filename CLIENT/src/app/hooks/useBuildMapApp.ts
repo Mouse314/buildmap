@@ -1188,7 +1188,7 @@ export function useBuildMapApp() {
     locationRequestInFlightRef.current = true
 
     setIsLocating(true)
-    setLocationStatusText('Уточняем текущее местоположение…')
+    // setLocationStatusText('Уточняем текущее местоположение…')
 
     navigator.geolocation.getCurrentPosition(
       (position) => {

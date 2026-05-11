@@ -210,7 +210,7 @@ export function TopBar({
                             onChange={onCategoryChange}
                             buttonClassName="topSelect topSelectCategory"
                             options={[
-                                { value: '__all__', label: 'Не выбрано' },
+                                { value: '__all__', label: 'Все помещения' },
                                 ...categoryOptions.map((c) => ({ value: c, label: c })),
                             ]}
                         />
@@ -343,6 +343,7 @@ export function TopBar({
 
                 <HudButton
                     title={isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                    hint={isAdminMode ? 'Режим администратора включён' : 'Включить режим администратора для доступа к скрытым функциям'}    
                     data={{ action: 'toggle-admin' }}
                     className={isAdminMode ? 'topButton topDesktopOnly adminModeButton adminModeButtonActive' : 'topButton topDesktopOnly adminModeButton'}
                     onClick={onToggleAdminMode}
@@ -511,6 +512,7 @@ export function TopBar({
                             <div className="mobileControlsRow">
                                 <HudButton
                                     title={isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                                    hint={isAdminMode ? 'Режим администратора включён' : 'Включить режим администратора для доступа к скрытым функциям'}
                                     data={{ action: 'toggle-admin-mobile' }}
                                     className={isAdminMode ? 'topButton adminModeButton adminModeButtonActive' : 'topButton adminModeButton'}
                                     onClick={onToggleAdminMode}

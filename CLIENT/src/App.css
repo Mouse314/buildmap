@@ -17,6 +17,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.appRoot button {
+  -webkit-tap-highlight-color: transparent;
+}
+.appRoot[data-theme='dark'] .hudButton {
+  color: #f0f5ff;
+}
+
 .hudButton:focus,
 .hudButton:focus-visible {
   outline: none;
@@ -28,6 +35,31 @@
 
 .hudButton:disabled {
   cursor: not-allowed;
+}
+
+.appRoot[data-theme='dark'] button {
+  transition:
+    outline-color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .appRoot[data-theme='dark'] button:hover:not(:disabled) {
+    outline: 2px solid rgba(138, 226, 255, 0.45);
+    outline-offset: 0;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .appRoot button:focus,
+  .appRoot button:focus-visible,
+  .appRoot button:active {
+    outline: none;
+    outline-offset: 0;
+  }
 }
 
 .hudButtonContent {
@@ -97,6 +129,7 @@
 .hudPanelBodyWrapCollapsed {
   grid-template-rows: 0fr;
   overflow: hidden;
+  height: 0;
 }
 
 .hudPanelBody {
@@ -127,7 +160,7 @@
 
 .hudAnchoredModalSurface {
   opacity: 1;
-  animation: none;
+  animation: roomHoverTipIn 110ms ease-out both;
 }
 
 @keyframes hudModalOverlayIn {
@@ -252,17 +285,18 @@
   inset: 0;
   padding: 0;
   background: transparent;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .roomModal {
   position: fixed;
-  width: clamp(280px, 34vw, 420px);
+  width: clamp(300px, 34vw, 420px);
   max-width: calc(100vw - 24px);
   max-height: min(78vh, 680px);
   display: flex;
   flex-direction: column;
   color: #111;
+  animation: roomHoverTipIn 110ms ease-out both;
 }
 .appRoot[data-theme='dark'] .roomModal {
   color: #f0f5ff;
@@ -274,12 +308,12 @@
 
 .roomModalAbove {
   transform: translate(-50%, calc(-100% - 12px));
-  animation: none;
+  animation: roomModalAboveIn 110ms ease-out both;
 }
 
 .roomModalBelow {
   transform: translate(-50%, 12px);
-  animation: none;
+  animation: roomModalBelowIn 110ms ease-out both;
 }
 
 @keyframes roomModalOverlayIn {
@@ -443,12 +477,12 @@
   margin-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .roomModalActionBtn {
   width: 100%;
-  height: 40px;
+  height: 30px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -471,25 +505,25 @@
 }
 
 .roomModalScheduleBtn {
-  border: 2px solid rgba(133, 195, 255, 0.46);
-  background: rgba(182, 228, 255, 0.36);
+  border: 2px solid rgba(148, 148, 148, 0.46);
+  background: rgba(255, 255, 255, 0.42);
   color: #111;
 }
 
 .roomModalScheduleBtn:hover {
   transition: 150ms ease-out;
-  background: rgba(182, 228, 255, 0.52);
+  background: rgba(255, 255, 255, 0.52);
 }
 
 .roomModalReportBtn {
-  border: 2px solid rgba(255, 173, 173, 0.54);
-  background: rgba(255, 214, 214, 0.38);
+  border: 2px solid rgba(144, 144, 144, 0.54);
+  background: rgba(255, 255, 255, 0.42);
   color: #111;
 }
 
 .roomModalReportBtn:hover {
   transition: 150ms ease-out;
-  background: rgba(255, 214, 214, 0.54);
+  background: rgba(255, 255, 255, 0.54);
 }
 
 .roomModalSaveBtn {
@@ -619,7 +653,7 @@
 
 .mapModeDock {
   position: absolute;
-  z-index: 125;
+  z-index: 1025;
   left: 12px;
   bottom: 14px;
   border-radius: 20px;
@@ -647,7 +681,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: 10px;
   width: 30px;
   border-radius: 10px;
   border: 2px solid rgba(206, 209, 255, 0.267);
@@ -691,6 +725,10 @@
   padding: 8px;
   max-width: min(92vw, 620px);
 }
+.appRoot[data-theme='dark'] .mapModeSwitchWrap {
+  border-color: rgba(206, 209, 255, 0.11);
+  background: rgba(31, 31, 31, 0.34);
+}
 
 .routeBottomCluster {
   position: absolute;
@@ -698,11 +736,12 @@
   left: 50%;
   bottom: 14px;
   transform: translateX(-50%);
-  width: max-content;
-  max-width: calc(100% - 22px);
+  width: calc(100% - 600px);
+  /* max-width: calc(100% - 600px); */
   display: flex;
   gap: 10px;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
   pointer-events: none;
 }
 
@@ -712,7 +751,7 @@
 
 .routeInfoBlock {
   width: clamp(260px, 22vw, 360px);
-  height: 89px;
+  height: 90px;
   border-radius: 14px;
   border: 2px solid rgba(206, 209, 255, 0.22);
   background: rgba(167, 167, 167, 0.46);
@@ -724,6 +763,7 @@
   font-size: 0.76rem;
   line-height: 1.3;
   font-weight: 700;
+  overflow: hidden;
 }
 
 .routeInfoTitle {
@@ -760,17 +800,22 @@
   font-weight: 700;
   color: #111;
 }
+.appRoot[data-theme='dark'] .routeHintItem {
+  border-color: rgba(206, 209, 255, 0.11);
+  background: rgba(31, 31, 31, 0.34);
+  color: #f0f5ff;
+}
 
 .locationStatusFloating {
   position: absolute;
   z-index: 126;
   left: 50%;
-  bottom: 98px;
+  bottom: 130px;
   transform: translateX(-50%);
   width: min(92vw, 620px);
   border-radius: 12px;
   border: 2px solid rgba(206, 209, 255, 0.267);
-  background: rgba(167, 167, 167, 0.72);
+  background: rgba(167, 167, 167, 0.52);
   backdrop-filter: blur(5px) saturate(115%);
   -webkit-backdrop-filter: blur(5px) saturate(115%);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
@@ -958,18 +1003,42 @@
   font-weight: 700;
   padding: 0 12px;
 }
+.mapModeBtn:hover {
+  transition: 150ms ease-out;
+  background: rgba(255, 255, 255, 0.42);
+}
+.appRoot[data-theme='dark'] .mapModeBtn {
+  background: rgba(23, 23, 23, 0.12);
+  border-color: rgba(206, 209, 255, 0.18);
+  color: #f0f5ff;
+}
+.appRoot[data-theme='dark'] .mapModeBtn:hover {
+  transition: 150ms ease-out;
+  background: rgba(13, 3, 125, 0.32);
+}
 
 .mapModeBtnActive {
   background: rgba(255, 255, 255, 0.45);
   border-color: rgba(206, 209, 255, 0.7);
 }
+.appRoot[data-theme='dark'] .mapModeBtnActive {
+  background: rgba(6, 6, 59, 0.3);
+  border-color: rgba(34, 38, 94, 0.5);
+}
 
-.gpsFab {
+.mapFabStack {
   position: absolute;
   z-index: 127;
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.gpsFab {
   width: 54px;
   height: 54px;
   border-radius: 50%;
@@ -986,8 +1055,14 @@
 
 .gpsFab:hover {
   transition: 150ms ease-out;
-  transform: translateY(-50%) scale(1.04);
+  transform: scale(1.04);
   background: rgba(0, 126, 190, 0.8);
+}
+
+.appRoot[data-theme='dark'] .gpsFab:hover {
+  border-color: rgba(138, 226, 255, 0.6);
+  background: rgba(16, 74, 136, 0.6);
+  box-shadow: 0 0 0 2px rgba(138, 226, 255, 0.22), 0 12px 28px rgba(15, 60, 140, 0.32);
 }
 
 .gpsFabActive {
@@ -1004,6 +1079,49 @@
   object-fit: contain;
   object-position: center;
   transform: translate(-2px, 1px);
+}
+
+.mapZoomFabGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mapZoomFab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(206, 209, 255, 0.26);
+  background: rgba(167, 167, 167, 0.62);
+  backdrop-filter: blur(5px) saturate(112%);
+  -webkit-backdrop-filter: blur(5px) saturate(112%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  color: #10243b;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapZoomFab:hover {
+  transition: 150ms ease-out;
+  transform: scale(1.04);
+  background: rgba(0, 126, 190, 0.76);
+}
+
+.appRoot[data-theme='dark'] .mapZoomFab {
+  border-color: rgba(206, 209, 255, 0.16);
+  background: rgba(23, 23, 23, 0.18);
+  color: #f0f5ff;
+}
+
+.appRoot[data-theme='dark'] .mapZoomFab:hover {
+  border-color: rgba(138, 226, 255, 0.55);
+  background: rgba(16, 74, 136, 0.56);
+  box-shadow: 0 0 0 2px rgba(138, 226, 255, 0.2), 0 10px 24px rgba(15, 60, 140, 0.28);
 }
 
 .mapModeRouteMeta {
@@ -1062,6 +1180,11 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   color: #111;
   font-weight: 800;
+}
+.appRoot[data-theme='dark'] .officesDirectoryFab {
+  border-color: rgba(206, 209, 255, 0.11);
+  background: rgba(31, 31, 31, 0.34);
+  color: #f0f5ff;
 }
 
 .officesDirectoryFab:hover {
@@ -1341,6 +1464,10 @@
   padding: 6px;
   max-width: min(96vw, 1240px);
 }
+.appRoot[data-theme='dark'] .schedulePeriodDock {
+  border-color: rgba(206, 209, 255, 0.11);
+  background: rgba(31, 31, 31, 0.34);
+}
 
 .schedulePeriodSwitch {
   display: inline-flex;
@@ -1352,15 +1479,25 @@
 .schedulePeriodBtn {
   min-width: 84px;
   height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: rgba(255, 255, 255, 0.32);
   color: #111;
   font-size: 0.8rem;
   font-weight: 700;
 }
+.appRoot[data-theme='dark'] .schedulePeriodBtn {
+  background: rgba(23, 23, 23, 0.12);
+  color: #f0f5ff;
+}
 
 .schedulePeriodBtnActive {
   background: rgba(255, 255, 255, 0.74);
+}
+.appRoot[data-theme='dark'] .schedulePeriodBtnActive {
+  background: rgba(74, 74, 104, 0.3);
 }
 
 .scheduleCalendarField {
@@ -1391,8 +1528,9 @@
 
 .scheduleMapFilterField {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 4px;
   font-size: 0.76rem;
   font-weight: 700;
@@ -1421,7 +1559,7 @@
 .scheduleActionsColumn {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   margin-left: auto;
 }
 
@@ -1437,7 +1575,7 @@
 }
 
 .scheduleOpenBtn {
-  height: 42px;
+  height: 36px;
   min-width: 220px;
   border-radius: 14px;
   border: 2px solid rgba(206, 209, 255, 0.3);
@@ -1448,6 +1586,11 @@
   color: #111;
   font-weight: 800;
   padding: 0 16px;
+}
+.appRoot[data-theme='dark'] .scheduleOpenBtn {
+  border-color: rgba(206, 209, 255, 0.11);
+  background: rgba(31, 31, 31, 0.34);
+  color: #f0f5ff;
 }
 
 .scheduleOpenBtn:hover {
@@ -1485,12 +1628,12 @@
 
 .scheduleRoomModalAbove {
   transform: translate(-50%, calc(-100% - 12px));
-  animation: none;
+  animation: roomModalAboveIn 110ms ease-out both;
 }
 
 .scheduleRoomModalBelow {
   transform: translate(-50%, 12px);
-  animation: none;
+  animation: roomModalBelowIn 110ms ease-out both;
 }
 
 @keyframes scheduleRoomModalAboveIn {
@@ -2051,10 +2194,12 @@
   }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1200px) {
   .routeBottomCluster {
     width: min(96vw, 560px);
+    width: 100%;
     justify-content: center;
+    bottom: 70px;
   }
 
   .routeBottomCluster .routeInfoBlock {
@@ -2076,8 +2221,9 @@
   .mapModeSwitchWrap {
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     width: 100%;
-    max-width: none;
+    padding: 8px 0;
   }
 
   .mapModeRouteMeta {
@@ -2128,13 +2274,23 @@
     margin-left: 0;
   }
 
-  .gpsFab {
+  .mapFabStack {
     right: 10px;
-    top: auto;
+    top: 30%;
     bottom: 132px;
     transform: none;
+    gap: 8px;
+  }
+
+  .gpsFab {
     width: 50px;
     height: 50px;
+  }
+
+  .mapZoomFab {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
 
   .gpsFab:hover {
@@ -2143,7 +2299,7 @@
 
   .officesDirectoryFab {
     right: 10px;
-    bottom: 76px;
+    bottom: 10px;
     height: 40px;
     font-size: 0.8rem;
     padding: 0 12px;
@@ -2164,17 +2320,18 @@
   .scheduleBottomCluster {
     left: 50%;
     right: auto;
-    bottom: 10px;
+    bottom: 60px;
     flex-direction: column;
     align-items: center;
     transform: translateX(-50%);
     width: calc(100% - 16px);
     max-width: 560px;
+    height: 300px;
   }
 
   .schedulePeriodDock {
     max-width: none;
-    width: 100%;
+    width: calc(100% - 20px);
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -2245,10 +2402,10 @@
 }
 
 .sidePanelToggle {
-  height: 34px;
-  width: 34px;
+  height: 24px;
+  width: 42px;
   padding: 0;
-  border-radius: 50%;
+  border-radius: 10px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(255, 255, 255, 0.20);
   color: #111;
@@ -2352,7 +2509,7 @@
   backdrop-filter: blur(5px) saturate(110%);
   -webkit-backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px) saturate(110%);
-  color: #111;
+  color: #111111;
   outline: none;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   font-weight: 700;
@@ -2360,6 +2517,11 @@
   align-items: center;
   justify-content: center;
 }
+.appRoot[data-theme='dark'] .floorButton {
+  background: rgba(58, 58, 58, 0.35);
+  color: #d7e6ff;
+}
+
 
 .floorButton:hover {
   transition: 150ms ease-out;
@@ -2370,6 +2532,9 @@
   border-color: rgba(206, 209, 255, 0.55);
   background: rgba(59, 161, 156, 0.72);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(206, 209, 255, 0.55);
+}
+.appRoot[data-theme='dark'] .floorButtonSelected {
+  background: rgba(10, 75, 72, 0.75);
 }
 
 .topSelect,
@@ -2456,7 +2621,9 @@
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  background-color: rgba(163, 163, 163, 0.582);
+  background-color: rgba(209, 209, 209, 0.419);
+  /* background: blur(5px) saturate(110%) rgba(255, 255, 255, 0.419);
+  backdrop-filter: blur(5px) saturate(110%); */
   border-radius: 50vh;
   transition: 1s ease-out;
   overflow: visible;
@@ -2469,6 +2636,8 @@
   right: 0;
   z-index: 80;
   background: linear-gradient(155deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04)), rgba(167, 167, 167, 0.35);
+  background: blur(5px);
+  backdrop-filter: blur(5px) saturate(110%);
   padding: 8px;
   max-height: 0;
   opacity: 0;
@@ -2481,6 +2650,8 @@
 
 .smartSearchPanelOpen {
   max-height: min(62vh, 460px);
+  background: blur(5px) saturate(110%) rgba(167, 167, 167, 0.55);
+  backdrop-filter: blur(5px) saturate(110%);
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -2697,6 +2868,7 @@
 
 .topDesktopOnly {
   display: flex;
+  /* overflow: hidden; */
 }
 
 .mobileControlsButton {
@@ -2899,7 +3071,7 @@
 .mobileControlsOverlay {
   position: fixed;
   inset: 0;
-  z-index: 950;
+  z-index: 1950;
   background: rgba(11, 15, 25, 0.22);
   display: flex;
   justify-content: flex-end;
@@ -2962,7 +3134,7 @@
 .mobileControlsRow .topButton,
 .mobileControlsRow .topSelect,
 .mobileControlsRow .topCountBadge {
-  width: 100%;
+  width: 100% - 20px;
   min-width: 0;
 }
 
@@ -3406,9 +3578,13 @@
 }
 
 @media (max-width: 640px) {
+  .routeHintItem {
+    display: none;
+  }
+
   .sidePanelLeft,
   .sidePanelRight {
-    top: 64px;
+    top: 74px;
   }
 
   .topBar {
