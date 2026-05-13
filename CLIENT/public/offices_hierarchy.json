@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-11T08:50:13.353Z",
+  "generatedAt": "2026-05-13T15:13:41.148Z",
   "stats": {
     "totalRows": 85,
-    "mappedRows": 42,
-    "unmappedRows": 43
+    "mappedRows": 43,
+    "unmappedRows": 42
   },
   "institutes": [
     {
@@ -1159,10 +1159,22 @@
               "id": "office-61",
               "type": "department",
               "name": "Кафедра физического воспитания",
-              "cabinet": "УСК-204",
+              "cabinet": "19-204",
               "link": "https://www.vyatsu.ru/studentu-1/nauka-i-praktika/gumanitarnyiy-2/internet-gazeta-onlinegf/kafedra-fizicheskogo-vospitaniya-2.html",
-              "parsedCabinet": null,
-              "location": null,
+              "parsedCabinet": {
+                "buildId": "build19",
+                "roomNo": "204",
+                "floorId": "floor2",
+                "normalizedRoomNo": "204",
+                "roomDigits": "204",
+                "isDigitsOnlyRoomNo": true
+              },
+              "location": {
+                "buildId": "build19",
+                "floorId": "floor2",
+                "roomKey": "bl:532",
+                "roomNo": "204"
+              },
               "children": []
             },
             {

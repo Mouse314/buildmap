@@ -26,6 +26,7 @@ function App() {
   const [mapModeDockOpen, setMapModeDockOpen] = React.useState(true)
   const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
   const [isScheduleStatsModalOpen, setIsScheduleStatsModalOpen] = React.useState(false)
+  const [isScheduleActionsCollapsed, setIsScheduleActionsCollapsed] = React.useState(true)
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
   const [bugReportText, setBugReportText] = React.useState('')
   const [bugReportContext, setBugReportContext] = React.useState('')
@@ -81,6 +82,7 @@ function App() {
     scheduleHeatByRoomKey,
     scheduleHeatMax,
     showGraphOverlay,
+    mouseLampEnabled,
     officesHierarchy,
     isAdminMode,
     geoFileStatusText,
@@ -127,6 +129,7 @@ function App() {
     openGraphicsPresetsModal,
     closeGraphicsPresetsModal,
     onToggleGraphOverlay,
+    onToggleMouseLamp,
     onRouteFloorJump,
     onRouteEndpointGeoAction,
     onSelectRoomKey,
@@ -165,6 +168,12 @@ function App() {
       setIsScheduleStatsModalOpen(false)
     }
   }, [mapMode])
+
+  React.useEffect(() => {
+    if (!isTouchDevice) {
+      setIsScheduleActionsCollapsed(false)
+    }
+  }, [isTouchDevice])
 
   const openBugReport = React.useCallback((context: string) => {
     setBugReportContext(context)
@@ -246,6 +255,10 @@ function App() {
         onSelectPreset={setGraphicsPreset}
         showGraphOverlay={showGraphOverlay}
         onToggleGraphOverlay={onToggleGraphOverlay}
+        mouseLampEnabled={mouseLampEnabled}
+        onToggleMouseLamp={onToggleMouseLamp}
+        isTouchDevice={isTouchDevice}
+        theme={theme}
         isAdminMode={isAdminMode}
         onOpenPresetSettings={openGraphicsPresetsModal}
       />
@@ -270,6 +283,7 @@ function App() {
           graphicsPreset={graphicsPreset}
           graphicsPresetConfig={graphicsPresetsById[graphicsPreset]}
           graphicsPresetRefreshToken={graphicsPresetRefreshToken}
+          mouseLampEnabled={mouseLampEnabled}
           searchText={searchText}
           matchedKeys={matchedKeys}
           searchResultJumpTrigger={searchResultJumpTrigger}
@@ -576,7 +590,26 @@ function App() {
       ) : null}
 
       {mapMode === 'schedule' ? (
-        <div className="scheduleBottomCluster">
+        <HudPanel
+          title="Расписание"
+          className={
+            isTouchDevice
+              ? (isScheduleActionsCollapsed
+                  ? 'scheduleBottomCluster scheduleBottomClusterCompact scheduleBottomClusterTouch'
+                  : 'scheduleBottomCluster scheduleBottomClusterTouch')
+              : (isScheduleActionsCollapsed
+                  ? 'scheduleBottomCluster scheduleBottomClusterCompact'
+                  : 'scheduleBottomCluster')
+          }
+          headerClassName="scheduleDockHeader"
+          titleClassName="scheduleDockTitle"
+          bodyClassName="scheduleDockBody"
+          showHeader={isTouchDevice}
+          collapsible={isTouchDevice}
+          expanded={!isScheduleActionsCollapsed}
+          onToggle={() => setIsScheduleActionsCollapsed((value) => !value)}
+          toggleButtonClassName="mapModeDockToggle"
+        >
           <div className="schedulePeriodDock">
             <div className="schedulePeriodSwitch" role="group" aria-label="Период отображения">
               <HudButton
@@ -655,23 +688,29 @@ function App() {
                 </datalist>
               </label>
             </div>
-
           </div>
 
-          <div className="scheduleActionsColumn">
-            <HudButton title="Показать расписание" data={{ action: 'open-schedule-table' }} className="scheduleOpenBtn" onClick={onOpenScheduleModal}>
-              Показать расписание
-            </HudButton>
-            <HudButton
-              title="Статистика"
-              data={{ action: 'open-schedule-stats' }}
-              className="scheduleOpenBtn scheduleStatsOpenBtn"
-              onClick={() => setIsScheduleStatsModalOpen(true)}
-            >
-              Статистика
-            </HudButton>
+          <div className="scheduleActionsDock">
+            <div className="scheduleActionsColumn">
+              <HudButton
+                title="Показать расписание"
+                data={{ action: 'open-schedule-table' }}
+                className="scheduleOpenBtn"
+                onClick={onOpenScheduleModal}
+              >
+                Показать расписание
+              </HudButton>
+              <HudButton
+                title="Статистика"
+                data={{ action: 'open-schedule-stats' }}
+                className="scheduleOpenBtn scheduleStatsOpenBtn"
+                onClick={() => setIsScheduleStatsModalOpen(true)}
+              >
+                Статистика
+              </HudButton>
+            </div>
           </div>
-        </div>
+        </HudPanel>
       ) : null}
 
       <ScheduleModal

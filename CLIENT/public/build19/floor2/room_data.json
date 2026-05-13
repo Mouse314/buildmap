@@ -19181,6 +19181,7 @@
     "blenderID": 532,
     "roomID": 8,
     "roomNo": "204",
+    "description": "Кафедра физического воспитания",
     "areClosed": false,
     "areaM2": 10.73,
     "vertexIndices": [
@@ -19229,7 +19230,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "преподавательская"
   },
   {
     "key": "bl:533",

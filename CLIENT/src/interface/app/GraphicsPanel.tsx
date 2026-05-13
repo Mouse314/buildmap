@@ -8,6 +8,10 @@ type GraphicsPanelProps = {
   onSelectPreset: (preset: GraphicsPresetId) => void;
   showGraphOverlay: boolean;
   onToggleGraphOverlay: () => void;
+  mouseLampEnabled: boolean;
+  onToggleMouseLamp: () => void;
+  isTouchDevice: boolean;
+  theme: 'light' | 'dark';
   isAdminMode: boolean;
   onOpenPresetSettings: () => void;
 };
@@ -19,6 +23,10 @@ export function GraphicsPanel({
   onSelectPreset,
   showGraphOverlay,
   onToggleGraphOverlay,
+  mouseLampEnabled,
+  onToggleMouseLamp,
+  isTouchDevice,
+  theme,
   isAdminMode,
   onOpenPresetSettings,
 }: GraphicsPanelProps) {
@@ -65,16 +73,31 @@ export function GraphicsPanel({
           </div>
           <hr className="graphicsDivider" />
           <div className="graphicsExtraToggles">
-            <HudButton
-              title="Сетка графа"
-              data={{ action: 'toggle-graph-overlay' }}
-              hint="Показать или скрыть сетку графа"
-              className={showGraphOverlay ? 'topButton graphicsButton graphicsButtonSelected' : 'topButton graphicsButton'}
-              aria-pressed={showGraphOverlay}
-              onClick={onToggleGraphOverlay}
-            >
-              Сетка графа
-            </HudButton>
+            {isAdminMode ? (
+              <HudButton
+                title="Сетка графа"
+                context="Админ-режим"
+                data={{ action: 'toggle-graph-overlay' }}
+                hint="Показать или скрыть сетку графа"
+                className={showGraphOverlay ? 'topButton graphicsButton graphicsButtonSelected' : 'topButton graphicsButton'}
+                aria-pressed={showGraphOverlay}
+                onClick={onToggleGraphOverlay}
+              >
+                Сетка графа
+              </HudButton>
+            ) : null}
+
+            {!isTouchDevice && theme === 'dark' ? (
+              <label className="graphicsToggleLabel">
+                <input
+                  className="graphicsToggleCheckbox"
+                  type="checkbox"
+                  checked={mouseLampEnabled}
+                  onChange={onToggleMouseLamp}
+                />
+                <span>Свечение под курсором</span>
+              </label>
+            ) : null}
 
             {isAdminMode ? (
               <HudButton

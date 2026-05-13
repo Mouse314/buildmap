@@ -556,11 +556,14 @@
 }
 
 .roomHoverTip {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   z-index: 900;
   pointer-events: none;
   max-width: 340px;
-  padding: 10px 12px;
+  padding: 7px 12px;
+  padding-bottom: 10px;
   border-radius: 16px;
   border: 2px solid rgba(206, 209, 255, 0.267);
   background: rgba(167, 167, 167, 0.72);
@@ -678,6 +681,9 @@
 }
 
 .mapModeDockToggle {
+  position: absolute;
+  right: 6px;
+  z-index: 300;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1027,6 +1033,7 @@
 }
 
 .mapFabStack {
+  height: 100px;
   position: absolute;
   z-index: 127;
   right: 14px;
@@ -1449,6 +1456,13 @@
   gap: 10px;
 }
 
+.scheduleBottomClusterTouch {
+  left: 8px;
+  right: 8px;
+  transform: none;
+  width: auto;
+}
+
 .schedulePeriodDock {
   min-height: 42px;
   border-radius: 14px;
@@ -1556,11 +1570,44 @@
   font-weight: 700;
 }
 
+.scheduleDockHeader {
+  display: none;
+
+}
+
+.scheduleDockTitle {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.scheduleDockBody {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 180ms ease, transform 180ms ease;
+  overflow: hidden;
+}
+
+.hudPanelBodyWrapCollapsed .scheduleDockBody {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.scheduleActionsDock {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  align-items: stretch;
+}
+
 .scheduleActionsColumn {
   display: flex;
   flex-direction: column;
   gap: 9px;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .scheduleStatsOpenBtn {
@@ -2329,6 +2376,49 @@
     height: 300px;
   }
 
+  .scheduleBottomClusterTouch {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    width: auto;
+    max-width: 560px;
+  }
+
+  .scheduleBottomClusterCompact {
+    height: auto;
+    gap: 6px;
+  }
+
+  .scheduleDockHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: calc(100% - 20px);
+    padding: 6px 10px;
+    border-radius: 14px;
+    border: 2px solid rgba(206, 209, 255, 0.3);
+    background: rgba(167, 167, 167, 0.72);
+    backdrop-filter: blur(5px) saturate(115%);
+    -webkit-backdrop-filter: blur(5px) saturate(115%);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+  }
+
+  .appRoot[data-theme='dark'] .scheduleDockHeader {
+    border-color: rgba(206, 209, 255, 0.11);
+    background: rgba(31, 31, 31, 0.34);
+    color: #f0f5ff;
+  }
+
+  .scheduleDockBody {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
   .schedulePeriodDock {
     max-width: none;
     width: calc(100% - 20px);
@@ -2363,6 +2453,12 @@
 
   .scheduleActionsColumn {
     width: 100%;
+  }
+
+  .scheduleActionsDock {
+    width: 100%;
+    margin-left: 0;
+    align-items: center;
   }
 
   .scheduleOpenBtn {
@@ -2481,6 +2577,53 @@
 .graphicsExtraToggles .graphicsButton {
   width: 100%;
   min-width: 0;
+}
+
+.graphicsToggleLabel {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.graphicsToggleCheckbox {
+  margin: 0;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid rgba(206, 209, 255, 0.55);
+  background: rgba(255, 255, 255, 0.55);
+  display: inline-grid;
+  place-content: center;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.graphicsToggleCheckbox::after {
+  content: '';
+  width: 6px;
+  height: 10px;
+  border: solid #111;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform 120ms ease;
+}
+
+.graphicsToggleCheckbox:checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.appRoot[data-theme='dark'] .graphicsToggleCheckbox {
+  border-color: rgba(206, 209, 255, 0.65);
+  background: rgba(31, 31, 31, 0.45);
+}
+
+.appRoot[data-theme='dark'] .graphicsToggleCheckbox::after {
+  border-color: #e6f0ff;
 }
 
 .graphicsPresetSettingsButton {

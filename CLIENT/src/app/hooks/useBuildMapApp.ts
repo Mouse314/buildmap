@@ -359,6 +359,7 @@ export function useBuildMapApp() {
   const graphicsPresetsLastPreviewSignatureRef = React.useRef('')
   const [geoAdminOpen, setGeoAdminOpen] = React.useState(true)
   const [showGraphOverlay, setShowGraphOverlay] = React.useState(false)
+  const [mouseLampEnabled, setMouseLampEnabled] = React.useState(true)
 
   const [selectedCategory, setSelectedCategory] = React.useState<string>('__all__')
   const [searchText, setSearchText] = React.useState<string>('')
@@ -1311,6 +1312,10 @@ export function useBuildMapApp() {
     setShowGraphOverlay((current) => !current)
   }, [])
 
+  const onToggleMouseLamp = React.useCallback(() => {
+    setMouseLampEnabled((current) => !current)
+  }, [])
+
   const onRouteFloorJump = React.useCallback((targetFloorId: string) => {
     setSelectedFloor(targetFloorId)
   }, [setSelectedFloor])
@@ -1564,6 +1569,7 @@ export function useBuildMapApp() {
     routeFloorJumps,
     routeHints,
     showGraphOverlay,
+    mouseLampEnabled,
     officesHierarchy,
     isAdminMode,
     geoFileStatusText,
@@ -1615,6 +1621,7 @@ export function useBuildMapApp() {
     closeGraphicsPresetsModal,
     onToggleGeoAdminPanel,
     onToggleGraphOverlay,
+    onToggleMouseLamp,
     onRouteFloorJump,
     onSelectRoomKey,
     onOpenRoom,

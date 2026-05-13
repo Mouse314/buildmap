@@ -91,6 +91,7 @@ export function FloorPlanCanvas({
   onRouteFloorJump,
   onRouteEndpointGeoAction,
   showGraphOverlay = false,
+  mouseLampEnabled = true,
   userLocationOverlay = null,
   geoAnchorMarkers = null,
   zoomRequest = null,
@@ -127,6 +128,7 @@ export function FloorPlanCanvas({
   onRouteFloorJump?: (targetFloorId: string) => void;
   onRouteEndpointGeoAction?: (mode: 'jump-floor' | 'cancel', targetFloorId: string | null) => void;
   showGraphOverlay?: boolean;
+  mouseLampEnabled?: boolean;
   userLocationOverlay?: {
     mode: 'inside' | 'outside';
     x: number;
@@ -224,6 +226,7 @@ export function FloorPlanCanvas({
     return window.matchMedia?.('(pointer: coarse)').matches ?? false;
   }, []);
 
+  const mouseLampAllowed = mouseLampEnabled && !isTouchDevice;
 
 
   const dpr = React.useMemo(() => {
@@ -483,7 +486,7 @@ export function FloorPlanCanvas({
       <PerspectiveCamera makeDefault near={0.1} far={5000} fov={45} position={new THREE.Vector3(0, 150, 0)} />
       <SceneLights
         theme={theme}
-        mouseLampEnabled={preset.mouseLampEnabled}
+        mouseLampEnabled={preset.mouseLampEnabled && mouseLampAllowed}
         graphicsPreset={graphicsPreset}
         ambientIntensity={colors.ambientIntensity}
         dirIntensity={colors.dirIntensity}

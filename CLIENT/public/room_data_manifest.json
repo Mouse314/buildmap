@@ -45,7 +45,9 @@
     },
     {
       "id": "build15",
-      "floors": []
+      "floors": [
+        "floor1"
+      ]
     },
     {
       "id": "build16",
