@@ -32028,7 +32028,7 @@
   {
     "key": "bl:890",
     "blenderID": 890,
-    "roomID": 2,
+    "roomID": 9,
     "areClosed": false,
     "areaM2": 7.28,
     "vertexIndices": [
@@ -32057,7 +32057,8 @@
       }
     ],
     "build": null,
-    "floor": null
+    "floor": null,
+    "category": "лестница"
   },
   {
     "key": "bl:891",

@@ -1,6 +1,20 @@
 {
   "version": 1,
   "buildId": "build15",
-  "updatedAt": "",
-  "floors": {}
+  "updatedAt": "2026-05-14T13:56:28.044Z",
+  "floors": {
+    "floor2": {
+      "bl:890": {
+        "roomID": 9,
+        "roomNo": null,
+        "category": "лестница",
+        "description": null,
+        "areClosed": false,
+        "areaM2": 7.28,
+        "build": null,
+        "floor": null,
+        "updatedAt": "2026-05-14T13:56:28.044Z"
+      }
+    }
+  }
 }

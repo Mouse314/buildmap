@@ -1,0 +1,3410 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-14T14:45:57.525Z",
+  "nodes": [
+    {
+      "key": "bl:1",
+      "roomID": 17,
+      "roomNo": null,
+      "kind": "room",
+      "x": -30.237,
+      "y": -23.197
+    },
+    {
+      "key": "bl:6",
+      "roomID": 17,
+      "roomNo": null,
+      "kind": "room",
+      "x": 22.838,
+      "y": -23.357
+    },
+    {
+      "key": "bl:17",
+      "roomID": 17,
+      "roomNo": null,
+      "kind": "room",
+      "x": -19.454,
+      "y": -17.7
+    },
+    {
+      "key": "bl:31",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -10.703,
+      "y": -21.744
+    },
+    {
+      "key": "bl:33",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -0.278,
+      "y": -21.744
+    },
+    {
+      "key": "bl:35",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 6.66,
+      "y": -21.744
+    },
+    {
+      "key": "bl:37",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 14.016,
+      "y": -21.744
+    },
+    {
+      "key": "bl:41",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 24.592,
+      "y": -21.744
+    },
+    {
+      "key": "bl:43",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 28.241,
+      "y": -21.744
+    },
+    {
+      "key": "bl:44",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -14.169,
+      "y": -21.744
+    },
+    {
+      "key": "bl:54",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 17.683,
+      "y": -18.974
+    },
+    {
+      "key": "bl:56",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 6.863,
+      "y": -18.974
+    },
+    {
+      "key": "bl:60",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 3.401,
+      "y": -18.974
+    },
+    {
+      "key": "bl:67",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -17.386,
+      "y": -18.974
+    },
+    {
+      "key": "bl:69",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -20.831,
+      "y": -18.974
+    },
+    {
+      "key": "bl:73",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -28.036,
+      "y": -18.974
+    },
+    {
+      "key": "bl:77",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -31.419,
+      "y": -18.974
+    },
+    {
+      "key": "bl:80",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -35.363,
+      "y": -18.974
+    },
+    {
+      "key": "bl:85",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -38.322,
+      "y": -18.974
+    },
+    {
+      "key": "bl:87",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -41.415,
+      "y": -18.974
+    },
+    {
+      "key": "bl:94",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -41.373,
+      "y": -21.923
+    },
+    {
+      "key": "bl:97",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -34.918,
+      "y": -21.923
+    },
+    {
+      "key": "bl:102",
+      "roomID": 2,
+      "roomNo": null,
+      "kind": "room",
+      "x": 53.665,
+      "y": -19.44
+    },
+    {
+      "key": "bl:104",
+      "roomID": 2,
+      "roomNo": null,
+      "kind": "room",
+      "x": 51.14,
+      "y": -14.293
+    },
+    {
+      "key": "bl:109",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 53.873,
+      "y": -24.32
+    },
+    {
+      "key": "bl:114",
+      "roomID": 8,
+      "roomNo": null,
+      "kind": "room",
+      "x": 38.993,
+      "y": 29.59
+    },
+    {
+      "key": "bl:118",
+      "roomID": 8,
+      "roomNo": null,
+      "kind": "room",
+      "x": 39.162,
+      "y": 11.819
+    },
+    {
+      "key": "bl:130",
+      "roomID": 8,
+      "roomNo": null,
+      "kind": "room",
+      "x": 33.593,
+      "y": 33.364
+    },
+    {
+      "key": "bl:136",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 29.508,
+      "y": 43.686
+    },
+    {
+      "key": "bl:138",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.915,
+      "y": 42.142
+    },
+    {
+      "key": "bl:140",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.915,
+      "y": 38.444
+    },
+    {
+      "key": "bl:143",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.915,
+      "y": 31.741
+    },
+    {
+      "key": "bl:148",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 35.067,
+      "y": 20.752
+    },
+    {
+      "key": "bl:150",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.941,
+      "y": 17.26
+    },
+    {
+      "key": "bl:152",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.942,
+      "y": 10.486
+    },
+    {
+      "key": "bl:156",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.941,
+      "y": 6.775
+    },
+    {
+      "key": "bl:158",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.942,
+      "y": 3.535
+    },
+    {
+      "key": "bl:166",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 30.879
+    },
+    {
+      "key": "bl:169",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 28.383
+    },
+    {
+      "key": "bl:175",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 24.548
+    },
+    {
+      "key": "bl:177",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 13.446
+    },
+    {
+      "key": "bl:183",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 2.977
+    },
+    {
+      "key": "bl:187",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 0.03
+    },
+    {
+      "key": "bl:191",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.608,
+      "y": -4.25
+    },
+    {
+      "key": "bl:197",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.062,
+      "y": -12.539
+    },
+    {
+      "key": "bl:201",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 32.079,
+      "y": -12.538
+    },
+    {
+      "key": "bl:220",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -18.442,
+      "y": -21.744
+    },
+    {
+      "key": "bl:303",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 39.317,
+      "y": 43.687
+    },
+    {
+      "key": "bl:304",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 42.284,
+      "y": 43.686
+    },
+    {
+      "key": "bl:308",
+      "roomID": 8,
+      "roomNo": null,
+      "kind": "room",
+      "x": 33.593,
+      "y": 29.834
+    },
+    {
+      "key": "bl:321",
+      "roomID": 2,
+      "roomNo": null,
+      "kind": "room",
+      "x": -41.179,
+      "y": -32.34
+    },
+    {
+      "key": "bl:324",
+      "roomID": 17,
+      "roomNo": null,
+      "kind": "room",
+      "x": 12.259,
+      "y": -22.907
+    },
+    {
+      "key": "bl:326",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.868,
+      "y": -0.092
+    },
+    {
+      "key": "bl:352",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -14.358,
+      "y": -18.974
+    },
+    {
+      "key": "bl:362",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.915,
+      "y": 28.063
+    },
+    {
+      "key": "bl:375",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 37.672,
+      "y": 10.093
+    },
+    {
+      "key": "bl:386",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 21.429,
+      "y": -21.744
+    },
+    {
+      "key": "bl:387",
+      "roomID": 17,
+      "roomNo": null,
+      "kind": "room",
+      "x": -12.576,
+      "y": -23.197
+    },
+    {
+      "key": "bl:394",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -31.879,
+      "y": -21.744
+    },
+    {
+      "key": "bl:399",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 28.255,
+      "y": -18.974
+    },
+    {
+      "key": "bl:414",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 13.924,
+      "y": -18.974
+    },
+    {
+      "key": "bl:417",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -7.072,
+      "y": -18.974
+    },
+    {
+      "key": "bl:424",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -28.381,
+      "y": -21.744
+    },
+    {
+      "key": "bl:430",
+      "roomID": 2,
+      "roomNo": "412",
+      "kind": "room",
+      "x": -37.44,
+      "y": -23.487
+    },
+    {
+      "key": "bl:431",
+      "roomID": 17,
+      "roomNo": "413",
+      "kind": "room",
+      "x": -44.493,
+      "y": -23.473
+    },
+    {
+      "key": "bl:432",
+      "roomID": 17,
+      "roomNo": "414",
+      "kind": "room",
+      "x": -43.807,
+      "y": -15.87
+    },
+    {
+      "key": "bl:433",
+      "roomID": 8,
+      "roomNo": "415а",
+      "kind": "room",
+      "x": -38.123,
+      "y": -15.889
+    },
+    {
+      "key": "bl:434",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -35.24,
+      "y": -18.293
+    },
+    {
+      "key": "bl:435",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -33.797,
+      "y": -20.428
+    },
+    {
+      "key": "bl:436",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -19.471,
+      "y": -20.295
+    },
+    {
+      "key": "bl:437",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 5.313,
+      "y": -20.329
+    },
+    {
+      "key": "bl:438",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 15.974,
+      "y": -20.312
+    },
+    {
+      "key": "bl:439",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -41.114,
+      "y": -20.462
+    },
+    {
+      "key": "bl:440",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -26.545,
+      "y": -20.323
+    },
+    {
+      "key": "bl:441",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -7.085,
+      "y": -20.324
+    },
+    {
+      "key": "bl:442",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 10.58,
+      "y": -20.32
+    },
+    {
+      "key": "bl:444",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 29.894,
+      "y": -20.358
+    },
+    {
+      "key": "bl:446",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 22.998,
+      "y": -20.323
+    },
+    {
+      "key": "bl:447",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 33.543,
+      "y": -20.301
+    },
+    {
+      "key": "bl:448",
+      "roomID": 17,
+      "roomNo": "423",
+      "kind": "room",
+      "x": 24.739,
+      "y": -15.874
+    },
+    {
+      "key": "bl:449",
+      "roomID": 8,
+      "roomNo": "422",
+      "kind": "room",
+      "x": 17.8,
+      "y": -15.872
+    },
+    {
+      "key": "bl:450",
+      "roomID": 8,
+      "roomNo": "421",
+      "kind": "room",
+      "x": 12.304,
+      "y": -15.873
+    },
+    {
+      "key": "bl:451",
+      "roomID": 8,
+      "roomNo": "420",
+      "kind": "room",
+      "x": 6.992,
+      "y": -15.874
+    },
+    {
+      "key": "bl:452",
+      "roomID": 17,
+      "roomNo": "419",
+      "kind": "room",
+      "x": -0.064,
+      "y": -15.873
+    },
+    {
+      "key": "bl:453",
+      "roomID": 17,
+      "roomNo": "418",
+      "kind": "room",
+      "x": -8.985,
+      "y": -15.874
+    },
+    {
+      "key": "bl:454",
+      "roomID": 8,
+      "roomNo": "418а",
+      "kind": "room",
+      "x": -14.154,
+      "y": -15.883
+    },
+    {
+      "key": "bl:455",
+      "roomID": 2,
+      "roomNo": "417",
+      "kind": "room",
+      "x": -17.744,
+      "y": -15.868
+    },
+    {
+      "key": "bl:456",
+      "roomID": 17,
+      "roomNo": "416",
+      "kind": "room",
+      "x": -23.046,
+      "y": -15.875
+    },
+    {
+      "key": "bl:457",
+      "roomID": 8,
+      "roomNo": "415",
+      "kind": "room",
+      "x": -28.418,
+      "y": -15.871
+    },
+    {
+      "key": "bl:458",
+      "roomID": 3,
+      "roomNo": null,
+      "kind": "room",
+      "x": -31.892,
+      "y": -15.883
+    },
+    {
+      "key": "bl:459",
+      "roomID": 2,
+      "roomNo": "411",
+      "kind": "room",
+      "x": -31.924,
+      "y": -24.816
+    },
+    {
+      "key": "bl:460",
+      "roomID": 17,
+      "roomNo": "410",
+      "kind": "room",
+      "x": -24.856,
+      "y": -24.817
+    },
+    {
+      "key": "bl:461",
+      "roomID": 17,
+      "roomNo": "409",
+      "kind": "room",
+      "x": -17.754,
+      "y": -24.818
+    },
+    {
+      "key": "bl:462",
+      "roomID": 17,
+      "roomNo": "408",
+      "kind": "room",
+      "x": -14.185,
+      "y": -24.805
+    },
+    {
+      "key": "bl:463",
+      "roomID": 17,
+      "roomNo": "407",
+      "kind": "room",
+      "x": -7.208,
+      "y": -24.811
+    },
+    {
+      "key": "bl:464",
+      "roomID": 17,
+      "roomNo": "406",
+      "kind": "room",
+      "x": 1.78,
+      "y": -24.819
+    },
+    {
+      "key": "bl:465",
+      "roomID": 17,
+      "roomNo": "405",
+      "kind": "room",
+      "x": 8.798,
+      "y": -24.819
+    },
+    {
+      "key": "bl:466",
+      "roomID": 17,
+      "roomNo": "404",
+      "kind": "room",
+      "x": 14.046,
+      "y": -24.814
+    },
+    {
+      "key": "bl:467",
+      "roomID": 17,
+      "roomNo": "403",
+      "kind": "room",
+      "x": 19.475,
+      "y": -24.815
+    },
+    {
+      "key": "bl:468",
+      "roomID": 17,
+      "roomNo": "402",
+      "kind": "room",
+      "x": 24.579,
+      "y": -24.829
+    },
+    {
+      "key": "bl:469",
+      "roomID": 17,
+      "roomNo": "401",
+      "kind": "room",
+      "x": 28.112,
+      "y": -24.82
+    },
+    {
+      "key": "bl:470",
+      "roomID": 2,
+      "roomNo": null,
+      "kind": "room",
+      "x": 44.172,
+      "y": -20.64
+    },
+    {
+      "key": "bl:471",
+      "roomID": 2,
+      "roomNo": null,
+      "kind": "room",
+      "x": 52.969,
+      "y": -16.481
+    },
+    {
+      "key": "bl:472",
+      "roomID": 2,
+      "roomNo": null,
+      "kind": "room",
+      "x": 52.97,
+      "y": -21.877
+    },
+    {
+      "key": "bl:473",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 52.969,
+      "y": -26.043
+    },
+    {
+      "key": "bl:474",
+      "roomID": 3,
+      "roomNo": null,
+      "kind": "room",
+      "x": 53.404,
+      "y": -29.802
+    },
+    {
+      "key": "bl:475",
+      "roomID": 8,
+      "roomNo": "439",
+      "kind": "room",
+      "x": 39.151,
+      "y": -7.825
+    },
+    {
+      "key": "bl:476",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.287,
+      "y": -2.615
+    },
+    {
+      "key": "bl:477",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.191,
+      "y": 8.378
+    },
+    {
+      "key": "bl:478",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.309,
+      "y": 19.146
+    },
+    {
+      "key": "bl:479",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.242,
+      "y": 29.707
+    },
+    {
+      "key": "bl:480",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.245,
+      "y": 36.643
+    },
+    {
+      "key": "bl:481",
+      "roomID": 8,
+      "roomNo": "430",
+      "kind": "room",
+      "x": 35.004,
+      "y": 47.758
+    },
+    {
+      "key": "bl:482",
+      "roomID": 8,
+      "roomNo": "431",
+      "kind": "room",
+      "x": 42.479,
+      "y": 47.772
+    },
+    {
+      "key": "bl:483",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 39.42,
+      "y": 40.124
+    },
+    {
+      "key": "bl:484",
+      "roomID": 8,
+      "roomNo": "429",
+      "kind": "room",
+      "x": 31.755,
+      "y": 36.942
+    },
+    {
+      "key": "bl:485",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 34.192,
+      "y": 42.175
+    },
+    {
+      "key": "bl:486",
+      "roomID": 8,
+      "roomNo": "428",
+      "kind": "room",
+      "x": 31.754,
+      "y": 31.6
+    },
+    {
+      "key": "bl:487",
+      "roomID": 8,
+      "roomNo": "427",
+      "kind": "room",
+      "x": 31.756,
+      "y": 26.256
+    },
+    {
+      "key": "bl:488",
+      "roomID": 8,
+      "roomNo": "426а",
+      "kind": "room",
+      "x": 31.912,
+      "y": 20.918
+    },
+    {
+      "key": "bl:489",
+      "roomID": 8,
+      "roomNo": "426",
+      "kind": "room",
+      "x": 31.775,
+      "y": 15.458
+    },
+    {
+      "key": "bl:490",
+      "roomID": 8,
+      "roomNo": "425",
+      "kind": "room",
+      "x": 31.773,
+      "y": 10.136
+    },
+    {
+      "key": "bl:491",
+      "roomID": 8,
+      "roomNo": "424",
+      "kind": "room",
+      "x": 31.779,
+      "y": 6.616
+    },
+    {
+      "key": "bl:492",
+      "roomID": 8,
+      "roomNo": "423а",
+      "kind": "room",
+      "x": 31.772,
+      "y": 3.034
+    },
+    {
+      "key": "bl:493",
+      "roomID": 3,
+      "roomNo": null,
+      "kind": "room",
+      "x": 31.708,
+      "y": -0.554
+    },
+    {
+      "key": "bl:494",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.271,
+      "y": 3.021
+    },
+    {
+      "key": "bl:495",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 31.892,
+      "y": -4.345
+    },
+    {
+      "key": "bl:496",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.161,
+      "y": -7.587
+    },
+    {
+      "key": "bl:497",
+      "roomID": 8,
+      "roomNo": "437",
+      "kind": "room",
+      "x": 40.817,
+      "y": 4.767
+    },
+    {
+      "key": "bl:498",
+      "roomID": 8,
+      "roomNo": "438",
+      "kind": "room",
+      "x": 40.832,
+      "y": -0.57
+    },
+    {
+      "key": "bl:499",
+      "roomID": 8,
+      "roomNo": "436",
+      "kind": "room",
+      "x": 40.807,
+      "y": 10.066
+    },
+    {
+      "key": "bl:500",
+      "roomID": 8,
+      "roomNo": "435",
+      "kind": "room",
+      "x": 40.825,
+      "y": 15.392
+    },
+    {
+      "key": "bl:501",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.275,
+      "y": 13.687
+    },
+    {
+      "key": "bl:502",
+      "roomID": 8,
+      "roomNo": "434",
+      "kind": "room",
+      "x": 40.829,
+      "y": 22.611
+    },
+    {
+      "key": "bl:503",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.27,
+      "y": 24.494
+    },
+    {
+      "key": "bl:504",
+      "roomID": 8,
+      "roomNo": "433",
+      "kind": "room",
+      "x": 40.828,
+      "y": 27.818
+    },
+    {
+      "key": "bl:505",
+      "roomID": 8,
+      "roomNo": "432",
+      "kind": "room",
+      "x": 40.822,
+      "y": 33.119
+    },
+    {
+      "key": "bl:506",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 36.281,
+      "y": 33.171
+    },
+    {
+      "key": "bl:507",
+      "roomID": 9,
+      "roomNo": null,
+      "kind": "room",
+      "x": 31.968,
+      "y": 42.173
+    },
+    {
+      "key": "bl:508",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 29.529,
+      "y": 42.17
+    },
+    {
+      "key": "bl:509",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": -35.2,
+      "y": -13.601
+    },
+    {
+      "key": "bl:510",
+      "roomID": 9,
+      "roomNo": null,
+      "kind": "room",
+      "x": -35.22,
+      "y": -16.024
+    },
+    {
+      "key": "bl:511",
+      "roomID": 1,
+      "roomNo": null,
+      "kind": "room",
+      "x": 31.913,
+      "y": -10.869
+    },
+    {
+      "key": "bl:512",
+      "roomID": 9,
+      "roomNo": null,
+      "kind": "room",
+      "x": 31.903,
+      "y": -7.629
+    },
+    {
+      "key": "street:bl:197",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 34.251,
+      "y": -12.538
+    },
+    {
+      "key": "street:bl:201",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 29.661,
+      "y": -12.539
+    },
+    {
+      "key": "street:bl:434",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": -37.47,
+      "y": -18.293
+    },
+    {
+      "key": "street:bl:439",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": -45.821,
+      "y": -22.138
+    },
+    {
+      "key": "street:bl:440",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": -22.781,
+      "y": -21.89
+    },
+    {
+      "key": "street:bl:441",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": -5.311,
+      "y": -22.198
+    },
+    {
+      "key": "street:bl:442",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 9.113,
+      "y": -22.262
+    },
+    {
+      "key": "street:bl:446",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 23.949,
+      "y": -18.286
+    },
+    {
+      "key": "street:bl:447",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 37.82,
+      "y": -20.718
+    },
+    {
+      "key": "street:bl:473",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 50.381,
+      "y": -26.042
+    },
+    {
+      "key": "street:bl:476",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 38.254,
+      "y": -2.567
+    },
+    {
+      "key": "street:bl:483",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 44.555,
+      "y": 40.135
+    },
+    {
+      "key": "street:bl:485",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 34.193,
+      "y": 39.946
+    },
+    {
+      "key": "street:bl:494",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 37.666,
+      "y": 6.793
+    },
+    {
+      "key": "street:bl:495",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 31.885,
+      "y": -2.087
+    },
+    {
+      "key": "street:bl:496",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 34.067,
+      "y": -7.582
+    },
+    {
+      "key": "street:bl:501",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 37.687,
+      "y": 17.229
+    },
+    {
+      "key": "street:bl:503",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 37.681,
+      "y": 20.876
+    },
+    {
+      "key": "street:bl:506",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 38.048,
+      "y": 34.629
+    },
+    {
+      "key": "street:bl:508",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 27.969,
+      "y": 42.154
+    },
+    {
+      "key": "street:bl:509",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": -35.186,
+      "y": -11.996
+    },
+    {
+      "key": "street:bl:511",
+      "roomID": null,
+      "roomNo": null,
+      "kind": "street",
+      "label": "на улицу",
+      "x": 35.492,
+      "y": -10.868
+    }
+  ],
+  "edges": [
+    {
+      "from": "bl:1",
+      "to": "bl:459",
+      "via": {
+        "x": -30.314,
+        "y": -23.197
+      }
+    },
+    {
+      "from": "bl:1",
+      "to": "bl:460",
+      "via": {
+        "x": -30.159,
+        "y": -23.197
+      }
+    },
+    {
+      "from": "bl:6",
+      "to": "bl:467",
+      "via": {
+        "x": 22.753,
+        "y": -23.357
+      }
+    },
+    {
+      "from": "bl:6",
+      "to": "bl:468",
+      "via": {
+        "x": 22.924,
+        "y": -23.357
+      }
+    },
+    {
+      "from": "bl:17",
+      "to": "bl:455",
+      "via": {
+        "x": -19.355,
+        "y": -17.7
+      }
+    },
+    {
+      "from": "bl:17",
+      "to": "bl:456",
+      "via": {
+        "x": -19.553,
+        "y": -17.7
+      }
+    },
+    {
+      "from": "bl:31",
+      "to": "bl:441",
+      "via": {
+        "x": -10.703,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:31",
+      "to": "bl:463",
+      "via": {
+        "x": -10.703,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:33",
+      "to": "bl:441",
+      "via": {
+        "x": -0.279,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:33",
+      "to": "bl:464",
+      "via": {
+        "x": -0.278,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:35",
+      "to": "bl:442",
+      "via": {
+        "x": 6.66,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:35",
+      "to": "bl:465",
+      "via": {
+        "x": 6.66,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:37",
+      "to": "bl:442",
+      "via": {
+        "x": 14.016,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:37",
+      "to": "bl:466",
+      "via": {
+        "x": 14.016,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:41",
+      "to": "bl:446",
+      "via": {
+        "x": 24.591,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:41",
+      "to": "bl:468",
+      "via": {
+        "x": 24.591,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:43",
+      "to": "bl:446",
+      "via": {
+        "x": 28.241,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:43",
+      "to": "bl:469",
+      "via": {
+        "x": 28.241,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:44",
+      "to": "bl:441",
+      "via": {
+        "x": -14.168,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:44",
+      "to": "bl:462",
+      "via": {
+        "x": -14.168,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:54",
+      "to": "bl:446",
+      "via": {
+        "x": 17.683,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:54",
+      "to": "bl:449",
+      "via": {
+        "x": 17.683,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:56",
+      "to": "bl:442",
+      "via": {
+        "x": 6.863,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:56",
+      "to": "bl:451",
+      "via": {
+        "x": 6.863,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:60",
+      "to": "bl:441",
+      "via": {
+        "x": 3.401,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:60",
+      "to": "bl:452",
+      "via": {
+        "x": 3.401,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:67",
+      "to": "bl:441",
+      "via": {
+        "x": -17.386,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:67",
+      "to": "bl:455",
+      "via": {
+        "x": -17.386,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:69",
+      "to": "bl:440",
+      "via": {
+        "x": -20.831,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:69",
+      "to": "bl:456",
+      "via": {
+        "x": -20.831,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:73",
+      "to": "bl:440",
+      "via": {
+        "x": -28.036,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:73",
+      "to": "bl:457",
+      "via": {
+        "x": -28.036,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:77",
+      "to": "bl:440",
+      "via": {
+        "x": -31.419,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:77",
+      "to": "bl:458",
+      "via": {
+        "x": -31.419,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:80",
+      "to": "bl:434",
+      "via": {
+        "x": -35.362,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:80",
+      "to": "bl:439",
+      "via": {
+        "x": -35.362,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:85",
+      "to": "bl:433",
+      "via": {
+        "x": -38.322,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:85",
+      "to": "bl:439",
+      "via": {
+        "x": -38.322,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:87",
+      "to": "bl:432",
+      "via": {
+        "x": -41.415,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:87",
+      "to": "bl:439",
+      "via": {
+        "x": -41.415,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:94",
+      "to": "bl:431",
+      "via": {
+        "x": -41.373,
+        "y": -22.014
+      }
+    },
+    {
+      "from": "bl:94",
+      "to": "bl:439",
+      "via": {
+        "x": -41.373,
+        "y": -21.831
+      }
+    },
+    {
+      "from": "bl:97",
+      "to": "bl:430",
+      "via": {
+        "x": -34.918,
+        "y": -22.014
+      }
+    },
+    {
+      "from": "bl:97",
+      "to": "bl:439",
+      "via": {
+        "x": -34.918,
+        "y": -21.831
+      }
+    },
+    {
+      "from": "bl:102",
+      "to": "bl:471",
+      "via": {
+        "x": 53.665,
+        "y": -19.369
+      }
+    },
+    {
+      "from": "bl:102",
+      "to": "bl:472",
+      "via": {
+        "x": 53.665,
+        "y": -19.511
+      }
+    },
+    {
+      "from": "bl:104",
+      "to": "bl:470",
+      "via": {
+        "x": 50.999,
+        "y": -14.293
+      }
+    },
+    {
+      "from": "bl:104",
+      "to": "bl:471",
+      "via": {
+        "x": 51.281,
+        "y": -14.293
+      }
+    },
+    {
+      "from": "bl:109",
+      "to": "bl:472",
+      "via": {
+        "x": 53.873,
+        "y": -24.242
+      }
+    },
+    {
+      "from": "bl:109",
+      "to": "bl:473",
+      "via": {
+        "x": 53.873,
+        "y": -24.397
+      }
+    },
+    {
+      "from": "bl:114",
+      "to": "bl:504",
+      "via": {
+        "x": 38.993,
+        "y": 29.511
+      }
+    },
+    {
+      "from": "bl:114",
+      "to": "bl:505",
+      "via": {
+        "x": 38.993,
+        "y": 29.668
+      }
+    },
+    {
+      "from": "bl:118",
+      "to": "bl:499",
+      "via": {
+        "x": 39.162,
+        "y": 11.74
+      }
+    },
+    {
+      "from": "bl:118",
+      "to": "bl:500",
+      "via": {
+        "x": 39.162,
+        "y": 11.897
+      }
+    },
+    {
+      "from": "bl:130",
+      "to": "bl:484",
+      "via": {
+        "x": 33.593,
+        "y": 33.449
+      }
+    },
+    {
+      "from": "bl:130",
+      "to": "bl:486",
+      "via": {
+        "x": 33.593,
+        "y": 33.28
+      }
+    },
+    {
+      "from": "bl:136",
+      "to": "bl:481",
+      "via": {
+        "x": 29.508,
+        "y": 43.868
+      }
+    },
+    {
+      "from": "bl:136",
+      "to": "bl:508",
+      "via": {
+        "x": 29.508,
+        "y": 43.505
+      }
+    },
+    {
+      "from": "bl:138",
+      "to": "bl:483",
+      "via": {
+        "x": 35.193,
+        "y": 42.142
+      }
+    },
+    {
+      "from": "bl:138",
+      "to": "bl:485",
+      "via": {
+        "x": 34.637,
+        "y": 42.142
+      }
+    },
+    {
+      "from": "bl:140",
+      "to": "bl:483",
+      "via": {
+        "x": 35.193,
+        "y": 38.444
+      }
+    },
+    {
+      "from": "bl:140",
+      "to": "bl:484",
+      "via": {
+        "x": 34.637,
+        "y": 38.444
+      }
+    },
+    {
+      "from": "bl:143",
+      "to": "bl:486",
+      "via": {
+        "x": 34.637,
+        "y": 31.741
+      }
+    },
+    {
+      "from": "bl:143",
+      "to": "bl:506",
+      "via": {
+        "x": 35.193,
+        "y": 31.741
+      }
+    },
+    {
+      "from": "bl:148",
+      "to": "bl:488",
+      "via": {
+        "x": 34.941,
+        "y": 20.752
+      }
+    },
+    {
+      "from": "bl:148",
+      "to": "bl:503",
+      "via": {
+        "x": 35.193,
+        "y": 20.752
+      }
+    },
+    {
+      "from": "bl:150",
+      "to": "bl:489",
+      "via": {
+        "x": 34.69,
+        "y": 17.26
+      }
+    },
+    {
+      "from": "bl:150",
+      "to": "bl:501",
+      "via": {
+        "x": 35.193,
+        "y": 17.26
+      }
+    },
+    {
+      "from": "bl:152",
+      "to": "bl:490",
+      "via": {
+        "x": 34.69,
+        "y": 10.486
+      }
+    },
+    {
+      "from": "bl:152",
+      "to": "bl:501",
+      "via": {
+        "x": 35.193,
+        "y": 10.486
+      }
+    },
+    {
+      "from": "bl:156",
+      "to": "bl:491",
+      "via": {
+        "x": 34.69,
+        "y": 6.776
+      }
+    },
+    {
+      "from": "bl:156",
+      "to": "bl:494",
+      "via": {
+        "x": 35.193,
+        "y": 6.776
+      }
+    },
+    {
+      "from": "bl:158",
+      "to": "bl:492",
+      "via": {
+        "x": 34.69,
+        "y": 3.534
+      }
+    },
+    {
+      "from": "bl:158",
+      "to": "bl:494",
+      "via": {
+        "x": 35.193,
+        "y": 3.534
+      }
+    },
+    {
+      "from": "bl:166",
+      "to": "bl:505",
+      "via": {
+        "x": 37.99,
+        "y": 30.879
+      }
+    },
+    {
+      "from": "bl:166",
+      "to": "bl:506",
+      "via": {
+        "x": 37.354,
+        "y": 30.879
+      }
+    },
+    {
+      "from": "bl:169",
+      "to": "bl:503",
+      "via": {
+        "x": 37.354,
+        "y": 28.383
+      }
+    },
+    {
+      "from": "bl:169",
+      "to": "bl:504",
+      "via": {
+        "x": 37.99,
+        "y": 28.383
+      }
+    },
+    {
+      "from": "bl:175",
+      "to": "bl:502",
+      "via": {
+        "x": 37.99,
+        "y": 24.549
+      }
+    },
+    {
+      "from": "bl:175",
+      "to": "bl:503",
+      "via": {
+        "x": 37.354,
+        "y": 24.549
+      }
+    },
+    {
+      "from": "bl:177",
+      "to": "bl:500",
+      "via": {
+        "x": 37.99,
+        "y": 13.446
+      }
+    },
+    {
+      "from": "bl:177",
+      "to": "bl:501",
+      "via": {
+        "x": 37.354,
+        "y": 13.446
+      }
+    },
+    {
+      "from": "bl:183",
+      "to": "bl:494",
+      "via": {
+        "x": 37.354,
+        "y": 2.977
+      }
+    },
+    {
+      "from": "bl:183",
+      "to": "bl:497",
+      "via": {
+        "x": 37.99,
+        "y": 2.977
+      }
+    },
+    {
+      "from": "bl:187",
+      "to": "bl:494",
+      "via": {
+        "x": 37.354,
+        "y": 0.03
+      }
+    },
+    {
+      "from": "bl:187",
+      "to": "bl:498",
+      "via": {
+        "x": 37.99,
+        "y": 0.03
+      }
+    },
+    {
+      "from": "bl:191",
+      "to": "bl:475",
+      "via": {
+        "x": 37.862,
+        "y": -4.25
+      }
+    },
+    {
+      "from": "bl:191",
+      "to": "bl:496",
+      "via": {
+        "x": 37.354,
+        "y": -4.25
+      }
+    },
+    {
+      "from": "bl:197",
+      "to": "bl:447",
+      "via": {
+        "x": 36.062,
+        "y": -12.896
+      }
+    },
+    {
+      "from": "bl:197",
+      "to": "bl:496",
+      "via": {
+        "x": 36.062,
+        "y": -12.181
+      }
+    },
+    {
+      "from": "bl:201",
+      "to": "bl:447",
+      "via": {
+        "x": 32.079,
+        "y": -12.896
+      }
+    },
+    {
+      "from": "bl:201",
+      "to": "bl:511",
+      "via": {
+        "x": 32.079,
+        "y": -12.181
+      }
+    },
+    {
+      "from": "bl:220",
+      "to": "bl:441",
+      "via": {
+        "x": -18.443,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:220",
+      "to": "bl:461",
+      "via": {
+        "x": -18.443,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:303",
+      "to": "bl:481",
+      "via": {
+        "x": 39.317,
+        "y": 43.868
+      }
+    },
+    {
+      "from": "bl:303",
+      "to": "bl:483",
+      "via": {
+        "x": 39.317,
+        "y": 43.505
+      }
+    },
+    {
+      "from": "bl:304",
+      "to": "bl:482",
+      "via": {
+        "x": 42.284,
+        "y": 43.868
+      }
+    },
+    {
+      "from": "bl:304",
+      "to": "bl:483",
+      "via": {
+        "x": 42.284,
+        "y": 43.505
+      }
+    },
+    {
+      "from": "bl:308",
+      "to": "bl:486",
+      "via": {
+        "x": 33.593,
+        "y": 29.919
+      }
+    },
+    {
+      "from": "bl:308",
+      "to": "bl:487",
+      "via": {
+        "x": 33.593,
+        "y": 29.749
+      }
+    },
+    {
+      "from": "bl:324",
+      "to": "bl:465",
+      "via": {
+        "x": 12.153,
+        "y": -22.907
+      }
+    },
+    {
+      "from": "bl:324",
+      "to": "bl:466",
+      "via": {
+        "x": 12.364,
+        "y": -22.907
+      }
+    },
+    {
+      "from": "bl:326",
+      "to": "bl:493",
+      "via": {
+        "x": 34.543,
+        "y": -0.092
+      }
+    },
+    {
+      "from": "bl:326",
+      "to": "bl:494",
+      "via": {
+        "x": 35.193,
+        "y": -0.092
+      }
+    },
+    {
+      "from": "bl:352",
+      "to": "bl:441",
+      "via": {
+        "x": -14.358,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:352",
+      "to": "bl:454",
+      "via": {
+        "x": -14.358,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:362",
+      "to": "bl:487",
+      "via": {
+        "x": 34.637,
+        "y": 28.063
+      }
+    },
+    {
+      "from": "bl:362",
+      "to": "bl:503",
+      "via": {
+        "x": 35.193,
+        "y": 28.063
+      }
+    },
+    {
+      "from": "bl:375",
+      "to": "bl:499",
+      "via": {
+        "x": 37.99,
+        "y": 10.093
+      }
+    },
+    {
+      "from": "bl:375",
+      "to": "bl:501",
+      "via": {
+        "x": 37.354,
+        "y": 10.093
+      }
+    },
+    {
+      "from": "bl:386",
+      "to": "bl:446",
+      "via": {
+        "x": 21.428,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:386",
+      "to": "bl:467",
+      "via": {
+        "x": 21.428,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:387",
+      "to": "bl:462",
+      "via": {
+        "x": -12.675,
+        "y": -23.197
+      }
+    },
+    {
+      "from": "bl:387",
+      "to": "bl:463",
+      "via": {
+        "x": -12.477,
+        "y": -23.197
+      }
+    },
+    {
+      "from": "bl:394",
+      "to": "bl:440",
+      "via": {
+        "x": -31.879,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:394",
+      "to": "bl:459",
+      "via": {
+        "x": -31.879,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:399",
+      "to": "bl:446",
+      "via": {
+        "x": 28.255,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:399",
+      "to": "bl:448",
+      "via": {
+        "x": 28.255,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:414",
+      "to": "bl:442",
+      "via": {
+        "x": 13.924,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:414",
+      "to": "bl:450",
+      "via": {
+        "x": 13.924,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:417",
+      "to": "bl:441",
+      "via": {
+        "x": -7.072,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:417",
+      "to": "bl:453",
+      "via": {
+        "x": -7.072,
+        "y": -18.847
+      }
+    },
+    {
+      "from": "bl:424",
+      "to": "bl:440",
+      "via": {
+        "x": -28.38,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:424",
+      "to": "bl:460",
+      "via": {
+        "x": -28.38,
+        "y": -21.944
+      }
+    },
+    {
+      "from": "bl:434",
+      "to": "bl:510",
+      "via": {
+        "x": -35.235,
+        "y": -17.739
+      }
+    },
+    {
+      "from": "bl:435",
+      "to": "bl:439",
+      "via": {
+        "x": -34.055,
+        "y": -20.323
+      }
+    },
+    {
+      "from": "bl:435",
+      "to": "bl:440",
+      "via": {
+        "x": -33.527,
+        "y": -20.323
+      }
+    },
+    {
+      "from": "bl:436",
+      "to": "bl:440",
+      "via": {
+        "x": -19.563,
+        "y": -20.322
+      }
+    },
+    {
+      "from": "bl:436",
+      "to": "bl:441",
+      "via": {
+        "x": -19.379,
+        "y": -20.322
+      }
+    },
+    {
+      "from": "bl:437",
+      "to": "bl:441",
+      "via": {
+        "x": 5.208,
+        "y": -20.322
+      }
+    },
+    {
+      "from": "bl:437",
+      "to": "bl:442",
+      "via": {
+        "x": 5.417,
+        "y": -20.322
+      }
+    },
+    {
+      "from": "bl:438",
+      "to": "bl:442",
+      "via": {
+        "x": 15.743,
+        "y": -20.322
+      }
+    },
+    {
+      "from": "bl:438",
+      "to": "bl:446",
+      "via": {
+        "x": 16.205,
+        "y": -20.322
+      }
+    },
+    {
+      "from": "bl:444",
+      "to": "bl:446",
+      "via": {
+        "x": 29.789,
+        "y": -20.358
+      }
+    },
+    {
+      "from": "bl:444",
+      "to": "bl:447",
+      "via": {
+        "x": 29.999,
+        "y": -20.358
+      }
+    },
+    {
+      "from": "bl:476",
+      "to": "bl:494",
+      "via": {
+        "x": 36.273,
+        "y": -2.256
+      }
+    },
+    {
+      "from": "bl:476",
+      "to": "bl:496",
+      "via": {
+        "x": 36.273,
+        "y": -2.974
+      }
+    },
+    {
+      "from": "bl:477",
+      "to": "bl:494",
+      "via": {
+        "x": 36.273,
+        "y": 8.297
+      }
+    },
+    {
+      "from": "bl:477",
+      "to": "bl:501",
+      "via": {
+        "x": 36.273,
+        "y": 8.45
+      }
+    },
+    {
+      "from": "bl:478",
+      "to": "bl:501",
+      "via": {
+        "x": 36.273,
+        "y": 18.923
+      }
+    },
+    {
+      "from": "bl:478",
+      "to": "bl:503",
+      "via": {
+        "x": 36.273,
+        "y": 19.37
+      }
+    },
+    {
+      "from": "bl:479",
+      "to": "bl:503",
+      "via": {
+        "x": 36.273,
+        "y": 29.618
+      }
+    },
+    {
+      "from": "bl:479",
+      "to": "bl:506",
+      "via": {
+        "x": 36.273,
+        "y": 29.79
+      }
+    },
+    {
+      "from": "bl:480",
+      "to": "bl:483",
+      "via": {
+        "x": 36.273,
+        "y": 36.733
+      }
+    },
+    {
+      "from": "bl:480",
+      "to": "bl:506",
+      "via": {
+        "x": 36.273,
+        "y": 36.552
+      }
+    },
+    {
+      "from": "bl:485",
+      "to": "bl:507",
+      "via": {
+        "x": 33.748,
+        "y": 42.175
+      }
+    },
+    {
+      "from": "bl:495",
+      "to": "bl:512",
+      "via": {
+        "x": 31.897,
+        "y": -5.701
+      }
+    },
+    {
+      "from": "bl:507",
+      "to": "bl:508",
+      "via": {
+        "x": 30.189,
+        "y": 42.172
+      }
+    },
+    {
+      "from": "bl:509",
+      "to": "bl:510",
+      "via": {
+        "x": -35.206,
+        "y": -14.306
+      }
+    },
+    {
+      "from": "bl:511",
+      "to": "bl:512",
+      "via": {
+        "x": 31.909,
+        "y": -9.555
+      }
+    },
+    {
+      "from": "bl:197",
+      "to": "street:bl:197",
+      "via": {
+        "x": 35.151,
+        "y": -12.538
+      }
+    },
+    {
+      "from": "bl:201",
+      "to": "street:bl:201",
+      "via": {
+        "x": 30.561,
+        "y": -12.538
+      }
+    },
+    {
+      "from": "bl:434",
+      "to": "street:bl:434",
+      "via": {
+        "x": -36.57,
+        "y": -18.293
+      }
+    },
+    {
+      "from": "bl:439",
+      "to": "street:bl:439",
+      "via": {
+        "x": -44.974,
+        "y": -21.836
+      }
+    },
+    {
+      "from": "bl:440",
+      "to": "street:bl:440",
+      "via": {
+        "x": -23.611,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:441",
+      "to": "street:bl:441",
+      "via": {
+        "x": -5.93,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:442",
+      "to": "street:bl:442",
+      "via": {
+        "x": 9.655,
+        "y": -21.544
+      }
+    },
+    {
+      "from": "bl:446",
+      "to": "street:bl:446",
+      "via": {
+        "x": 23.569,
+        "y": -19.101
+      }
+    },
+    {
+      "from": "bl:447",
+      "to": "street:bl:447",
+      "via": {
+        "x": 36.924,
+        "y": -20.631
+      }
+    },
+    {
+      "from": "bl:473",
+      "to": "street:bl:473",
+      "via": {
+        "x": 51.281,
+        "y": -26.042
+      }
+    },
+    {
+      "from": "bl:476",
+      "to": "street:bl:476",
+      "via": {
+        "x": 37.354,
+        "y": -2.589
+      }
+    },
+    {
+      "from": "bl:483",
+      "to": "street:bl:483",
+      "via": {
+        "x": 43.655,
+        "y": 40.133
+      }
+    },
+    {
+      "from": "bl:485",
+      "to": "street:bl:485",
+      "via": {
+        "x": 34.192,
+        "y": 40.846
+      }
+    },
+    {
+      "from": "bl:494",
+      "to": "street:bl:494",
+      "via": {
+        "x": 37.354,
+        "y": 5.948
+      }
+    },
+    {
+      "from": "bl:495",
+      "to": "street:bl:495",
+      "via": {
+        "x": 31.888,
+        "y": -2.987
+      }
+    },
+    {
+      "from": "bl:496",
+      "to": "street:bl:496",
+      "via": {
+        "x": 34.967,
+        "y": -7.584
+      }
+    },
+    {
+      "from": "bl:501",
+      "to": "street:bl:501",
+      "via": {
+        "x": 37.354,
+        "y": 16.393
+      }
+    },
+    {
+      "from": "bl:503",
+      "to": "street:bl:503",
+      "via": {
+        "x": 37.354,
+        "y": 21.714
+      }
+    },
+    {
+      "from": "bl:506",
+      "to": "street:bl:506",
+      "via": {
+        "x": 37.354,
+        "y": 34.056
+      }
+    },
+    {
+      "from": "bl:508",
+      "to": "street:bl:508",
+      "via": {
+        "x": 28.869,
+        "y": 42.163
+      }
+    },
+    {
+      "from": "bl:509",
+      "to": "street:bl:509",
+      "via": {
+        "x": -35.194,
+        "y": -12.896
+      }
+    },
+    {
+      "from": "bl:511",
+      "to": "street:bl:511",
+      "via": {
+        "x": 34.592,
+        "y": -10.868
+      }
+    }
+  ],
+  "adjacency": {
+    "bl:1": [
+      "bl:459",
+      "bl:460"
+    ],
+    "bl:6": [
+      "bl:467",
+      "bl:468"
+    ],
+    "bl:17": [
+      "bl:455",
+      "bl:456"
+    ],
+    "bl:31": [
+      "bl:441",
+      "bl:463"
+    ],
+    "bl:33": [
+      "bl:441",
+      "bl:464"
+    ],
+    "bl:35": [
+      "bl:442",
+      "bl:465"
+    ],
+    "bl:37": [
+      "bl:442",
+      "bl:466"
+    ],
+    "bl:41": [
+      "bl:446",
+      "bl:468"
+    ],
+    "bl:43": [
+      "bl:446",
+      "bl:469"
+    ],
+    "bl:44": [
+      "bl:441",
+      "bl:462"
+    ],
+    "bl:54": [
+      "bl:446",
+      "bl:449"
+    ],
+    "bl:56": [
+      "bl:442",
+      "bl:451"
+    ],
+    "bl:60": [
+      "bl:441",
+      "bl:452"
+    ],
+    "bl:67": [
+      "bl:441",
+      "bl:455"
+    ],
+    "bl:69": [
+      "bl:440",
+      "bl:456"
+    ],
+    "bl:73": [
+      "bl:440",
+      "bl:457"
+    ],
+    "bl:77": [
+      "bl:440",
+      "bl:458"
+    ],
+    "bl:80": [
+      "bl:434",
+      "bl:439"
+    ],
+    "bl:85": [
+      "bl:433",
+      "bl:439"
+    ],
+    "bl:87": [
+      "bl:432",
+      "bl:439"
+    ],
+    "bl:94": [
+      "bl:431",
+      "bl:439"
+    ],
+    "bl:97": [
+      "bl:430",
+      "bl:439"
+    ],
+    "bl:102": [
+      "bl:471",
+      "bl:472"
+    ],
+    "bl:104": [
+      "bl:470",
+      "bl:471"
+    ],
+    "bl:109": [
+      "bl:472",
+      "bl:473"
+    ],
+    "bl:114": [
+      "bl:504",
+      "bl:505"
+    ],
+    "bl:118": [
+      "bl:499",
+      "bl:500"
+    ],
+    "bl:130": [
+      "bl:484",
+      "bl:486"
+    ],
+    "bl:136": [
+      "bl:481",
+      "bl:508"
+    ],
+    "bl:138": [
+      "bl:483",
+      "bl:485"
+    ],
+    "bl:140": [
+      "bl:483",
+      "bl:484"
+    ],
+    "bl:143": [
+      "bl:486",
+      "bl:506"
+    ],
+    "bl:148": [
+      "bl:488",
+      "bl:503"
+    ],
+    "bl:150": [
+      "bl:489",
+      "bl:501"
+    ],
+    "bl:152": [
+      "bl:490",
+      "bl:501"
+    ],
+    "bl:156": [
+      "bl:491",
+      "bl:494"
+    ],
+    "bl:158": [
+      "bl:492",
+      "bl:494"
+    ],
+    "bl:166": [
+      "bl:505",
+      "bl:506"
+    ],
+    "bl:169": [
+      "bl:503",
+      "bl:504"
+    ],
+    "bl:175": [
+      "bl:502",
+      "bl:503"
+    ],
+    "bl:177": [
+      "bl:500",
+      "bl:501"
+    ],
+    "bl:183": [
+      "bl:494",
+      "bl:497"
+    ],
+    "bl:187": [
+      "bl:494",
+      "bl:498"
+    ],
+    "bl:191": [
+      "bl:475",
+      "bl:496"
+    ],
+    "bl:197": [
+      "bl:447",
+      "bl:496",
+      "street:bl:197"
+    ],
+    "bl:201": [
+      "bl:447",
+      "bl:511",
+      "street:bl:201"
+    ],
+    "bl:220": [
+      "bl:441",
+      "bl:461"
+    ],
+    "bl:303": [
+      "bl:481",
+      "bl:483"
+    ],
+    "bl:304": [
+      "bl:482",
+      "bl:483"
+    ],
+    "bl:308": [
+      "bl:486",
+      "bl:487"
+    ],
+    "bl:321": [],
+    "bl:324": [
+      "bl:465",
+      "bl:466"
+    ],
+    "bl:326": [
+      "bl:493",
+      "bl:494"
+    ],
+    "bl:352": [
+      "bl:441",
+      "bl:454"
+    ],
+    "bl:362": [
+      "bl:487",
+      "bl:503"
+    ],
+    "bl:375": [
+      "bl:499",
+      "bl:501"
+    ],
+    "bl:386": [
+      "bl:446",
+      "bl:467"
+    ],
+    "bl:387": [
+      "bl:462",
+      "bl:463"
+    ],
+    "bl:394": [
+      "bl:440",
+      "bl:459"
+    ],
+    "bl:399": [
+      "bl:446",
+      "bl:448"
+    ],
+    "bl:414": [
+      "bl:442",
+      "bl:450"
+    ],
+    "bl:417": [
+      "bl:441",
+      "bl:453"
+    ],
+    "bl:424": [
+      "bl:440",
+      "bl:460"
+    ],
+    "bl:430": [
+      "bl:97"
+    ],
+    "bl:431": [
+      "bl:94"
+    ],
+    "bl:432": [
+      "bl:87"
+    ],
+    "bl:433": [
+      "bl:85"
+    ],
+    "bl:434": [
+      "bl:510",
+      "bl:80",
+      "street:bl:434"
+    ],
+    "bl:435": [
+      "bl:439",
+      "bl:440"
+    ],
+    "bl:436": [
+      "bl:440",
+      "bl:441"
+    ],
+    "bl:437": [
+      "bl:441",
+      "bl:442"
+    ],
+    "bl:438": [
+      "bl:442",
+      "bl:446"
+    ],
+    "bl:439": [
+      "bl:435",
+      "bl:80",
+      "bl:85",
+      "bl:87",
+      "bl:94",
+      "bl:97",
+      "street:bl:439"
+    ],
+    "bl:440": [
+      "bl:394",
+      "bl:424",
+      "bl:435",
+      "bl:436",
+      "bl:69",
+      "bl:73",
+      "bl:77",
+      "street:bl:440"
+    ],
+    "bl:441": [
+      "bl:220",
+      "bl:31",
+      "bl:33",
+      "bl:352",
+      "bl:417",
+      "bl:436",
+      "bl:437",
+      "bl:44",
+      "bl:60",
+      "bl:67",
+      "street:bl:441"
+    ],
+    "bl:442": [
+      "bl:35",
+      "bl:37",
+      "bl:414",
+      "bl:437",
+      "bl:438",
+      "bl:56",
+      "street:bl:442"
+    ],
+    "bl:444": [
+      "bl:446",
+      "bl:447"
+    ],
+    "bl:446": [
+      "bl:386",
+      "bl:399",
+      "bl:41",
+      "bl:43",
+      "bl:438",
+      "bl:444",
+      "bl:54",
+      "street:bl:446"
+    ],
+    "bl:447": [
+      "bl:197",
+      "bl:201",
+      "bl:444",
+      "street:bl:447"
+    ],
+    "bl:448": [
+      "bl:399"
+    ],
+    "bl:449": [
+      "bl:54"
+    ],
+    "bl:450": [
+      "bl:414"
+    ],
+    "bl:451": [
+      "bl:56"
+    ],
+    "bl:452": [
+      "bl:60"
+    ],
+    "bl:453": [
+      "bl:417"
+    ],
+    "bl:454": [
+      "bl:352"
+    ],
+    "bl:455": [
+      "bl:17",
+      "bl:67"
+    ],
+    "bl:456": [
+      "bl:17",
+      "bl:69"
+    ],
+    "bl:457": [
+      "bl:73"
+    ],
+    "bl:458": [
+      "bl:77"
+    ],
+    "bl:459": [
+      "bl:1",
+      "bl:394"
+    ],
+    "bl:460": [
+      "bl:1",
+      "bl:424"
+    ],
+    "bl:461": [
+      "bl:220"
+    ],
+    "bl:462": [
+      "bl:387",
+      "bl:44"
+    ],
+    "bl:463": [
+      "bl:31",
+      "bl:387"
+    ],
+    "bl:464": [
+      "bl:33"
+    ],
+    "bl:465": [
+      "bl:324",
+      "bl:35"
+    ],
+    "bl:466": [
+      "bl:324",
+      "bl:37"
+    ],
+    "bl:467": [
+      "bl:386",
+      "bl:6"
+    ],
+    "bl:468": [
+      "bl:41",
+      "bl:6"
+    ],
+    "bl:469": [
+      "bl:43"
+    ],
+    "bl:470": [
+      "bl:104"
+    ],
+    "bl:471": [
+      "bl:102",
+      "bl:104"
+    ],
+    "bl:472": [
+      "bl:102",
+      "bl:109"
+    ],
+    "bl:473": [
+      "bl:109",
+      "street:bl:473"
+    ],
+    "bl:474": [],
+    "bl:475": [
+      "bl:191"
+    ],
+    "bl:476": [
+      "bl:494",
+      "bl:496",
+      "street:bl:476"
+    ],
+    "bl:477": [
+      "bl:494",
+      "bl:501"
+    ],
+    "bl:478": [
+      "bl:501",
+      "bl:503"
+    ],
+    "bl:479": [
+      "bl:503",
+      "bl:506"
+    ],
+    "bl:480": [
+      "bl:483",
+      "bl:506"
+    ],
+    "bl:481": [
+      "bl:136",
+      "bl:303"
+    ],
+    "bl:482": [
+      "bl:304"
+    ],
+    "bl:483": [
+      "bl:138",
+      "bl:140",
+      "bl:303",
+      "bl:304",
+      "bl:480",
+      "street:bl:483"
+    ],
+    "bl:484": [
+      "bl:130",
+      "bl:140"
+    ],
+    "bl:485": [
+      "bl:138",
+      "bl:507",
+      "street:bl:485"
+    ],
+    "bl:486": [
+      "bl:130",
+      "bl:143",
+      "bl:308"
+    ],
+    "bl:487": [
+      "bl:308",
+      "bl:362"
+    ],
+    "bl:488": [
+      "bl:148"
+    ],
+    "bl:489": [
+      "bl:150"
+    ],
+    "bl:490": [
+      "bl:152"
+    ],
+    "bl:491": [
+      "bl:156"
+    ],
+    "bl:492": [
+      "bl:158"
+    ],
+    "bl:493": [
+      "bl:326"
+    ],
+    "bl:494": [
+      "bl:156",
+      "bl:158",
+      "bl:183",
+      "bl:187",
+      "bl:326",
+      "bl:476",
+      "bl:477",
+      "street:bl:494"
+    ],
+    "bl:495": [
+      "bl:512",
+      "street:bl:495"
+    ],
+    "bl:496": [
+      "bl:191",
+      "bl:197",
+      "bl:476",
+      "street:bl:496"
+    ],
+    "bl:497": [
+      "bl:183"
+    ],
+    "bl:498": [
+      "bl:187"
+    ],
+    "bl:499": [
+      "bl:118",
+      "bl:375"
+    ],
+    "bl:500": [
+      "bl:118",
+      "bl:177"
+    ],
+    "bl:501": [
+      "bl:150",
+      "bl:152",
+      "bl:177",
+      "bl:375",
+      "bl:477",
+      "bl:478",
+      "street:bl:501"
+    ],
+    "bl:502": [
+      "bl:175"
+    ],
+    "bl:503": [
+      "bl:148",
+      "bl:169",
+      "bl:175",
+      "bl:362",
+      "bl:478",
+      "bl:479",
+      "street:bl:503"
+    ],
+    "bl:504": [
+      "bl:114",
+      "bl:169"
+    ],
+    "bl:505": [
+      "bl:114",
+      "bl:166"
+    ],
+    "bl:506": [
+      "bl:143",
+      "bl:166",
+      "bl:479",
+      "bl:480",
+      "street:bl:506"
+    ],
+    "bl:507": [
+      "bl:485",
+      "bl:508"
+    ],
+    "bl:508": [
+      "bl:136",
+      "bl:507",
+      "street:bl:508"
+    ],
+    "bl:509": [
+      "bl:510",
+      "street:bl:509"
+    ],
+    "bl:510": [
+      "bl:434",
+      "bl:509"
+    ],
+    "bl:511": [
+      "bl:201",
+      "bl:512",
+      "street:bl:511"
+    ],
+    "bl:512": [
+      "bl:495",
+      "bl:511"
+    ],
+    "street:bl:197": [
+      "bl:197"
+    ],
+    "street:bl:201": [
+      "bl:201"
+    ],
+    "street:bl:434": [
+      "bl:434"
+    ],
+    "street:bl:439": [
+      "bl:439"
+    ],
+    "street:bl:440": [
+      "bl:440"
+    ],
+    "street:bl:441": [
+      "bl:441"
+    ],
+    "street:bl:442": [
+      "bl:442"
+    ],
+    "street:bl:446": [
+      "bl:446"
+    ],
+    "street:bl:447": [
+      "bl:447"
+    ],
+    "street:bl:473": [
+      "bl:473"
+    ],
+    "street:bl:476": [
+      "bl:476"
+    ],
+    "street:bl:483": [
+      "bl:483"
+    ],
+    "street:bl:485": [
+      "bl:485"
+    ],
+    "street:bl:494": [
+      "bl:494"
+    ],
+    "street:bl:495": [
+      "bl:495"
+    ],
+    "street:bl:496": [
+      "bl:496"
+    ],
+    "street:bl:501": [
+      "bl:501"
+    ],
+    "street:bl:503": [
+      "bl:503"
+    ],
+    "street:bl:506": [
+      "bl:506"
+    ],
+    "street:bl:508": [
+      "bl:508"
+    ],
+    "street:bl:509": [
+      "bl:509"
+    ],
+    "street:bl:511": [
+      "bl:511"
+    ]
+  }
+}
