@@ -20,6 +20,8 @@ except ModuleNotFoundError as exc:
 
 
 PAGE_URL = "https://www.vyatsu.ru/studentu-1/spravochnaya-informatsiya/raspisanie-zanyatiy-dlya-studentov.html"
+# ATTESTATION_PAGE_URL = "https://www.vyatsu.ru/internet-gazeta/raspisanie-sessiy-obuchayuschihsya-na-2016-2017-uc.html"
+# EXTRAMURAL_PAGE_URL = "https://www.vyatsu.ru/studentu-1/spravochnaya-informatsiya/raspisanie-zanyatiy-obuchayuschihsya-ochnoy-zaochnoy-formyi.html"
 DEFAULT_TIMEOUT = 60
 HREF_INTERVAL_RE = re.compile(r"_(\d{8})_(\d{8})\.pdf(?:$|[?#])", re.IGNORECASE)
 TEXT_DATE_RE = re.compile(r"(\d{1,2}[._\-/]\d{1,2}[._\-/]\d{2,4})")
@@ -27,6 +29,7 @@ SPACED_INTERVAL_RE = re.compile(
     r"с\s*(\d{1,2})\s+(\d{1,2})\s+(\d{2,4})\s+по\s+(\d{1,2})\s+(\d{1,2})\s+(\d{2,4})",
     re.IGNORECASE,
 )
+GROUP_CODE_RE = re.compile(r"\b[А-Яа-яЁёA-Za-z]{1,8}[БбBb6]?-?\d{4}-\d{2}-\d{2}\b")
 
 
 @dataclass(frozen=True)
@@ -75,6 +78,33 @@ def parse_spaced_date(day_raw: str, month_raw: str, year_raw: str) -> date | Non
         return date(year, month, day)
     except ValueError:
         return None
+
+
+def extract_group_code(text: str) -> str | None:
+    match = GROUP_CODE_RE.search(text or "")
+    return match.group(0) if match else None
+
+
+def safe_label_pdf_name(label: str, fallback: str) -> str:
+    text = str(label or "").strip()
+    if not text:
+        text = fallback
+    text = re.sub(r"[<>:\"/\\|?*]+", "_", text)
+    text = text.strip(" .")
+    if not text:
+        text = fallback
+    if not text.lower().endswith(".pdf"):
+        text = f"{text}.pdf"
+    return text
+
+
+def build_session_file_name(label: str, fallback_index: int) -> str:
+    group_code = extract_group_code(label)
+    if group_code:
+        base = f"сессия_{group_code}"
+    else:
+        base = f"сессия_{fallback_index:04d}"
+    return safe_label_pdf_name(base, fallback=f"session_{fallback_index:04d}.pdf")
 
 
 def parse_cli_date(raw: str) -> date:
@@ -139,6 +169,67 @@ def safe_pdf_name(url: str, fallback_index: int) -> str:
         cleaned = f"{cleaned}.pdf" if cleaned else f"schedule_{fallback_index:04d}.pdf"
 
     return cleaned
+
+
+def collect_always_links(
+    session: requests.Session,
+    page_url: str,
+    target_date: date,
+    naming: str,
+) -> list[SchedulePdfLink]:
+    print(f"Loading page: {page_url}")
+    response = session.get(page_url, timeout=DEFAULT_TIMEOUT)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    groups = soup.select("div.grpPeriod")
+    period_blocks = soup.select("div.listPeriod")
+    print(f"Found grpPeriod blocks: {len(groups)}")
+    print(f"Found listPeriod blocks: {len(period_blocks)}")
+
+    all_anchors = soup.select("div.grpPeriod a[href]")
+    print(f"Found links in grpPeriod: {len(all_anchors)}")
+
+    if not all_anchors:
+        all_anchors = soup.select("div.listPeriod a[href]")
+        print(f"Fallback links in listPeriod: {len(all_anchors)}")
+
+    links_by_url: dict[str, SchedulePdfLink] = {}
+    total_anchors = len(all_anchors)
+
+    for idx, anchor in enumerate(all_anchors, start=1):
+        href = (anchor.get("href") or "").strip()
+        if ".pdf" not in href.lower():
+            continue
+
+        absolute_url = urljoin(page_url, href)
+        label = anchor.get_text(" ", strip=True) or Path(urlparse(absolute_url).path).name
+
+        if absolute_url in links_by_url:
+            continue
+
+        if naming == "session":
+            file_name = build_session_file_name(label, len(links_by_url) + 1)
+        elif naming == "label":
+            fallback_name = safe_pdf_name(absolute_url, len(links_by_url) + 1)
+            file_name = safe_label_pdf_name(label, fallback=fallback_name)
+        else:
+            file_name = safe_pdf_name(absolute_url, len(links_by_url) + 1)
+
+        links_by_url[absolute_url] = SchedulePdfLink(
+            url=absolute_url,
+            file_name=file_name,
+            period_start=target_date,
+            period_end=target_date,
+            label=label or file_name,
+        )
+
+        if idx % 500 == 0 or idx == total_anchors:
+            print(f"Scanned links: {idx}/{total_anchors}")
+
+    links = sorted(links_by_url.values(), key=lambda item: item.file_name)
+    print(f"Matching links for {page_url}: {len(links)}")
+    return links
 
 
 def unique_destination(path: Path, overwrite: bool) -> Path:
@@ -214,6 +305,32 @@ def collect_links_for_date(session: requests.Session, target_date: date) -> list
 
     links = sorted(links_by_url.values(), key=lambda item: item.file_name)
     print(f"Matching links for {target_date.isoformat()}: {len(links)}")
+
+    # Session/exam sources disabled per request.
+    # attestation_links = collect_always_links(
+    #     session=session,
+    #     page_url=ATTESTATION_PAGE_URL,
+    #     target_date=target_date,
+    #     naming="session",
+    # )
+    # extramural_links = collect_always_links(
+    #     session=session,
+    #     page_url=EXTRAMURAL_PAGE_URL,
+    #     target_date=target_date,
+    #     naming="label",
+    # )
+    #
+    # combined_links = []
+    # seen_urls = set()
+    # for batch in (links, attestation_links, extramural_links):
+    #     for link in batch:
+    #         if link.url in seen_urls:
+    #             continue
+    #         seen_urls.add(link.url)
+    #         combined_links.append(link)
+    #
+    # print(f"Total links collected: {len(combined_links)}")
+    # return combined_links
     return links
 
 

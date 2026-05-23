@@ -59,6 +59,9 @@ WEEKDAY_BY_INDEX = {
     5: "суббота",
     6: "воскресенье",
 }
+CURRENT_YEAR = date.today().year
+MIN_REASONABLE_YEAR = CURRENT_YEAR - 6
+MAX_REASONABLE_YEAR = CURRENT_YEAR + 2
 
 
 def parse_cli_date(raw):
@@ -189,6 +192,27 @@ def reverse_compact(text):
     return compact[::-1]
 
 
+def normalize_year(value):
+    if value < 100:
+        candidates = [2000 + value, 1900 + value]
+        for candidate in candidates:
+            if MIN_REASONABLE_YEAR <= candidate <= MAX_REASONABLE_YEAR:
+                return candidate
+        return None
+    if MIN_REASONABLE_YEAR <= value <= MAX_REASONABLE_YEAR:
+        return value
+    return None
+
+
+def format_date_components(day, month, year):
+    normalized_year = normalize_year(year)
+    if normalized_year is None:
+        return None
+    if not (1 <= day <= 31 and 1 <= month <= 12):
+        return None
+    return f"{day:02d}.{month:02d}.{normalized_year % 100:02d}"
+
+
 def parse_valid_date(raw):
     match = re.fullmatch(r'(\d{1,2})[./](\d{1,2})[./](\d{2,4})', raw)
     if not match:
@@ -198,10 +222,13 @@ def parse_valid_date(raw):
     month = int(match.group(2))
     year = int(match.group(3))
 
-    if not (1 <= day <= 31 and 1 <= month <= 12):
-        return None
+    return format_date_components(day, month, year)
 
-    return f"{day:02d}.{month:02d}.{year % 100:02d}"
+
+def _add_valid_date(valid_dates, day, month, year):
+    formatted = format_date_components(day, month, year)
+    if formatted:
+        valid_dates.append(formatted)
 
 
 def find_date_in_digits(raw_digits, prefer_last=False):
@@ -209,14 +236,25 @@ def find_date_in_digits(raw_digits, prefer_last=False):
         return None
 
     valid_dates = []
+    if len(raw_digits) >= 8:
+        for idx in range(0, len(raw_digits) - 7):
+            candidate = raw_digits[idx: idx + 8]
+            day = int(candidate[0:2])
+            month = int(candidate[2:4])
+            year = int(candidate[4:8])
+            _add_valid_date(valid_dates, day, month, year)
+
+            year = int(candidate[0:4])
+            month = int(candidate[4:6])
+            day = int(candidate[6:8])
+            _add_valid_date(valid_dates, day, month, year)
+
     for idx in range(0, len(raw_digits) - 5):
         candidate = raw_digits[idx: idx + 6]
         day = int(candidate[0:2])
         month = int(candidate[2:4])
         year = int(candidate[4:6])
-        if not (1 <= day <= 31 and 1 <= month <= 12):
-            continue
-        valid_dates.append(f"{day:02d}.{month:02d}.{year:02d}")
+        _add_valid_date(valid_dates, day, month, year)
 
     if not valid_dates:
         return None
@@ -256,6 +294,75 @@ def extract_date_from_noisy_prefix(text):
 
     reverse = find_date_in_digits(digits[::-1], prefer_last=True)
     return reverse
+
+
+def extract_date_day_from_page_text(text):
+    if not text:
+        return None, None
+
+    candidates = [text, reverse_compact(text)]
+    page_day = None
+    page_date = None
+
+    for candidate in candidates:
+        day_match = DAY_RE.search(candidate)
+        if day_match:
+            page_day = day_match.group(1).lower()
+            break
+
+    for candidate in candidates:
+        date_match = DATE_RE.search(candidate)
+        if date_match:
+            parsed = parse_valid_date(date_match.group(1).replace('/', '.'))
+            if parsed:
+                page_date = parsed
+                break
+
+    return page_date, page_day
+
+
+def is_date_candidate_cell(cell):
+    if GROUP_CODE_RE.search(cell):
+        return False
+    if INTERVAL_RE.search(cell):
+        return False
+    if ROOM_RE.search(cell):
+        return False
+    if TEACHER_RE.search(cell):
+        return False
+    if LESSON_KEYWORDS_RE.search(cell):
+        return False
+    if DAY_RE.search(cell) or DATE_RE.search(cell):
+        return True
+    digits = re.findall(r'\d', cell)
+    return len(digits) >= 6
+
+
+def extract_date_from_digits_cells(cells):
+    candidate_cells = [cell for cell in cells if is_date_candidate_cell(cell)]
+    if not candidate_cells:
+        return None
+
+    digit_sources = []
+    for cell in candidate_cells:
+        digits = ''.join(ch for ch in cell if ch.isdigit())
+        if digits:
+            digit_sources.append(digits)
+            digit_sources.append(digits[::-1])
+
+    joined_digits = ''.join(ch for cell in candidate_cells for ch in cell if ch.isdigit())
+    if joined_digits:
+        digit_sources.append(joined_digits)
+        digit_sources.append(joined_digits[::-1])
+
+    for digits in digit_sources:
+        if len(digits) < 6:
+            continue
+        recovered = find_date_in_digits(digits, prefer_last=True)
+        if recovered:
+            return recovered
+
+    return None
 
 
 def weekday_from_date_ru(date_str):
@@ -414,14 +521,9 @@ def extract_date_day(cells, current_date, current_day):
 
     # Некоторые даты в вертикальной колонке приходят как поток символов; пробуем восстановить по цифрам.
     if current_date is None:
-        for candidate in reversed_candidates:
-            if not DAY_RE.search(candidate):
-                continue
-            digits = ''.join(ch for ch in candidate if ch.isdigit())
-            recovered = find_date_in_digits(digits)
-            if recovered:
-                current_date = recovered
-            break
+        recovered = extract_date_from_digits_cells(cells)
+        if recovered:
+            current_date = recovered
 
     return current_date, current_day
 
@@ -717,12 +819,14 @@ def parse_schedule_pdf(pdf_path):
     # Открываем PDF файл
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
+            page_text = page.extract_text() or ""
+            page_default_date, page_default_day = extract_date_day_from_page_text(page_text)
             # Извлекаем таблицы с текущей страницы
             tables = page.extract_tables()
             
             for table in tables:
-                current_date = None
-                current_day = None
+                current_date = page_default_date
+                current_day = page_default_day
                 current_interval = None
                 
                 for row in table:
@@ -734,6 +838,10 @@ def parse_schedule_pdf(pdf_path):
                         continue
 
                     current_date, current_day = extract_date_day(cells, current_date, current_day)
+                    if current_date is None and page_default_date:
+                        current_date = page_default_date
+                    if current_day is None and page_default_day:
+                        current_day = page_default_day
 
                     interval = None
                     for cell in cells:

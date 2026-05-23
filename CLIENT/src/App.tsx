@@ -480,12 +480,12 @@ function App() {
           Обычный
         </HudButton>
         <HudButton
-          title="Маршруты"
+          title="Навигация"
           data={{ mode: 'routes' }}
           className={mapMode === 'routes' ? 'mapModeBtn mapModeBtnActive' : 'mapModeBtn'}
           onClick={onSetRouteModeRoutes}
         >
-          Маршруты
+          Навигация
         </HudButton>
         <HudButton
           title="Расписание"
@@ -590,8 +590,7 @@ function App() {
       ) : null}
 
       {mapMode === 'schedule' ? (
-        <HudPanel
-          title="Расписание"
+        <div
           className={
             isTouchDevice
               ? (isScheduleActionsCollapsed
@@ -601,116 +600,128 @@ function App() {
                   ? 'scheduleBottomCluster scheduleBottomClusterCompact'
                   : 'scheduleBottomCluster')
           }
-          headerClassName="scheduleDockHeader"
-          titleClassName="scheduleDockTitle"
-          bodyClassName="scheduleDockBody"
-          showHeader={isTouchDevice}
-          collapsible={isTouchDevice}
-          expanded={!isScheduleActionsCollapsed}
-          onToggle={() => setIsScheduleActionsCollapsed((value) => !value)}
-          toggleButtonClassName="mapModeDockToggle"
         >
-          <div className="schedulePeriodDock">
-            <div className="schedulePeriodSwitch" role="group" aria-label="Период отображения">
-              <HudButton
-                title="Неделя"
-                data={{ period: 'week' }}
-                className={schedulePeriodMode === 'week' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
-                onClick={() => onSetSchedulePeriodMode('week')}
-              >
-                Неделя
-              </HudButton>
-              <HudButton
-                title="День"
-                data={{ period: 'day' }}
-                className={schedulePeriodMode === 'day' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
-                onClick={() => onSetSchedulePeriodMode('day')}
-              >
-                День
-              </HudButton>
-            </div>
+          <HudPanel
+            title="Расписание"
+            className="scheduleDockPanel"
+            headerClassName="scheduleDockHeader"
+            titleClassName="scheduleDockTitle"
+            bodyClassName="scheduleDockBody"
+            showHeader={isTouchDevice}
+            collapsible={isTouchDevice}
+            expanded={!isScheduleActionsCollapsed}
+            onToggle={() => setIsScheduleActionsCollapsed((value) => !value)}
+            toggleButtonClassName="mapModeDockToggle"
+          >
+            <div className="schedulePeriodDock">
+              <div className="schedulePeriodSwitch" role="group" aria-label="Период отображения">
+                <HudButton
+                  title="Неделя"
+                  data={{ period: 'week' }}
+                  className={schedulePeriodMode === 'week' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
+                  onClick={() => onSetSchedulePeriodMode('week')}
+                >
+                  Неделя
+                </HudButton>
+                <HudButton
+                  title="День"
+                  data={{ period: 'day' }}
+                  className={schedulePeriodMode === 'day' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
+                  onClick={() => onSetSchedulePeriodMode('day')}
+                >
+                  День
+                </HudButton>
+              </div>
 
-            <div className="scheduleCalendarColumn">
-              <label className="scheduleCalendarField">
-                <span>Календарь</span>
-                <input
-                  type="date"
-                  value={scheduleFocusDateIso}
-                  onChange={(e) => onSetScheduleFocusDate(e.target.value)}
-                />
-              </label>
+              <div className="scheduleCalendarColumn">
+                <label className="scheduleCalendarField">
+                  <span>Календарь</span>
+                  <input
+                    type="date"
+                    value={scheduleFocusDateIso}
+                    onChange={(e) => onSetScheduleFocusDate(e.target.value)}
+                  />
+                </label>
 
-              <div className="schedulePeriodMeta" aria-live="polite">
-                {isScheduleLoading
-                  ? 'Загружаем расписание...'
-                  : (scheduleLoadError
-                      ? `Ошибка: ${scheduleLoadError}`
-                      : (schedulePeriodMode === 'week'
-                          ? `Неделя с ${formatIsoDateForUi(scheduleFocusDateIso)}`
-                          : `День: ${formatIsoDateForUi(scheduleFocusDateIso)}`))}
+                <div className="schedulePeriodMeta" aria-live="polite">
+                  {isScheduleLoading
+                    ? 'Загружаем расписание...'
+                    : (scheduleLoadError
+                        ? `Ошибка: ${scheduleLoadError}`
+                        : (schedulePeriodMode === 'week'
+                            ? `Неделя с ${formatIsoDateForUi(scheduleFocusDateIso)}`
+                            : `День: ${formatIsoDateForUi(scheduleFocusDateIso)}`))}
+                </div>
+              </div>
+
+              <div className="scheduleMapFiltersColumn">
+                <label className="scheduleMapFilterField">
+                  <span>Преподаватель</span>
+                  <input
+                    type="search"
+                    className="scheduleMapFilterInput"
+                    value={scheduleTeacherFilter}
+                    onChange={(e) => onSetScheduleTeacherFilter(e.target.value)}
+                    placeholder="Поиск по преподавателям"
+                    list="schedule-teacher-filter-options"
+                    title="Фильтр по преподавателю"
+                  />
+                  <datalist id="schedule-teacher-filter-options">
+                    {scheduleTeacherSuggestions.map((teacher) => (
+                      <option key={`schedule-teacher-${teacher}`} value={teacher} />
+                    ))}
+                  </datalist>
+                </label>
+
+                <label className="scheduleMapFilterField">
+                  <span>Группа</span>
+                  <input
+                    type="search"
+                    className="scheduleMapFilterInput"
+                    value={scheduleGroupFilter}
+                    onChange={(e) => onSetScheduleGroupFilter(e.target.value)}
+                    placeholder="Поиск по группам"
+                    list="schedule-group-filter-options"
+                    title="Фильтр по группе"
+                  />
+                  <datalist id="schedule-group-filter-options">
+                    {scheduleGroupSuggestions.map((group) => (
+                      <option key={`schedule-group-${group}`} value={group} />
+                    ))}
+                  </datalist>
+                </label>
               </div>
             </div>
 
-            <div className="scheduleMapFiltersColumn">
-              <label className="scheduleMapFilterField">
-                <span>Преподаватель</span>
-                <input
-                  type="search"
-                  className="scheduleMapFilterInput"
-                  value={scheduleTeacherFilter}
-                  onChange={(e) => onSetScheduleTeacherFilter(e.target.value)}
-                  placeholder="Поиск по преподавателям"
-                  list="schedule-teacher-filter-options"
-                  title="Фильтр по преподавателю"
-                />
-                <datalist id="schedule-teacher-filter-options">
-                  {scheduleTeacherSuggestions.map((teacher) => (
-                    <option key={`schedule-teacher-${teacher}`} value={teacher} />
-                  ))}
-                </datalist>
-              </label>
-
-              <label className="scheduleMapFilterField">
-                <span>Группа</span>
-                <input
-                  type="search"
-                  className="scheduleMapFilterInput"
-                  value={scheduleGroupFilter}
-                  onChange={(e) => onSetScheduleGroupFilter(e.target.value)}
-                  placeholder="Поиск по группам"
-                  list="schedule-group-filter-options"
-                  title="Фильтр по группе"
-                />
-                <datalist id="schedule-group-filter-options">
-                  {scheduleGroupSuggestions.map((group) => (
-                    <option key={`schedule-group-${group}`} value={group} />
-                  ))}
-                </datalist>
-              </label>
+            <div className="scheduleActionsDock">
+              <div className="scheduleActionsColumn">
+                <HudButton
+                  title="Показать расписание"
+                  data={{ action: 'open-schedule-table' }}
+                  className="scheduleOpenBtn"
+                  onClick={onOpenScheduleModal}
+                >
+                  Показать расписание
+                </HudButton>
+                <HudButton
+                  title="Статистика"
+                  data={{ action: 'open-schedule-stats' }}
+                  className="scheduleOpenBtn scheduleStatsOpenBtn"
+                  onClick={() => setIsScheduleStatsModalOpen(true)}
+                >
+                  Статистика
+                </HudButton>
+              </div>
             </div>
-          </div>
+          </HudPanel>
 
-          <div className="scheduleActionsDock">
-            <div className="scheduleActionsColumn">
-              <HudButton
-                title="Показать расписание"
-                data={{ action: 'open-schedule-table' }}
-                className="scheduleOpenBtn"
-                onClick={onOpenScheduleModal}
-              >
-                Показать расписание
-              </HudButton>
-              <HudButton
-                title="Статистика"
-                data={{ action: 'open-schedule-stats' }}
-                className="scheduleOpenBtn scheduleStatsOpenBtn"
-                onClick={() => setIsScheduleStatsModalOpen(true)}
-              >
-                Статистика
-              </HudButton>
+          {!isTouchDevice ? (
+            <div className="scheduleInfoBlock" aria-hidden>
+              <div className="scheduleInfoTitle">⚠️Внимание!</div>
+              <div className="scheduleInfoText">Расписание может содержать ошибки, либо отсутствовать. В этом проекте оно носит статистический характер и не является заменой официальной информации на сайте ВУЗа или в личном кабинете</div>
             </div>
-          </div>
-        </HudPanel>
+          ) : null}
+        </div>
       ) : null}
 
       <ScheduleModal
