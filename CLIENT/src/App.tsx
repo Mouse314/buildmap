@@ -590,25 +590,26 @@ function App() {
       ) : null}
 
       {mapMode === 'schedule' ? (
-        <div
-          className={
-            isTouchDevice
-              ? (isScheduleActionsCollapsed
-                  ? 'scheduleBottomCluster scheduleBottomClusterCompact scheduleBottomClusterTouch'
-                  : 'scheduleBottomCluster scheduleBottomClusterTouch')
-              : (isScheduleActionsCollapsed
-                  ? 'scheduleBottomCluster scheduleBottomClusterCompact'
-                  : 'scheduleBottomCluster')
-          }
-        >
+        <section className={"hudPanel scheduleBottomClusterWrap " + (isTouchDevice ? 'scheduleBottomClusterWrapTouch' : '')}>
+          <div
+            className={
+              isTouchDevice
+                ? (isScheduleActionsCollapsed
+                    ? 'scheduleBottomCluster scheduleBottomClusterCompact scheduleBottomClusterTouch'
+                    : 'scheduleBottomCluster scheduleBottomClusterTouch')
+                : (isScheduleActionsCollapsed
+                    ? 'scheduleBottomCluster scheduleBottomClusterCompact'
+                    : 'scheduleBottomCluster')
+            }
+          >
           <HudPanel
             title="Расписание"
             className="scheduleDockPanel"
             headerClassName="scheduleDockHeader"
             titleClassName="scheduleDockTitle"
             bodyClassName="scheduleDockBody"
-            showHeader={isTouchDevice}
-            collapsible={isTouchDevice}
+            showHeader
+            collapsible
             expanded={!isScheduleActionsCollapsed}
             onToggle={() => setIsScheduleActionsCollapsed((value) => !value)}
             toggleButtonClassName="mapModeDockToggle"
@@ -713,15 +714,15 @@ function App() {
                 </HudButton>
               </div>
             </div>
+            {!isTouchDevice ? (
+              <div className="scheduleInfoBlock" aria-hidden>
+                <div className="scheduleInfoTitle">⚠️Внимание!</div>
+                <div className="scheduleInfoText">Расписание может содержать ошибки, либо отсутствовать. Оно не является заменой официальной информации на сайте ВУЗа или в личном кабинете</div>
+              </div>
+            ) : null}
           </HudPanel>
-
-          {!isTouchDevice ? (
-            <div className="scheduleInfoBlock" aria-hidden>
-              <div className="scheduleInfoTitle">⚠️Внимание!</div>
-              <div className="scheduleInfoText">Расписание может содержать ошибки, либо отсутствовать. В этом проекте оно носит статистический характер и не является заменой официальной информации на сайте ВУЗа или в личном кабинете</div>
-            </div>
-          ) : null}
         </div>
+        </section>
       ) : null}
 
       <ScheduleModal

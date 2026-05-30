@@ -148,6 +148,9 @@ export function TopBar({
     const hasAnyBlock = hasCurrent || hasOther || hasCategories;
 
     const groupsCount = Number(hasCurrent) + Number(hasOther) + Number(hasCategories);
+    const themeLabel = theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞';
+    const adminLabel = isAdminMode ? 'Админ: ВКЛ' : 'админ';
+    const bugReportLabel = 'Сообщить об ошибке';
 
     return (
         <>
@@ -333,31 +336,33 @@ export function TopBar({
             </div>
 
             <HudButton
-                title={theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
+                title={themeLabel}
                 data={{ action: 'toggle-theme' }}
                 className="topButton topThemeButton topDesktopOnly"
                 onClick={onToggleTheme}
             >
-                {theme === 'light' ? 'Тёмная тема 🌃' : 'Светлая тема 🌞'}
+                {themeLabel}
             </HudButton>
 
                 <HudButton
-                    title={isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                    title={adminLabel}
                     hint={isAdminMode ? 'Режим администратора включён' : 'Включить режим администратора для доступа к скрытым функциям'}    
                     data={{ action: 'toggle-admin' }}
                     className={isAdminMode ? 'topButton topDesktopOnly adminModeButton adminModeButtonActive' : 'topButton topDesktopOnly adminModeButton'}
                     onClick={onToggleAdminMode}
                 >
-                    {isAdminMode ? 'Админ: ВКЛ' : 'админ'}
+                    {adminLabel}
                 </HudButton>
 
                 <HudButton
-                    title="Сообщить об ошибке"
+                    title={bugReportLabel}
                     data={{ action: 'open-bug-report' }}
-                    className="topButton topDesktopOnly"
+                    className="topButton topDesktopOnly topButtonMarqueeOnly"
                     onClick={() => onOpenBugReport(`Корпус: ${buildLabel(selectedBuild)}\nКатегория: ${selectedCategory === '__all__' ? 'Не выбрано' : selectedCategory}`)}
                 >
-                    Сообщить об ошибке
+                    <span className="topButtonMarquee">
+                        <span className="topButtonMarqueeText" data-text={bugReportLabel}>{bugReportLabel}</span>
+                    </span>
                 </HudButton>
 
                 <HudButton

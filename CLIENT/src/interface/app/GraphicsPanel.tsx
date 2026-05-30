@@ -47,7 +47,7 @@ export function GraphicsPanel({
           <div className="graphicsButtons">
             {graphicsPresets.map((p) => {
               const selected = graphicsPreset === p.id;
-              const needsWarning = p.id === 'medium' || p.id === 'max';
+              const needsWarning = p.id === 'max';
               return (
                 <HudButton
                   key={p.id}
@@ -71,7 +71,7 @@ export function GraphicsPanel({
             <span className="graphicsWarningMark" aria-hidden>⚠️</span>
             Возможно снижение плавности
           </div>
-          <hr className="graphicsDivider" />
+          {/* <hr className="graphicsDivider" /> */}
           <div className="graphicsExtraToggles">
             {isAdminMode ? (
               <HudButton

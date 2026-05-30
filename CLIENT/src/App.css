@@ -62,6 +62,13 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .topButton.topDesktopOnly .topButtonMarqueeText {
+    animation: none;
+    transform: none;
+  }
+}
+
 .hudButtonContent {
   display: inline-flex;
   align-items: center;
@@ -129,7 +136,6 @@
 .hudPanelBodyWrapCollapsed {
   grid-template-rows: 0fr;
   overflow: hidden;
-  height: 0;
 }
 
 .hudPanelBody {
@@ -642,6 +648,7 @@
   -webkit-backdrop-filter: blur(5px) saturate(110%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   padding: 10px;
+  padding-bottom: 0px;
 }
 
 .sidePanelLeft {
@@ -707,6 +714,7 @@
   width: fit-content;
   max-width: calc(100vw - 24px);
   padding: 8px 10px;
+  padding-bottom: 0px;
 }
 
 .mapModeDockCollapsed .mapModeDockTitle {
@@ -783,8 +791,7 @@
 }
 
 .scheduleInfoBlock {
-  width: clamp(260px, 22vw, 360px);
-  height: 90px;
+  width: 350px;
   border-radius: 14px;
   border: 2px solid rgba(206, 209, 255, 0.22);
   background: rgba(167, 167, 167, 0.46);
@@ -1475,12 +1482,32 @@
   left: 50%;
   bottom: 14px;
   transform: translateX(-50%);
-  width: max-content;
+  width: 1350px;
   max-width: calc(100% - 22px);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+.scheduleDockPanel {
+  width: 100%;
+  max-width: 100%;
+}
+
+.scheduleBottomClusterWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 124;
+  pointer-events: none;
+}
+
+.scheduleBottomClusterWrapTouch {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.scheduleBottomClusterWrap .scheduleBottomCluster {
+  pointer-events: auto;
 }
 
 .scheduleBottomClusterTouch {
@@ -1491,7 +1518,6 @@
 }
 
 .schedulePeriodDock {
-  min-height: 42px;
   border-radius: 14px;
   border: 2px solid rgba(206, 209, 255, 0.3);
   background: rgba(167, 167, 167, 0.72);
@@ -1500,7 +1526,7 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   display: flex;
   align-items: flex-start;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   gap: 8px;
   padding: 6px;
   max-width: min(96vw, 1240px);
@@ -1587,7 +1613,7 @@
 
 .scheduleMapFilterInput {
   height: 30px;
-  min-width: 220px;
+  min-width: 120px;
   max-width: 320px;
   border-radius: 9px;
   border: 1px solid rgba(0, 0, 0, 0.18);
@@ -1598,8 +1624,28 @@
 }
 
 .scheduleDockHeader {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: calc(100% - 20px);
+  padding: 6px 8px;
+  border-radius: 14px;
+  border: 2px solid rgba(206, 209, 255, 0.3);
+  background: rgba(167, 167, 167, 0.72);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  margin-bottom: 6px;
+}
 
+.appRoot[data-theme='dark'] .scheduleDockHeader {
+  border-color: rgba(206, 209, 255, 0.11);
+  background: rgba(31, 31, 31, 0.34);
+  color: #f0f5ff;
 }
 
 .scheduleDockTitle {
@@ -1609,12 +1655,22 @@
 
 .scheduleDockBody {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 10px;
   opacity: 1;
   transform: translateY(0);
   transition: opacity 180ms ease, transform 180ms ease;
   overflow: hidden;
+}
+
+.scheduleDockBody > * {
+  align-self: stretch;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.scheduleDockBody > :not(.scheduleInfoBlock) {
+  width: fit-content;
 }
 
 .hudPanelBodyWrapCollapsed .scheduleDockBody {
@@ -2430,32 +2486,8 @@
     gap: 6px;
   }
 
-  .scheduleDockHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: calc(100% - 20px);
-    padding: 6px 10px;
-    border-radius: 14px;
-    border: 2px solid rgba(206, 209, 255, 0.3);
-    background: rgba(167, 167, 167, 0.72);
-    backdrop-filter: blur(5px) saturate(115%);
-    -webkit-backdrop-filter: blur(5px) saturate(115%);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-    position: relative;
-    z-index: 2;
-    pointer-events: auto;
-  }
-
   .scheduleInfoBlock {
     display: none;
-  }
-
-  .appRoot[data-theme='dark'] .scheduleDockHeader {
-    border-color: rgba(206, 209, 255, 0.11);
-    background: rgba(31, 31, 31, 0.34);
-    color: #f0f5ff;
   }
 
   .scheduleDockBody {
@@ -2479,6 +2511,10 @@
   .scheduleCalendarColumn {
     width: 100%;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items:center;
   }
 
   .scheduleMapFilterField {
@@ -2504,6 +2540,9 @@
     width: 100%;
     margin-left: 0;
     align-items: center;
+    display: flex;
+    flex-direction: column;
+
   }
 
   .scheduleOpenBtn {
@@ -2573,6 +2612,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-bottom: 10px;
 }
 
 .graphicsButtons {
@@ -3018,6 +3058,24 @@
   overflow: hidden;
 }
 
+.topButtonMarquee {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.topButton.topDesktopOnly .topButtonMarqueeText {
+  display: inline-block;
+  padding-right: 24px;
+  animation: topButtonMarquee 12s linear infinite;
+  will-change: transform;
+}
+
+.topButton.topDesktopOnly .topButtonMarqueeText::after {
+  content: attr(data-text);
+  padding-left: 24px;
+}
+
 .topButton:disabled {
   opacity: 0.65;
   cursor: not-allowed;
@@ -3057,6 +3115,15 @@
 .topDesktopOnly {
   display: flex;
   /* overflow: hidden; */
+}
+
+@keyframes topButtonMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .mobileControlsButton {
