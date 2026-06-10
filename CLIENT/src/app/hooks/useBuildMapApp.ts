@@ -367,6 +367,7 @@ export function useBuildMapApp() {
   const [pendingSearchJump, setPendingSearchJump] = React.useState<SearchIndexedRoom | null>(null)
   const [isScheduleModalOpen, setIsScheduleModalOpen] = React.useState(false)
   const [schedulePeriodMode, setSchedulePeriodMode] = React.useState<SchedulePeriodMode>('week')
+  const [scheduleSourcePrefix, setScheduleSourcePrefix] = React.useState<string>('schedule')
   const [scheduleFocusDateIso, setScheduleFocusDateIso] = React.useState<string>(() => toWeekStartMondayIso(getTodayIso()))
   const [scheduleTeacherFilter, setScheduleTeacherFilter] = React.useState<string>('')
   const [scheduleGroupFilter, setScheduleGroupFilter] = React.useState<string>('')
@@ -434,7 +435,7 @@ export function useBuildMapApp() {
     let cancelled = false
     setScheduleLoadError(null)
 
-    fetchScheduleManifest()
+    fetchScheduleManifest(scheduleSourcePrefix)
       .then((manifest) => {
         if (cancelled) return
         setScheduleManifest(manifest)
@@ -449,7 +450,7 @@ export function useBuildMapApp() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [scheduleSourcePrefix])
 
   const scheduleManifestEntriesByFocusDate = React.useMemo(() => {
     const entries = scheduleManifest?.dates ?? []
@@ -486,11 +487,12 @@ export function useBuildMapApp() {
     setScheduleLoadError(null)
 
     Promise.all(scheduleManifestEntriesByFocusDate.map(async (entry) => {
-      const cached = scheduleDatasetByBatchDateRef.current.get(entry.date)
+      const cacheKey = `${scheduleSourcePrefix}:${entry.date}`
+      const cached = scheduleDatasetByBatchDateRef.current.get(cacheKey)
       if (cached) return cached
 
-      const dataset = await fetchScheduleBatchDataset(entry.date, entry.files.map((file) => file.name))
-      scheduleDatasetByBatchDateRef.current.set(entry.date, dataset)
+      const dataset = await fetchScheduleBatchDataset(entry.date, entry.files.map((file) => file.name), scheduleSourcePrefix)
+      scheduleDatasetByBatchDateRef.current.set(cacheKey, dataset)
       return dataset
     }))
       .then((datasets) => {
@@ -510,7 +512,7 @@ export function useBuildMapApp() {
     return () => {
       cancelled = true
     }
-  }, [scheduleManifestEntriesByFocusDate])
+  }, [scheduleManifestEntriesByFocusDate, scheduleSourcePrefix])
 
   const selectedBuildNumber = React.useMemo(() => buildNumberFromBuildId(selectedBuild), [selectedBuild])
 
@@ -1643,6 +1645,8 @@ export function useBuildMapApp() {
     onSetScheduleFocusDate,
     onSetScheduleTeacherFilter,
     onSetScheduleGroupFilter,
+    scheduleSourcePrefix,
+    onSetScheduleSourcePrefix: setScheduleSourcePrefix,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,

@@ -21,14 +21,14 @@ function isScheduleManifest(value: unknown): value is ScheduleManifest {
   return Boolean(value && typeof value === 'object' && Array.isArray((value as Record<string, unknown>).dates))
 }
 
-function scheduleStaticManifestUrl(): string {
-  return publicAssetUrl('schedule/manifest.json')
+function scheduleStaticManifestUrl(sourcePrefix: string = 'schedule'): string {
+  return publicAssetUrl(`${sourcePrefix}/manifest.json`)
 }
 
-function scheduleStaticCsvUrl(date: string, name: string): string {
+function scheduleStaticCsvUrl(sourcePrefix: string, date: string, name: string): string {
   const safeDate = encodeURIComponent(date.trim())
   const safeName = encodeURIComponent(name.trim())
-  return publicAssetUrl(`schedule/${safeDate}/${safeName}`)
+  return publicAssetUrl(`${sourcePrefix}/${safeDate}/${safeName}`)
 }
 
 function delay(ms: number): Promise<void> {
@@ -93,8 +93,8 @@ async function mapWithConcurrency<T, R>(
   return results
 }
 
-async function fetchScheduleManifestFromStatic(): Promise<ScheduleManifest> {
-  const response = await fetch(scheduleStaticManifestUrl())
+async function fetchScheduleManifestFromStatic(sourcePrefix: string = 'schedule'): Promise<ScheduleManifest> {
+  const response = await fetch(scheduleStaticManifestUrl(sourcePrefix))
   if (!response.ok) {
     throw new Error(`Ошибка загрузки локального манифеста расписания (${response.status})`)
   }
@@ -107,23 +107,23 @@ async function fetchScheduleManifestFromStatic(): Promise<ScheduleManifest> {
   return data
 }
 
-async function fetchScheduleCsvFromStatic(date: string, name: string): Promise<string> {
-  return fetchTextWithRetry(scheduleStaticCsvUrl(date, name), 'Ошибка загрузки локального CSV')
+async function fetchScheduleCsvFromStatic(sourcePrefix: string, date: string, name: string): Promise<string> {
+  return fetchTextWithRetry(scheduleStaticCsvUrl(sourcePrefix, date, name), 'Ошибка загрузки локального CSV')
 }
 
-export async function fetchScheduleManifest(): Promise<ScheduleManifest> {
-  return fetchScheduleManifestFromStatic()
+export async function fetchScheduleManifest(sourcePrefix: string = 'schedule'): Promise<ScheduleManifest> {
+  return fetchScheduleManifestFromStatic(sourcePrefix)
 }
 
-export async function fetchScheduleCsv(date: string, name: string): Promise<string> {
-  return fetchScheduleCsvFromStatic(date, name)
+export async function fetchScheduleCsv(date: string, name: string, sourcePrefix: string = 'schedule'): Promise<string> {
+  return fetchScheduleCsvFromStatic(sourcePrefix, date, name)
 }
 
 // Загружает несколько CSV расписания и объединяет их в единый набор данных.
-export async function fetchScheduleBatchDataset(date: string, fileNames: string[]): Promise<ScheduleDataset> {
+export async function fetchScheduleBatchDataset(date: string, fileNames: string[], sourcePrefix: string = 'schedule'): Promise<ScheduleDataset> {
   if (fileNames.length === 0) return new ScheduleDataset([])
 
-  const csvTexts = await mapWithConcurrency(fileNames, CSV_FETCH_CONCURRENCY, (name) => fetchScheduleCsv(date, name))
+  const csvTexts = await mapWithConcurrency(fileNames, CSV_FETCH_CONCURRENCY, (name) => fetchScheduleCsv(date, name, sourcePrefix))
   const datasets = csvTexts.map((text, idx) => {
     const csvName = fileNames[idx] ?? ''
     const dataset = ScheduleDataset.fromCsv(text)

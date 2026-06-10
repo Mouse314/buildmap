@@ -41,6 +41,7 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
   const [selectedDateIso, setSelectedDateIso] = React.useState('')
   const [globalFilter, setGlobalFilter] = React.useState('')
   const [columnFilters, setColumnFilters] = React.useState<Record<ScheduleColumnKey, string>>(EMPTY_COLUMN_FILTERS)
+  const [sourcePrefix, setSourcePrefix] = React.useState('schedule')
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -49,7 +50,7 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
     setManifestLoading(true)
     setManifestError(null)
 
-    fetchScheduleManifest()
+    fetchScheduleManifest(sourcePrefix)
       .then((value) => {
         if (cancelled) return
         setManifest(value)
@@ -78,7 +79,7 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
     return () => {
       cancelled = true
     }
-  }, [isOpen])
+  }, [isOpen, sourcePrefix])
 
   const selectedBatchFiles = React.useMemo(() => {
     const dates = manifest?.dates ?? []
@@ -107,7 +108,7 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
     setCsvLoading(true)
     setCsvError(null)
 
-    fetchScheduleCsv(selectedBatchDate, selectedCsvName)
+    fetchScheduleCsv(selectedBatchDate, selectedCsvName, sourcePrefix)
       .then((csvText) => {
         if (cancelled) return
         setDataset(ScheduleDataset.fromCsv(csvText))
@@ -129,7 +130,7 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
     return () => {
       cancelled = true
     }
-  }, [isOpen, selectedBatchDate, selectedCsvName])
+  }, [isOpen, selectedBatchDate, selectedCsvName, sourcePrefix])
 
   const subgroups = React.useMemo(() => dataset?.getSubgroups() ?? [], [dataset])
   const dateIsos = React.useMemo(() => dataset?.getDateIsos() ?? [], [dataset])
@@ -169,8 +170,8 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
     <HudModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Расписание подгрупп"
-      context="CSV из папки parsed_schedule с фильтрацией по всем столбцам"
+      title="Расписание"
+      context="Просмотр и фильтрация CSV файлов"
       overlayClassName="scheduleOverlay"
       surfaceClassName="scheduleModal"
       headerClassName="scheduleModalHeader"
@@ -180,6 +181,22 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
       bodyClassName="scheduleModalBody"
     >
         <div className="scheduleControlsGrid">
+          <label className="scheduleField">
+            <span className="scheduleFieldLabel">Тип расписания</span>
+            <select
+              className="scheduleSelect"
+              value={sourcePrefix}
+              onChange={(e) => {
+                setSourcePrefix(e.target.value);
+                setSelectedBatchDate('');
+                setSelectedCsvName('');
+              }}
+            >
+              <option value="schedule">Учебные группы</option>
+              <option value="schedule_teacher">Преподаватели</option>
+            </select>
+          </label>
+
           <label className="scheduleField">
             <span className="scheduleFieldLabel">Пакет расписания</span>
             <select

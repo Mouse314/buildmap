@@ -64,6 +64,7 @@ function App() {
     scheduleFocusDateIso,
     scheduleTeacherFilter,
     scheduleGroupFilter,
+    scheduleSourcePrefix,
     scheduleTeacherSuggestions,
     scheduleGroupSuggestions,
     scheduleStatsSummary,
@@ -152,6 +153,7 @@ function App() {
     onSetScheduleFocusDate,
     onSetScheduleTeacherFilter,
     onSetScheduleGroupFilter,
+    onSetScheduleSourcePrefix,
     onSetActiveRouteFrom,
     onSetActiveRouteTo,
     onSetMainEntrance,
@@ -615,6 +617,25 @@ function App() {
             toggleButtonClassName="mapModeDockToggle"
           >
             <div className="schedulePeriodDock">
+              <div className="scheduleSourceSwitch" role="group" aria-label="Источник расписания">
+                <HudButton
+                  title="Учебные группы"
+                  data={{ source: 'schedule' }}
+                  className={scheduleSourcePrefix === 'schedule' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
+                  onClick={() => onSetScheduleSourcePrefix('schedule')}
+                >
+                  Группы
+                </HudButton>
+                <HudButton
+                  title="Преподаватели"
+                  data={{ source: 'schedule_teacher' }}
+                  className={scheduleSourcePrefix === 'schedule_teacher' ? 'schedulePeriodBtn schedulePeriodBtnActive' : 'schedulePeriodBtn'}
+                  onClick={() => onSetScheduleSourcePrefix('schedule_teacher')}
+                >
+                  Преподаватели
+                </HudButton>
+              </div>
+
               <div className="schedulePeriodSwitch" role="group" aria-label="Период отображения">
                 <HudButton
                   title="Неделя"

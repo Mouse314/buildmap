@@ -8,6 +8,40 @@ This directory is intentionally kept in the monorepo and is pushed to GitHub tog
 
 Parser scripts are stored in `SERVER/schedule_parser`.
 
+### Teacher HTML Parser (test pipeline)
+
+Separate from the PDF parser. Downloads teacher schedule tables from
+`https://www.vyatsu.ru/studentu-1/spravochnaya-informatsiya/teacher.html`
+and exports group CSV files into `SERVER/schedule_parser/parsed_schedule_teacher`.
+
+PowerShell (from `SERVER/schedule_parser`):
+
+```powershell
+# Parse only existing local HTML files (default mode, no download)
+.\run_teacher_parser.ps1
+
+# Download HTML for target date + parse
+.\run_teacher_parser.ps1 -Download
+
+# Download + parse for explicit date
+.\run_teacher_parser.ps1 -Download -Date 2026-06-10
+
+# Quick test on first N downloaded/local HTML files
+.\run_teacher_parser.ps1 -Limit 3
+```
+
+Useful options via direct call:
+
+```powershell
+.\.venv\Scripts\python.exe .\teacher_parser.py --skip-download --limit 5
+.\.venv\Scripts\python.exe .\teacher_parser.py --date 2026-06-10
+```
+
+Folders:
+
+- `SERVER/schedule_parser/schedule_teacher` - downloaded teacher HTML files
+- `SERVER/schedule_parser/parsed_schedule_teacher` - parsed group CSV output
+
 ### What It Does
 
 - Downloads current schedule PDF files from VyatSU into `SERVER/schedule_parser/schedule`.

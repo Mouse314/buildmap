@@ -45,12 +45,7 @@ async function writeEmptyManifest(targetRoot) {
   );
 }
 
-async function syncScheduleData() {
-  const clientRoot = path.resolve(__dirname, '..');
-  const sourceRoot = path.resolve(clientRoot, '../SERVER/schedule_parser/parsed_schedule');
-  const targetRoot = path.resolve(clientRoot, 'public/schedule');
-  const maxDates = parseMaxDates();
-
+async function syncFolder(sourceRoot, targetRoot, maxDates) {
   await fs.rm(targetRoot, { recursive: true, force: true });
 
   let sourceEntries;
@@ -123,6 +118,19 @@ async function syncScheduleData() {
   console.log(
     `[schedule] Copied ${copiedCsvCount} ready CSV file(s) from ${manifestDates.length} date folder(s) into ${targetRoot}`,
   );
+}
+
+async function syncScheduleData() {
+  const clientRoot = path.resolve(__dirname, '..');
+  const maxDates = parseMaxDates();
+
+  const sourceGroups = path.resolve(clientRoot, '../SERVER/schedule_parser/parsed_schedule');
+  const targetGroups = path.resolve(clientRoot, 'public/schedule');
+  await syncFolder(sourceGroups, targetGroups, maxDates);
+
+  const sourceTeachers = path.resolve(clientRoot, '../SERVER/schedule_parser/parsed_schedule_teacher');
+  const targetTeachers = path.resolve(clientRoot, 'public/schedule_teacher');
+  await syncFolder(sourceTeachers, targetTeachers, maxDates);
 }
 
 void syncScheduleData();
