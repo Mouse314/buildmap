@@ -358,6 +358,7 @@ export function TopBar({
                     title={bugReportLabel}
                     data={{ action: 'open-bug-report' }}
                     className="topButton topDesktopOnly topButtonMarqueeOnly"
+                    style={{ maxWidth: '120px' }}
                     onClick={() => onOpenBugReport(`Корпус: ${buildLabel(selectedBuild)}\nКатегория: ${selectedCategory === '__all__' ? 'Не выбрано' : selectedCategory}`)}
                 >
                     <span className="topButtonMarquee">

@@ -182,22 +182,6 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
     >
         <div className="scheduleControlsGrid">
           <label className="scheduleField">
-            <span className="scheduleFieldLabel">Тип расписания</span>
-            <select
-              className="scheduleSelect"
-              value={sourcePrefix}
-              onChange={(e) => {
-                setSourcePrefix(e.target.value);
-                setSelectedBatchDate('');
-                setSelectedCsvName('');
-              }}
-            >
-              <option value="schedule">Учебные группы</option>
-              <option value="schedule_teacher">Преподаватели</option>
-            </select>
-          </label>
-
-          <label className="scheduleField">
             <span className="scheduleFieldLabel">Пакет расписания</span>
             <select
               className="scheduleSelect"
