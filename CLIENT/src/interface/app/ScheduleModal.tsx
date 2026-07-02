@@ -41,7 +41,7 @@ export function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
   const [selectedDateIso, setSelectedDateIso] = React.useState('')
   const [globalFilter, setGlobalFilter] = React.useState('')
   const [columnFilters, setColumnFilters] = React.useState<Record<ScheduleColumnKey, string>>(EMPTY_COLUMN_FILTERS)
-  const [sourcePrefix, setSourcePrefix] = React.useState('schedule')
+  const [sourcePrefix] = React.useState('schedule')
 
   React.useEffect(() => {
     if (!isOpen) return
